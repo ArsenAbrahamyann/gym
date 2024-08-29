@@ -2,6 +2,7 @@ package org.exemple.entity;
 
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Objects;
@@ -12,7 +13,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Training implements Serializable {
-    private static final long serialVersionUID = 789L;
+    @Serial
+    private static final long serialVersionUID = -5517414036571605326L;
     private String traineeId;
     private String trainerId;
     private String trainingName;
