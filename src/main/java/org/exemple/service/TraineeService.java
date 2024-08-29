@@ -20,9 +20,29 @@ public class TraineeService {
     private final TraineeDAO traineeDao;
     Scanner scanner = new Scanner(System.in);
 
+
     @Autowired
     public TraineeService(TraineeDAO traineeDao) {
         this.traineeDao = traineeDao;
+    }
+
+    /**
+     * Sets the Scanner instance used for user input.
+     *
+     * <p> This method allows setting a custom {@link Scanner} for reading user input.
+     * If the provided scanner is null, an {@link IllegalArgumentException} will be thrown.</p>
+     *
+     * @param scanner the {@link Scanner} instance to be set
+     * @throws IllegalArgumentException if the {@code scanner} is null
+     */
+    public  void setScanner(Scanner scanner) {
+        logger.info("Entering setScanner method.");
+        if (scanner == null) {
+            logger.error("Attempted to set a null scanner.");
+            throw new IllegalArgumentException("Scanner cannot be null.");
+        }
+        this.scanner = scanner;
+        logger.info("Scanner has been successfully set.");
     }
 
     /**
