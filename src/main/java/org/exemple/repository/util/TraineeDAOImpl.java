@@ -6,11 +6,10 @@ import org.exemple.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-
 public class TraineeDAOImpl implements TraineeDAO {
     private final InMemoryStorage storage;
 
@@ -18,7 +17,6 @@ public class TraineeDAOImpl implements TraineeDAO {
     public TraineeDAOImpl(InMemoryStorage storage) {
         this.storage = storage;
     }
-
 
     @Override
     public void createTrainee(Trainee trainee) {
@@ -37,7 +35,7 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public Trainee getTrainee(String userId) {
-        return  storage.getTraineeStorage().get(userId);
+        return storage.getTraineeStorage().get(userId);
     }
 
     @Override
