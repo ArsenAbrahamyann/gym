@@ -4,6 +4,7 @@ import org.exemple.entity.Trainer;
 import org.exemple.repository.TrainerDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,58 +12,54 @@ import java.util.Scanner;
 import static org.mockito.Mockito.*;
 
 public class TrainerServiceTest {
-    private TrainerDAO trainerDao;
-    private TrainerService trainerService;
+    private final TrainerDAO trainerDao = mock(TrainerDAO.class);
+    private final Scanner scanner = mock(Scanner.class);
+    private TrainerService underTest;
 
     @BeforeEach
     public void setUp() {
-        trainerDao = mock(TrainerDAO.class);
-        Scanner scanner = mock(Scanner.class);
-        trainerService = new TrainerService(trainerDao);
-        trainerService.setScanner(scanner);
+        underTest = new TrainerService(trainerDao);
+        underTest.setScanner(scanner);
     }
 
     @Test
     public void shouldCreateTrainerSuccessfully() {
-        Scanner scanner = mock(Scanner.class);
         when(scanner.nextLine()).thenReturn("Jane", "Smith", "Fitness");
-        trainerService.setScanner(scanner);
+        underTest.setScanner(scanner);
 
         doNothing().when(trainerDao).createTrainer(any(Trainer.class));
 
-        trainerService.createTrainer();
+        underTest.createTrainer();
 
         verify(trainerDao).createTrainer(any(Trainer.class));
     }
 
     @Test
     public void shouldUpdateTrainerSuccessfully() {
-        Scanner scanner = mock(Scanner.class);
         when(scanner.nextLine()).thenReturn("JaneSmith", "Yoga");
-        trainerService.setScanner(scanner);
+        underTest.setScanner(scanner);
 
         Trainer existingTrainer = new Trainer();
         existingTrainer.setUserId("JaneSmith");
         when(trainerDao.getTrainer("JaneSmith")).thenReturn(existingTrainer);
         doNothing().when(trainerDao).updateTrainer(anyString(), any(Trainer.class));
 
-        trainerService.updateTrainer();
+        underTest.updateTrainer();
 
         verify(trainerDao).updateTrainer(anyString(), any(Trainer.class));
     }
 
     @Test
     public void shouldDeleteTrainerSuccessfully() {
-        Scanner scanner = mock(Scanner.class);
         when(scanner.nextLine()).thenReturn("JaneSmith");
-        trainerService.setScanner(scanner);
+        underTest.setScanner(scanner);
 
         Trainer existingTrainer = new Trainer();
         existingTrainer.setUserId("JaneSmith");
         when(trainerDao.getTrainer("JaneSmith")).thenReturn(existingTrainer);
         doNothing().when(trainerDao).deleteTrainer(anyString());
 
-        trainerService.deleteTrainer();
+        underTest.deleteTrainer();
 
 
         verify(trainerDao).deleteTrainer(anyString());
@@ -70,16 +67,15 @@ public class TrainerServiceTest {
 
     @Test
     public void shouldViewTrainerSuccessfully() {
-        Scanner scanner = mock(Scanner.class);
         when(scanner.nextLine()).thenReturn("JaneSmith");
-        trainerService.setScanner(scanner);
+        underTest.setScanner(scanner);
 
         Trainer existingTrainer = new Trainer();
         existingTrainer.setUserId("JaneSmith");
         existingTrainer.setSpecialization("Fitness");
         when(trainerDao.getTrainer("JaneSmith")).thenReturn(existingTrainer);
 
-        trainerService.viewTrainer();
+        underTest.viewTrainer();
 
         verify(trainerDao).getTrainer(anyString());
     }
@@ -92,7 +88,7 @@ public class TrainerServiceTest {
         trainers.add(trainer);
         when(trainerDao.getAllTrainers()).thenReturn(trainers);
 
-        trainerService.viewAllTrainer();
+        underTest.viewAllTrainer();
 
         verify(trainerDao).getAllTrainers();
     }

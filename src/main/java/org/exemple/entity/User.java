@@ -2,6 +2,7 @@ package org.exemple.entity;
 
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -10,8 +11,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements Serializable{
-    private static final long serialVersionUID = 426879L;
-
+    @Serial
+    private static final long serialVersionUID = -4045911923399600304L;
     private String firstName;
     private String lastName;
     private String UserName;

@@ -2,6 +2,7 @@ package org.exemple.entity;
 
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -10,6 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingType implements Serializable {
-    private static final long serialVersionUID = 159L;
+    @Serial
+    private static final long serialVersionUID = 8305361785023997429L;
     private String trainingTypeName;
 }
