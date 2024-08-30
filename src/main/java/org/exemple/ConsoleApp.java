@@ -48,7 +48,7 @@ public class ConsoleApp {
                         System.out.println("Invalid choice. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Invalid input, expected a number.", e);
+                logger.error("Invalid input, expected a number.");
                 System.out.println("Invalid input. Please enter a number.");
             } catch (Exception e) {
                 logger.error("An unexpected error occurred.", e);

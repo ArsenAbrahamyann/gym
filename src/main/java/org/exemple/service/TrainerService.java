@@ -87,6 +87,7 @@ public class TrainerService {
             Trainer trainer = getTrainer(username);
             if (trainer != null) {
                 logger.info("Trainer found with username: {}", username);
+                System.out.println();
                 System.out.print("Enter new specialization: ");
                 String specialization = scanner.nextLine();
 
