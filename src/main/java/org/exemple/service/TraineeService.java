@@ -90,6 +90,7 @@ public class TraineeService {
             Trainee trainee = getTrainee(username);
             if (trainee != null) {
                 logger.info("Trainee found with username: {}", username);
+                System.out.println();
                 System.out.print("Enter new date of birth (YYYY-MM-DD): ");
                 String dateOfBirth = scanner.nextLine();
                 System.out.print("Enter new address: ");
