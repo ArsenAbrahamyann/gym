@@ -10,7 +10,7 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements Serializable{
+public class UserEntity implements Serializable{
     @Serial
     private static final long serialVersionUID = -4045911923399600304L;
     private String firstName;

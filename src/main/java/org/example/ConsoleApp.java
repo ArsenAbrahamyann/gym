@@ -28,7 +28,7 @@ public class ConsoleApp {
             printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("User selected option: {}", choice);
+                logger.info("UserEntity selected option: {}", choice);
                 switch (choice) {
                     case 1:
                         manageTrainees();
@@ -62,7 +62,7 @@ public class ConsoleApp {
             traineeService.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("User selected trainee option: {}", choice);
+                logger.info("UserEntity selected trainee option: {}", choice);
                 switch (choice) {
                     case 1:
                         traineeService.createTrainee();
@@ -100,7 +100,7 @@ public class ConsoleApp {
             trainerService.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("User selected trainer option: {}", choice);
+                logger.info("UserEntity selected trainer option: {}", choice);
                 switch (choice) {
                     case 1:
                         trainerService.createTrainer();
@@ -138,7 +138,7 @@ public class ConsoleApp {
             trainingService.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("User selected training option: {}", choice);
+                logger.info("UserEntity selected training option: {}", choice);
                 switch (choice) {
                     case 1:
                         trainingService.createTraining();

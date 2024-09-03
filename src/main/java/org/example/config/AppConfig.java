@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = "org.example")
-//@PropertySource("classpath:application.properties")
 public class AppConfig {
-    @Bean(initMethod = "loadFromFile", destroyMethod = "saveToFile")
+    @Bean
     public InMemoryStorage inMemoryStorage() {
         return new InMemoryStorage();
     }

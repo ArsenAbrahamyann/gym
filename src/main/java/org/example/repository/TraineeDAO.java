@@ -1,13 +1,13 @@
 package org.example.repository;
 
-import org.example.entity.Trainee;
+import org.example.entity.TraineeEntity;
 
 import java.util.List;
 
 public interface TraineeDAO {
-    void createTrainee(Trainee trainee);
-    void updateTrainee(String userId, Trainee trainee);
+    void createTrainee(TraineeEntity traineeEntity);
+    void updateTrainee(String userId, TraineeEntity traineeEntity);
     void deleteTrainee(String userId);
-    Trainee getTrainee(String userId);
-    List<Trainee> getAllTrainees();
+    TraineeEntity getTrainee(String userId);
+    List<TraineeEntity> getAllTrainees();
 }

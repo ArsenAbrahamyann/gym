@@ -1,7 +1,8 @@
 package org.example.service;
 
-import org.example.entity.Training;
-import org.example.entity.TrainingType;
+import lombok.extern.slf4j.Slf4j;
+import org.example.entity.TrainingEntity;
+import org.example.entity.TrainingTypeEntity;
 import org.example.repository.TrainingDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,8 @@ import java.util.Scanner;
  * Service class for managing trainings.
  */
 @Service
+@Slf4j
 public class TrainingService {
-    private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
     private final TrainingDAO trainingDao;
     Scanner scanner = new Scanner(System.in);
 
@@ -38,13 +39,13 @@ public class TrainingService {
      * @throws IllegalArgumentException if the {@code scanner} is null
      */
     public void setScanner(Scanner scanner) {
-        logger.info("Entering setScanner method.");
+        log.info("Entering setScanner method.");
         if (scanner == null) {
-            logger.error("Attempted to set a null scanner.");
+            log.error("Attempted to set a null scanner.");
             throw new IllegalArgumentException("Scanner cannot be null.");
         }
         this.scanner = scanner;
-        logger.info("Scanner has been successfully set.");
+        log.info("Scanner has been successfully set.");
     }
 
     /**
@@ -52,7 +53,7 @@ public class TrainingService {
      * Handles possible errors during the creation process.
      */
     public void createTraining() {
-        logger.info("Starting to create a new training.");
+        log.info("Starting to create a new training.");
         try {
             System.out.print("Enter trainee username: ");
             String traineeId = scanner.nextLine();
@@ -60,25 +61,25 @@ public class TrainingService {
             System.out.print("Enter trainer username: ");
             String trainerId = scanner.nextLine();
 
-            System.out.print("Enter training name: ");
+            System.out.print("Enter trainingEntity name: ");
             String trainingName = scanner.nextLine();
 
-            System.out.print("Enter training type: ");
+            System.out.print("Enter trainingEntity type: ");
             String trainingTypeName = scanner.nextLine();
-            TrainingType trainingType = new TrainingType(trainingTypeName);
+            TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity(trainingTypeName);
 
-            System.out.print("Enter training date (YYYY-MM-DD): ");
+            System.out.print("Enter trainingEntity date (YYYY-MM-DD): ");
             String trainingDateInput = scanner.nextLine();
             LocalDate trainingDate;
             try {
                 trainingDate = LocalDate.parse(trainingDateInput);
             } catch (DateTimeParseException e) {
-                logger.warn("Invalid training date format: {}", trainingDateInput);
+                log.warn("Invalid trainingEntity date format: {}", trainingDateInput);
                 System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                 return;
             }
 
-            System.out.print("Enter training duration (HH:MM): ");
+            System.out.print("Enter trainingEntity duration (HH:MM): ");
             String trainingDurationInput = scanner.nextLine();
             Duration trainingDuration;
             try {
@@ -90,25 +91,25 @@ public class TrainingService {
                 int minutes = Integer.parseInt(parts[1]);
                 trainingDuration = Duration.ofHours(hours).plusMinutes(minutes);
             } catch (NumberFormatException e) {
-                logger.warn("Invalid training duration format: {}", trainingDurationInput);
+                log.warn("Invalid trainingEntity duration format: {}", trainingDurationInput);
                 System.out.println("Invalid duration format. Please use HH:MM.");
                 return;
             }
 
-            Training training = new Training();
-            training.setTraineeId(traineeId);
-            training.setTrainerId(trainerId);
-            training.setTrainingName(trainingName);
-            training.setTrainingType(trainingType);
-            training.setTrainingDate(trainingDate.toString());
-            training.setTrainingDuration(trainingDuration);
+            TrainingEntity trainingEntity = new TrainingEntity();
+            trainingEntity.setTraineeId(traineeId);
+            trainingEntity.setTrainerId(trainerId);
+            trainingEntity.setTrainingName(trainingName);
+            trainingEntity.setTrainingTypeEntity(trainingTypeEntity);
+            trainingEntity.setTrainingDate(trainingDate.toString());
+            trainingEntity.setTrainingDuration(trainingDuration);
 
-            trainingDao.createTraining(training);
-            logger.info("Training '{}' created successfully.", trainingName);
-            System.out.println("Training created successfully.");
+            trainingDao.createTraining(trainingEntity);
+            log.info("TrainingEntity '{}' created successfully.", trainingName);
+            System.out.println("TrainingEntity created successfully.");
 
         } catch (Exception e) {
-            logger.error("Error occurred while creating training: ", e);
+            log.error("Error occurred while creating training: ", e);
             System.out.println("An error occurred while creating the training. Please try again.");
         }
     }
@@ -118,14 +119,14 @@ public class TrainingService {
      * Handles possible errors during the update process.
      */
     public void updateTraining() {
-        logger.info("Starting to update training.");
+        log.info("Starting to update training.");
         try {
             System.out.print("Enter the name of the training to update: ");
             String trainingName = scanner.nextLine();
 
-            Training existingTraining = getTraining(trainingName);
-            if (existingTraining != null) {
-                logger.info("Training '{}' found. Proceeding with update.", trainingName);
+            TrainingEntity existingTrainingEntity = getTraining(trainingName);
+            if (existingTrainingEntity != null) {
+                log.info("TrainingEntity '{}' found. Proceeding with update.", trainingName);
 
                 System.out.print("Enter new trainee username: ");
                 String traineeId = scanner.nextLine();
@@ -138,7 +139,7 @@ public class TrainingService {
 
                 System.out.print("Enter new training type: ");
                 String trainingTypeName = scanner.nextLine();
-                TrainingType trainingType = new TrainingType(trainingTypeName);
+                TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity(trainingTypeName);
 
                 System.out.print("Enter new training date (YYYY-MM-DD): ");
                 String trainingDateInput = scanner.nextLine();
@@ -146,7 +147,7 @@ public class TrainingService {
                 try {
                     trainingDate = LocalDate.parse(trainingDateInput);
                 } catch (DateTimeParseException e) {
-                    logger.warn("Invalid training date format: {}", trainingDateInput);
+                    log.warn("Invalid training date format: {}", trainingDateInput);
                     System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                     return;
                 }
@@ -163,28 +164,28 @@ public class TrainingService {
                     int minutes = Integer.parseInt(parts[1]);
                     trainingDuration = Duration.ofHours(hours).plusMinutes(minutes);
                 } catch (NumberFormatException e) {
-                    logger.warn("Invalid training duration format: {}", trainingDurationInput);
+                    log.warn("Invalid training duration format: {}", trainingDurationInput);
                     System.out.println("Invalid duration format. Please use HH:MM.");
                     return;
                 }
 
-                existingTraining.setTraineeId(traineeId);
-                existingTraining.setTrainerId(trainerId);
-                existingTraining.setTrainingName(newTrainingName);
-                existingTraining.setTrainingType(trainingType);
-                existingTraining.setTrainingDate(trainingDate.toString());
-                existingTraining.setTrainingDuration(trainingDuration);
+                existingTrainingEntity.setTraineeId(traineeId);
+                existingTrainingEntity.setTrainerId(trainerId);
+                existingTrainingEntity.setTrainingName(newTrainingName);
+                existingTrainingEntity.setTrainingTypeEntity(trainingTypeEntity);
+                existingTrainingEntity.setTrainingDate(trainingDate.toString());
+                existingTrainingEntity.setTrainingDuration(trainingDuration);
 
-                trainingDao.updateTraining(trainingName, existingTraining);
-                logger.info("Training '{}' updated successfully.", trainingName);
-                System.out.println("Training updated successfully.");
+                trainingDao.updateTraining(trainingName, existingTrainingEntity);
+                log.info("TrainingEntity '{}' updated successfully.", trainingName);
+                System.out.println("TrainingEntity updated successfully.");
             } else {
-                logger.warn("Training '{}' not found.", trainingName);
-                System.out.println("Training not found.");
+                log.warn("TrainingEntity '{}' not found.", trainingName);
+                System.out.println("TrainingEntity not found.");
             }
 
         } catch (Exception e) {
-            logger.error("Error occurred while updating training: ", e);
+            log.error("Error occurred while updating training: ", e);
             System.out.println("An error occurred while updating the training. Please try again.");
         }
     }
@@ -194,22 +195,22 @@ public class TrainingService {
      * Handles possible errors during the deletion process.
      */
     public void deleteTraining() {
-        logger.info("Starting to delete training.");
+        log.info("Starting to delete training.");
         try {
             System.out.print("Enter the name of the training to delete: ");
             String trainingName = scanner.nextLine();
 
-            Training existingTraining = getTraining(trainingName);
-            if (existingTraining != null) {
+            TrainingEntity existingTrainingEntity = getTraining(trainingName);
+            if (existingTrainingEntity != null) {
                 trainingDao.deleteTraining(trainingName);
-                logger.info("Training '{}' deleted successfully.", trainingName);
-                System.out.println("Training deleted successfully.");
+                log.info("TrainingEntity '{}' deleted successfully.", trainingName);
+                System.out.println("TrainingEntity deleted successfully.");
             } else {
-                logger.warn("Training '{}' not found.", trainingName);
-                System.out.println("Training not found.");
+                log.warn("TrainingEntity '{}' not found.", trainingName);
+                System.out.println("TrainingEntity not found.");
             }
         } catch (Exception e) {
-            logger.error("Error occurred while deleting training: ", e);
+            log.error("Error occurred while deleting training: ", e);
             System.out.println("An error occurred while deleting the training. Please try again.");
         }
     }
@@ -219,27 +220,27 @@ public class TrainingService {
      * Handles possible errors during the retrieval process.
      */
     public void viewTraining() {
-        logger.info("Starting to view training details.");
+        log.info("Starting to view training details.");
         try {
-            System.out.print("Enter training name to view: ");
+            System.out.print("Enter trainingEntity name to view: ");
             String trainingName = scanner.nextLine();
 
-            Training training = getTraining(trainingName);
-            if (training != null) {
-                logger.info("Displaying details for training '{}'.", trainingName);
-                System.out.println("Training Details:");
-                System.out.println("Trainee Username: " + training.getTraineeId());
-                System.out.println("Trainer Username: " + training.getTrainerId());
-                System.out.println("Training Name: " + training.getTrainingName());
-                System.out.println("Training Type: " + training.getTrainingType().getTrainingTypeName());
-                System.out.println("Training Date: " + training.getTrainingDate());
-                System.out.println("Training Duration: " + formatDuration(training.getTrainingDuration()));
+            TrainingEntity trainingEntity = getTraining(trainingName);
+            if (trainingEntity != null) {
+                log.info("Displaying details for trainingEntity '{}'.", trainingName);
+                System.out.println("TrainingEntity Details:");
+                System.out.println("TraineeEntity Username: " + trainingEntity.getTraineeId());
+                System.out.println("TrainerEntity Username: " + trainingEntity.getTrainerId());
+                System.out.println("TrainingEntity Name: " + trainingEntity.getTrainingName());
+                System.out.println("TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
+                System.out.println("TrainingEntity Date: " + trainingEntity.getTrainingDate());
+                System.out.println("TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
             } else {
-                logger.warn("Training '{}' not found.", trainingName);
-                System.out.println("Training not found.");
+                log.warn("TrainingEntity '{}' not found.", trainingName);
+                System.out.println("TrainingEntity not found.");
             }
         } catch (Exception e) {
-            logger.error("Error occurred while viewing training details: ", e);
+            log.error("Error occurred while viewing training details: ", e);
             System.out.println("An error occurred while retrieving the training details. Please try again.");
         }
     }
@@ -249,27 +250,33 @@ public class TrainingService {
      * Handles possible errors during the retrieval process.
      */
     public void viewAllTrainings() {
-        logger.info("Starting to view all trainings.");
+        log.info("Starting to view all trainings.");
         try {
-            List<Training> trainings = getAllTrainings();
-            if (trainings == null || trainings.isEmpty()) {
-                logger.info("No trainings found.");
-                System.out.println("No trainings found.");
+            List<TrainingEntity> trainingEntities = getAllTrainings();
+            if (trainingEntities == null || trainingEntities.isEmpty()) {
+                log.info("No trainingEntities found.");
+                System.out.println("No trainingEntities found.");
             } else {
-                logger.info("Displaying details of all trainings.");
+                log.info("Displaying details of all trainingEntities.");
                 System.out.println("All Trainings:");
-                for (Training training : trainings) {
-                    System.out.println("Trainee Username: " + training.getTraineeId());
-                    System.out.println("Trainer Username: " + training.getTrainerId());
-                    System.out.println("Training Name: " + training.getTrainingName());
-                    System.out.println("Training Type: " + training.getTrainingType().getTrainingTypeName());
-                    System.out.println("Training Date: " + training.getTrainingDate());
-                    System.out.println("Training Duration: " + formatDuration(training.getTrainingDuration()));
+                for (TrainingEntity trainingEntity : trainingEntities) {
+                    System.out.println("TraineeEntity Username: " + trainingEntity.getTraineeId());
+                    System.out.println("TrainerEntity Username: " + trainingEntity.getTrainerId());
+                    System.out.println("TrainingEntity Name: " + trainingEntity.getTrainingName());
+
+                    if (trainingEntity.getTrainingTypeEntity() != null) {
+                        System.out.println("TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
+                    } else {
+                        System.out.println("TrainingEntity Type: Not specified");
+                    }
+
+                    System.out.println("TrainingEntity Date: " + trainingEntity.getTrainingDate());
+                    System.out.println("TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
                     System.out.println("--------");
                 }
             }
         } catch (Exception e) {
-            logger.error("Error occurred while viewing all trainings: ", e);
+            log.error("Error occurred while viewing all trainings: ", e);
             System.out.println("An error occurred while retrieving the trainings. Please try again.");
         }
     }
@@ -278,14 +285,14 @@ public class TrainingService {
      * Prints the menu for managing trainings.
      */
     public void printMenu() {
-        logger.info("Displaying menu options for managing trainings.");
+        log.info("Displaying menu options for managing trainings.");
         StringBuilder sb = new StringBuilder();
         sb.append("\nManage Trainings " +
-                  "\n1. Create Training " +
-                  "\n2. View Training " +
+                  "\n1. Create TrainingEntity " +
+                  "\n2. View TrainingEntity " +
                   "\n3. View All Trainings " +
-                  "\n4. Update Training " +
-                  "\n5. Delete Training " +
+                  "\n4. Update TrainingEntity " +
+                  "\n5. Delete TrainingEntity " +
                   "\n6. Back to Main Menu" +
                   "\nEnter your choice: ");
         System.out.println(sb);
@@ -296,14 +303,14 @@ public class TrainingService {
      * Handles possible errors during the retrieval process.
      *
      * @param trainingName the name of the training
-     * @return the Training object if found, null otherwise
+     * @return the TrainingEntity object if found, null otherwise
      */
-    public Training getTraining(String trainingName) {
-        logger.info("Retrieving training with name: {}", trainingName);
+    public TrainingEntity getTraining(String trainingName) {
+        log.info("Retrieving training with name: {}", trainingName);
         try {
             return trainingDao.getTraining(trainingName);
         } catch (Exception e) {
-            logger.error("Error occurred while retrieving training '{}': ", trainingName, e);
+            log.error("Error occurred while retrieving training '{}': ", trainingName, e);
             return null;
         }
     }
@@ -314,12 +321,12 @@ public class TrainingService {
      *
      * @return a list of all trainings
      */
-    public List<Training> getAllTrainings() {
-        logger.info("Retrieving all trainings.");
+    public List<TrainingEntity> getAllTrainings() {
+        log.info("Retrieving all trainings.");
         try {
             return trainingDao.getAllTrainings();
         } catch (Exception e) {
-            logger.error("Error occurred while retrieving all trainings: ", e);
+            log.error("Error occurred while retrieving all trainings: ", e);
             return null;
         }
     }

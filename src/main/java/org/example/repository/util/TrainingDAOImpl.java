@@ -1,6 +1,6 @@
 package org.example.repository.util;
 
-import org.example.entity.Training;
+import org.example.entity.TrainingEntity;
 import org.example.repository.TrainingDAO;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +20,16 @@ public class TrainingDAOImpl implements TrainingDAO {
     }
 
     @Override
-    public void createTraining(Training training) {
-        storage.getTrainingStorage().put(training.getTrainingName(), training);
+    public void createTraining(TrainingEntity trainingEntity) {
+        storage.getTrainingStorage().put(trainingEntity.getTrainingName(), trainingEntity);
     }
 
     @Override
-    public void updateTraining(String trainingName, Training training) {
+    public void updateTraining(String trainingName, TrainingEntity trainingEntity) {
         if (storage.getTrainingStorage().containsKey(trainingName)) {
-            storage.getTrainingStorage().put(trainingName, training);
+            storage.getTrainingStorage().put(trainingName, trainingEntity);
         } else {
-            throw new NoSuchElementException("Training with name " + trainingName + " not found.");
+            throw new NoSuchElementException("TrainingEntity with name " + trainingName + " not found.");
         }
     }
 
@@ -39,12 +39,12 @@ public class TrainingDAOImpl implements TrainingDAO {
     }
 
     @Override
-    public Training getTraining(String trainingName) {
+    public TrainingEntity getTraining(String trainingName) {
         return  storage.getTrainingStorage().get(trainingName);
     }
 
     @Override
-    public List<Training> getAllTrainings() {
+    public List<TrainingEntity> getAllTrainings() {
         return new ArrayList<>(storage.getTrainingStorage().values());
     }
 

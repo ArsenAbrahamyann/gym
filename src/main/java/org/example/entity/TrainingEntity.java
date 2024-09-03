@@ -12,13 +12,13 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Training implements Serializable {
+public class TrainingEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = -5517414036571605326L;
     private String traineeId;
     private String trainerId;
     private String trainingName;
-    private TrainingType trainingType;
+    private TrainingTypeEntity trainingTypeEntity;
     private String trainingDate;
     private Duration trainingDuration;
 
@@ -28,18 +28,18 @@ public class Training implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Training that = (Training) o;
+        TrainingEntity that = (TrainingEntity) o;
         return Objects.equals(traineeId, that.traineeId) &&
                Objects.equals(trainerId, that.trainerId) &&
                Objects.equals(trainingName, that.trainingName) &&
                Objects.equals(trainingDate, that.trainingDate) &&
                Objects.equals(trainingDuration, that.trainingDuration) &&
-               Objects.equals(trainingType, that.trainingType);
+               Objects.equals(trainingTypeEntity, that.trainingTypeEntity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(traineeId, trainerId, trainingName, trainingDate, trainingDuration, trainingType);
+        return Objects.hash(traineeId, trainerId, trainingName, trainingDate, trainingDuration, trainingTypeEntity);
     }
 
 
