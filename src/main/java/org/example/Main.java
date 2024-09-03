@@ -2,6 +2,10 @@ package org.example;
 
 import org.example.config.AppConfig;
 
+import org.example.console.ConsoleApp;
+import org.example.console.TraineeConsoleImpl;
+import org.example.console.TrainerConsoleImpl;
+import org.example.console.TrainingConsoleImpl;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
@@ -20,7 +24,11 @@ public class Main {
 
         System.out.println("Beans initialized and ready to use");
 
-        ConsoleApp consoleApp = new ConsoleApp(traineeService, trainerService, trainingService);
+        TraineeConsoleImpl traineeConsole = new TraineeConsoleImpl(traineeService);
+        TrainerConsoleImpl trainerConsole = new TrainerConsoleImpl(trainerService);
+        TrainingConsoleImpl trainingConsole = new TrainingConsoleImpl(trainingService);
+
+        ConsoleApp consoleApp = new ConsoleApp(traineeConsole, trainerConsole, trainingConsole);
         consoleApp.run();
 
         ((AnnotationConfigApplicationContext) context).close();
