@@ -18,7 +18,7 @@ public class InMemoryStorage {
     private Map<String, TrainerEntity> trainerStorage = new HashMap<>();
     private Map<String, TrainingEntity> trainingStorage = new HashMap<>();
 
-    private static final String FILE_PATH = "storage.ser";
+    private static  String FILE_PATH = "storage.ser";
 
 
     @PostConstruct
