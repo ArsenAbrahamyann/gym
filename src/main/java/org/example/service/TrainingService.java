@@ -2,18 +2,11 @@ package org.example.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TrainingEntity;
-import org.example.entity.TrainingTypeEntity;
 import org.example.repository.TrainingDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Service class for managing trainings.

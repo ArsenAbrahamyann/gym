@@ -85,7 +85,7 @@ public class TrainerConsoleImpl {
 
                 trainerEntity.setSpecialization(specialization);
 
-                trainerService.updateTrainer(trainerEntity);
+                trainerService.updateTrainer(username,trainerEntity);
                 log.info("TrainerEntity updated successfully.");
                 System.out.println("TrainerEntity updated.");
             } else {

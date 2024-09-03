@@ -1,13 +1,6 @@
 package org.example.console;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.entity.TraineeEntity;
-import org.example.entity.UserUtils;
-import org.example.service.TraineeService;
-import org.example.service.TrainerService;
-import org.example.service.TrainingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
@@ -147,16 +140,16 @@ public class ConsoleApp {
                         trainingConsole.createTraining();
                         break;
                     case 2:
-                        trainingConsole.viewTraining();
-                        break;
-                    case 3:
-                        trainingConsole.viewAllTrainings();
-                        break;
-                    case 4:
                         trainingConsole.updateTraining();
                         break;
-                    case 5:
+                    case 3:
                         trainingConsole.deleteTraining();
+                        break;
+                    case 4:
+                        trainingConsole.viewTraining();
+                        break;
+                    case 5:
+                        trainingConsole.viewAllTrainings();
                         break;
                     case 6:
                         return;

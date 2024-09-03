@@ -2,7 +2,6 @@ package org.example.service;
 
 import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,29 +11,29 @@ import java.util.List;
  */
 @Service
 public class TrainerService {
-    private final TrainerDAO trainerDao;
+    private final TrainerDAO trainerDAO;
 
-    public TrainerService(TrainerDAO trainerDao) {
-        this.trainerDao = trainerDao;
+    public TrainerService(TrainerDAO trainerDAO) {
+        this.trainerDAO = trainerDAO;
     }
 
     public void createTrainer(TrainerEntity trainerEntity) {
-        trainerDao.createTrainer(trainerEntity);
+        trainerDAO.createTrainer(trainerEntity);
     }
 
-    public void updateTrainer(TrainerEntity trainerEntity) {
-        trainerDao.updateTrainer(trainerEntity.getUserId(), trainerEntity);
+    public void updateTrainer(String userId,TrainerEntity trainerEntity) {
+        trainerDAO.updateTrainer(userId, trainerEntity);
     }
 
     public void deleteTrainer(String userId) {
-        trainerDao.deleteTrainer(userId);
+        trainerDAO.deleteTrainer(userId);
     }
 
     public TrainerEntity getTrainer(String userId) {
-        return trainerDao.getTrainer(userId);
+        return trainerDAO.getTrainer(userId);
     }
 
     public List<TrainerEntity> getAllTrainers() {
-        return trainerDao.getAllTrainers();
+        return trainerDAO.getAllTrainers();
     }
 }
