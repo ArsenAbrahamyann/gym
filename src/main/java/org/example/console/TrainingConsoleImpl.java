@@ -3,7 +3,6 @@ package org.example.console;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
-import org.example.service.TraineeService;
 import org.example.service.TrainingService;
 
 import java.time.Duration;
@@ -327,10 +326,10 @@ public class TrainingConsoleImpl {
         StringBuilder sb = new StringBuilder();
         sb.append("\nManage Trainings " +
                   "\n1. Create TrainingEntity " +
-                  "\n2. View TrainingEntity " +
-                  "\n3. View All Trainings " +
-                  "\n4. Update TrainingEntity " +
-                  "\n5. Delete TrainingEntity " +
+                  "\n2. Update TrainingEntity" +
+                  "\n3. Delete TrainingEntity " +
+                  "\n4. View TrainingEntity " +
+                  "\n5. View All Trainings " +
                   "\n6. Back to Main Menu" +
                   "\nEnter your choice: ");
         System.out.println(sb);
