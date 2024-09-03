@@ -1,6 +1,6 @@
 package org.example.repository.util;
 
-import org.example.entity.Trainer;
+import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +19,17 @@ public class TrainerDAOImpl implements TrainerDAO {
     }
 
     @Override
-    public void createTrainer(Trainer trainer) {
-        storage.getTrainerStorage().put(trainer.getUserId(), trainer);
+    public void createTrainer(TrainerEntity trainerEntity) {
+        storage.getTrainerStorage().put(trainerEntity.getUserId(), trainerEntity);
     }
 
     @Override
-    public void updateTrainer(String userId, Trainer trainer) {
-        storage.getTrainerStorage().put(userId, trainer);
+    public void updateTrainer(String userId, TrainerEntity trainerEntity) {
+        storage.getTrainerStorage().put(userId, trainerEntity);
     }
 
     @Override
-    public Trainer getTrainer(String userId) {
+    public TrainerEntity getTrainer(String userId) {
         return storage.getTrainerStorage().get(userId);
     }
 
@@ -39,10 +39,10 @@ public class TrainerDAOImpl implements TrainerDAO {
     }
 
     @Override
-    public List<Trainer> getAllTrainers() {
+    public List<TrainerEntity> getAllTrainers() {
         return storage.getTrainerStorage().values().stream()
-                .filter(Trainer.class::isInstance)
-                .map(Trainer.class::cast)
+                .filter(TrainerEntity.class::isInstance)
+                .map(TrainerEntity.class::cast)
                 .collect(Collectors.toList());
     }
 }

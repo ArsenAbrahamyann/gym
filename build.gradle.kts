@@ -29,18 +29,13 @@ dependencies {
 
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-    testImplementation("org.mockito:mockito-core:5.0.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
     testImplementation("org.assertj:assertj-core:3.21.0")
 }
-sourceSets {
-    test {
-        java {
-            setSrcDirs(listOf("src/test/java"))
-        }
-    }
-}
+
 
 tasks.test {
     useJUnitPlatform()
