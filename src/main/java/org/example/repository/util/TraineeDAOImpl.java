@@ -1,6 +1,6 @@
 package org.example.repository.util;
 
-import org.example.entity.Trainee;
+import org.example.entity.TraineeEntity;
 import org.example.repository.TraineeDAO;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ public class TraineeDAOImpl implements TraineeDAO {
     }
 
     @Override
-    public void createTrainee(Trainee trainee) {
-        storage.getTraineeStorage().put(trainee.getUserId(), trainee);
+    public void createTrainee(TraineeEntity traineeEntity) {
+        storage.getTraineeStorage().put(traineeEntity.getUserId(), traineeEntity);
     }
 
     @Override
-    public void updateTrainee(String userId, Trainee trainee) {
-        storage.getTraineeStorage().put(userId, trainee);
+    public void updateTrainee(String userId, TraineeEntity traineeEntity) {
+        storage.getTraineeStorage().put(userId, traineeEntity);
     }
 
     @Override
@@ -34,15 +34,15 @@ public class TraineeDAOImpl implements TraineeDAO {
     }
 
     @Override
-    public Trainee getTrainee(String userId) {
+    public TraineeEntity getTrainee(String userId) {
         return storage.getTraineeStorage().get(userId);
     }
 
     @Override
-    public List<Trainee> getAllTrainees() {
+    public List<TraineeEntity> getAllTrainees() {
         return storage.getTraineeStorage().values().stream()
-                .filter(Trainee.class::isInstance)
-                .map(Trainee.class::cast)
+                .filter(TraineeEntity.class::isInstance)
+                .map(TraineeEntity.class::cast)
                 .collect(Collectors.toList());
     }
 }

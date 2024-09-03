@@ -1,8 +1,8 @@
 package org.example.storage;
 
-import org.example.entity.Trainee;
-import org.example.entity.Trainer;
-import org.example.entity.Training;
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
+import org.example.entity.TrainingEntity;
 import org.springframework.stereotype.Component;
 
 
@@ -14,9 +14,9 @@ import java.util.Map;
 
 @Component
 public class InMemoryStorage {
-    private Map<String, Trainee> traineeStorage = new HashMap<>();
-    private Map<String, Trainer> trainerStorage = new HashMap<>();
-    private Map<String, Training> trainingStorage = new HashMap<>();
+    private Map<String, TraineeEntity> traineeStorage = new HashMap<>();
+    private Map<String, TrainerEntity> trainerStorage = new HashMap<>();
+    private Map<String, TrainingEntity> trainingStorage = new HashMap<>();
 
     private static final String FILE_PATH = "storage.ser";
 
@@ -40,9 +40,9 @@ public class InMemoryStorage {
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_PATH))) {
             Map<String, Object> loadedData = (Map<String, Object>) ois.readObject();
-            traineeStorage = (Map<String, Trainee>) loadedData.get("traineeStorage");
-            trainerStorage = (Map<String, Trainer>) loadedData.get("trainerStorage");
-            trainingStorage = (Map<String, Training>) loadedData.get("trainingStorage");
+            traineeStorage = (Map<String, TraineeEntity>) loadedData.get("traineeStorage");
+            trainerStorage = (Map<String, TrainerEntity>) loadedData.get("trainerStorage");
+            trainingStorage = (Map<String, TrainingEntity>) loadedData.get("trainingStorage");
             System.out.println("Data loaded successfully from " + FILE_PATH);
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading file: " + e.getMessage());
@@ -61,15 +61,15 @@ public class InMemoryStorage {
             System.out.println("Error saving data to file: " + e.getMessage());
         }
     }
-    public Map<String, Trainee> getTraineeStorage() {
+    public Map<String, TraineeEntity> getTraineeStorage() {
         return traineeStorage;
     }
 
-    public Map<String, Trainer> getTrainerStorage() {
+    public Map<String, TrainerEntity> getTrainerStorage() {
         return trainerStorage;
     }
 
-    public Map<String, Training> getTrainingStorage() {
+    public Map<String, TrainingEntity> getTrainingStorage() {
         return trainingStorage;
     }
 }
