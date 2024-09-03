@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.entity.Trainer;
+import org.example.entity.TrainerEntity;
 import org.example.entity.UserUtils;
 import org.example.repository.TrainerDAO;
 import org.slf4j.Logger;
@@ -60,13 +60,13 @@ public class TrainerService {
 
             String username = UserUtils.generateUsername(firstName, lastName);
 
-            Trainer trainer = new Trainer();
-            trainer.setSpecialization(specialization);
-            trainer.setUserId(username);
+            TrainerEntity trainerEntity = new TrainerEntity();
+            trainerEntity.setSpecialization(specialization);
+            trainerEntity.setUserId(username);
 
-            trainerDao.createTrainer(trainer);
-            logger.info("Trainer created with username: {}", username);
-            System.out.println("Trainer created with username: " + username);
+            trainerDao.createTrainer(trainerEntity);
+            logger.info("TrainerEntity created with username: {}", username);
+            System.out.println("TrainerEntity created with username: " + username);
 
         } catch (Exception e) {
             logger.error("Error occurred while creating trainer: ", e);
@@ -81,24 +81,24 @@ public class TrainerService {
     public void updateTrainer() {
         logger.info("Starting to update trainer.");
         try {
-            System.out.print("Enter username of the trainer to update: ");
+            System.out.print("Enter username of the trainerEntity to update: ");
             String username = scanner.nextLine();
 
-            Trainer trainer = getTrainer(username);
-            if (trainer != null) {
-                logger.info("Trainer found with username: {}", username);
+            TrainerEntity trainerEntity = getTrainer(username);
+            if (trainerEntity != null) {
+                logger.info("TrainerEntity found with username: {}", username);
                 System.out.println();
                 System.out.print("Enter new specialization: ");
                 String specialization = scanner.nextLine();
 
-                trainer.setSpecialization(specialization);
+                trainerEntity.setSpecialization(specialization);
 
-                trainerDao.updateTrainer(trainer.getUserId(), trainer);
-                logger.info("Trainer updated successfully.");
-                System.out.println("Trainer updated.");
+                trainerDao.updateTrainer(trainerEntity.getUserId(), trainerEntity);
+                logger.info("TrainerEntity updated successfully.");
+                System.out.println("TrainerEntity updated.");
             } else {
-                logger.warn("Trainer not found with username: {}", username);
-                System.out.println("Trainer not found.");
+                logger.warn("TrainerEntity not found with username: {}", username);
+                System.out.println("TrainerEntity not found.");
             }
         } catch (Exception e) {
             logger.error("Error occurred while updating trainer: ", e);
@@ -113,17 +113,17 @@ public class TrainerService {
     public void deleteTrainer() {
         logger.info("Starting to delete trainer.");
         try {
-            System.out.print("Enter username of the trainer to delete: ");
+            System.out.print("Enter username of the trainerEntity to delete: ");
             String username = scanner.nextLine();
 
-            Trainer trainer = getTrainer(username);
-            if (trainer != null) {
-                trainerDao.deleteTrainer(trainer.getUserId());
-                logger.info("Trainer with username: {} deleted successfully.", username);
-                System.out.println("Trainer deleted.");
+            TrainerEntity trainerEntity = getTrainer(username);
+            if (trainerEntity != null) {
+                trainerDao.deleteTrainer(trainerEntity.getUserId());
+                logger.info("TrainerEntity with username: {} deleted successfully.", username);
+                System.out.println("TrainerEntity deleted.");
             } else {
-                logger.warn("Trainer not found with username: {}", username);
-                System.out.println("Trainer not found.");
+                logger.warn("TrainerEntity not found with username: {}", username);
+                System.out.println("TrainerEntity not found.");
             }
         } catch (Exception e) {
             logger.error("Error occurred while deleting trainer: ", e);
@@ -138,18 +138,18 @@ public class TrainerService {
     public void viewTrainer() {
         logger.info("Starting to view trainer details.");
         try {
-            System.out.print("Enter username of the trainer to view: ");
+            System.out.print("Enter username of the trainerEntity to view: ");
             String username = scanner.nextLine();
 
-            Trainer trainer = getTrainer(username);
-            if (trainer != null) {
-                logger.info("Displaying trainer details for username: {}", username);
-                System.out.println("Trainer Details:");
-                System.out.println("Username: " + trainer.getUserId());
-                System.out.println("Specialization: " + trainer.getSpecialization());
+            TrainerEntity trainerEntity = getTrainer(username);
+            if (trainerEntity != null) {
+                logger.info("Displaying trainerEntity details for username: {}", username);
+                System.out.println("TrainerEntity Details:");
+                System.out.println("Username: " + trainerEntity.getUserId());
+                System.out.println("Specialization: " + trainerEntity.getSpecialization());
             } else {
-                logger.warn("Trainer not found with username: {}", username);
-                System.out.println("Trainer not found.");
+                logger.warn("TrainerEntity not found with username: {}", username);
+                System.out.println("TrainerEntity not found.");
             }
         } catch (Exception e) {
             logger.error("Error occurred while viewing trainer details: ", e);
@@ -164,16 +164,16 @@ public class TrainerService {
     public void viewAllTrainer() {
         logger.info("Starting to view all trainers.");
         try {
-            List<Trainer> trainers = getAllTrainers();
-            if (trainers.isEmpty()) {
-                logger.info("No trainers found.");
+            List<TrainerEntity> trainerEntities = getAllTrainers();
+            if (trainerEntities.isEmpty()) {
+                logger.info("No trainerEntities found.");
                 System.out.println("No trainer found.");
             } else {
-                logger.info("Displaying details of all trainers.");
+                logger.info("Displaying details of all trainerEntities.");
                 System.out.println("All Trainers:");
-                for (Trainer trainer : trainers) {
-                    System.out.println("Username: " + trainer.getUserId());
-                    System.out.println("Specialization: " + trainer.getSpecialization());
+                for (TrainerEntity trainerEntity : trainerEntities) {
+                    System.out.println("Username: " + trainerEntity.getUserId());
+                    System.out.println("Specialization: " + trainerEntity.getSpecialization());
                     System.out.println("--------");
                 }
             }
@@ -188,9 +188,9 @@ public class TrainerService {
      * Handles possible errors during the retrieval process.
      *
      * @param userId the username of the trainer
-     * @return the Trainer object if found, null otherwise
+     * @return the TrainerEntity object if found, null otherwise
      */
-    public Trainer getTrainer(String userId) {
+    public TrainerEntity getTrainer(String userId) {
         logger.info("Retrieving trainer with username: {}", userId);
         try {
             return trainerDao.getTrainer(userId);
@@ -206,7 +206,7 @@ public class TrainerService {
      *
      * @return a list of all trainers
      */
-    public List<Trainer> getAllTrainers() {
+    public List<TrainerEntity> getAllTrainers() {
         logger.info("Retrieving all trainers.");
         try {
             return trainerDao.getAllTrainers();
@@ -222,11 +222,11 @@ public class TrainerService {
     public void printMenu() {
         logger.info("Displaying menu options for managing trainers.");
         StringBuilder sb = new StringBuilder();
-        sb.append("\nManage Trainer " +
-                  "\n1. Create Trainer " +
-                  "\n2. Update Trainer " +
-                  "\n3. Delete Trainer " +
-                  "\n4. View Trainer " +
+        sb.append("\nManage TrainerEntity " +
+                  "\n1. Create TrainerEntity " +
+                  "\n2. Update TrainerEntity " +
+                  "\n3. Delete TrainerEntity " +
+                  "\n4. View TrainerEntity " +
                   "\n5. View All Trainers " +
                   "\n6. Back to Main Menu" +
                   "\nEnter your choice: ");
