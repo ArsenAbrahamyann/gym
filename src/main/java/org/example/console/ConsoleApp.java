@@ -1,5 +1,8 @@
-package org.example;
+package org.example.console;
 
+import lombok.extern.slf4j.Slf4j;
+import org.example.entity.TraineeEntity;
+import org.example.entity.UserUtils;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
@@ -8,17 +11,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
+@Slf4j
 public class ConsoleApp {
-    private static final Logger logger = LoggerFactory.getLogger(ConsoleApp.class);
-    private final TraineeService traineeService;
-    private final TrainerService trainerService;
-    private final TrainingService trainingService;
+    private final TraineeConsoleImpl traineeConsole;
+    private final TrainerConsoleImpl trainerConsole;
+    private final TrainingConsoleImpl trainingConsole;
     private final Scanner scanner;
 
-    public ConsoleApp(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService) {
-        this.traineeService = traineeService;
-        this.trainerService = trainerService;
-        this.trainingService = trainingService;
+    public ConsoleApp(TraineeConsoleImpl traineeConsole, TrainerConsoleImpl trainerConsole, TrainingConsoleImpl trainingConsole) {
+        this.traineeConsole = traineeConsole;
+        this.trainerConsole = trainerConsole;
+        this.trainingConsole = trainingConsole;
         this.scanner = new Scanner(System.in);
     }
 
@@ -28,7 +31,7 @@ public class ConsoleApp {
             printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("UserEntity selected option: {}", choice);
+                log.info("UserEntity selected option: {}", choice);
                 switch (choice) {
                     case 1:
                         manageTrainees();
@@ -40,18 +43,18 @@ public class ConsoleApp {
                         manageTrainings();
                         break;
                     case 4:
-                        logger.info("Exiting the application.");
+                        log.info("Exiting the application.");
                         System.out.println("Exiting...");
                         return;
                     default:
-                        logger.warn("Invalid choice selected: {}", choice);
+                        log.warn("Invalid choice selected: {}", choice);
                         System.out.println("Invalid choice. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Invalid input, expected a number.");
+                log.error("Invalid input, expected a number.");
                 System.out.println("Invalid input. Please enter a number.");
             } catch (Exception e) {
-                logger.error("An unexpected error occurred.", e);
+                log.error("An unexpected error occurred.", e);
                 System.out.println("An unexpected error occurred. Please try again.");
             }
         }
@@ -59,37 +62,37 @@ public class ConsoleApp {
 
     private void manageTrainees() {
         while (true) {
-            traineeService.printMenu();
+            traineeConsole.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("UserEntity selected trainee option: {}", choice);
+                log.info("UserEntity selected trainee option: {}", choice);
                 switch (choice) {
                     case 1:
-                        traineeService.createTrainee();
+                        traineeConsole.createTrainee();
                         break;
                     case 2:
-                        traineeService.updateTrainee();
+                        traineeConsole.updateTrainee();
                         break;
                     case 3:
-                        traineeService.deleteTrainee();
+                        traineeConsole.deleteTrainee();
                         break;
                     case 4:
-                        traineeService.viewTrainee();
+                        traineeConsole.viewTrainee();
                         break;
                     case 5:
-                        traineeService.viewAllTrainee();
+                        traineeConsole.viewAllTrainee();
                         break;
                     case 6:
                         return;
                     default:
-                        logger.warn("Invalid trainee choice selected: {}", choice);
+                        log.warn("Invalid trainee choice selected: {}", choice);
                         System.out.println("Invalid choice. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Invalid input for trainee option, expected a number.", e);
+                log.error("Invalid input for trainee option, expected a number.", e);
                 System.out.println("Invalid input. Please enter a number.");
             } catch (Exception e) {
-                logger.error("An unexpected error occurred while managing trainees.", e);
+                log.error("An unexpected error occurred while managing trainees.", e);
                 System.out.println("An unexpected error occurred. Please try again.");
             }
         }
@@ -97,37 +100,37 @@ public class ConsoleApp {
 
     private void manageTrainers() {
         while (true) {
-            trainerService.printMenu();
+            trainerConsole.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("UserEntity selected trainer option: {}", choice);
+                log.info("UserEntity selected trainer option: {}", choice);
                 switch (choice) {
                     case 1:
-                        trainerService.createTrainer();
+                        trainerConsole.createTrainer();
                         break;
                     case 2:
-                        trainerService.updateTrainer();
+                        trainerConsole.updateTrainer();
                         break;
                     case 3:
-                        trainerService.deleteTrainer();
+                        trainerConsole.deleteTrainer();
                         break;
                     case 4:
-                        trainerService.viewTrainer();
+                        trainerConsole.viewTrainer();
                         break;
                     case 5:
-                        trainerService.viewAllTrainer();
+                        trainerConsole.viewAllTrainer();
                         break;
                     case 6:
                         return;
                     default:
-                        logger.warn("Invalid trainer choice selected: {}", choice);
+                        log.warn("Invalid trainer choice selected: {}", choice);
                         System.out.println("Invalid choice. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Invalid input for trainer option, expected a number.", e);
+                log.error("Invalid input for trainer option, expected a number.", e);
                 System.out.println("Invalid input. Please enter a number.");
             } catch (Exception e) {
-                logger.error("An unexpected error occurred while managing trainers.", e);
+                log.error("An unexpected error occurred while managing trainers.", e);
                 System.out.println("An unexpected error occurred. Please try again.");
             }
         }
@@ -135,44 +138,44 @@ public class ConsoleApp {
 
     private void manageTrainings() {
         while (true) {
-            trainingService.printMenu();
+            trainingConsole.printMenu();
             try {
                 Integer choice = Integer.parseInt(scanner.nextLine().trim());
-                logger.info("UserEntity selected training option: {}", choice);
+                log.info("UserEntity selected training option: {}", choice);
                 switch (choice) {
                     case 1:
-                        trainingService.createTraining();
+                        trainingConsole.createTraining();
                         break;
                     case 2:
-                        trainingService.viewTraining();
+                        trainingConsole.viewTraining();
                         break;
                     case 3:
-                        trainingService.viewAllTrainings();
+                        trainingConsole.viewAllTrainings();
                         break;
                     case 4:
-                        trainingService.updateTraining();
+                        trainingConsole.updateTraining();
                         break;
                     case 5:
-                        trainingService.deleteTraining();
+                        trainingConsole.deleteTraining();
                         break;
                     case 6:
                         return;
                     default:
-                        logger.warn("Invalid training choice selected: {}", choice);
+                        log.warn("Invalid training choice selected: {}", choice);
                         System.out.println("Invalid choice. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Invalid input for training option, expected a number.", e);
+                log.error("Invalid input for training option, expected a number.", e);
                 System.out.println("Invalid input. Please enter a number.");
             } catch (Exception e) {
-                logger.error("An unexpected error occurred while managing trainings.", e);
+                log.error("An unexpected error occurred while managing trainings.", e);
                 System.out.println("An unexpected error occurred. Please try again.");
             }
         }
     }
 
     public void printMenu() {
-        logger.info("Displaying main menu.");
+        log.info("Displaying main menu.");
         StringBuilder sb = new StringBuilder();
         sb.append("\nWelcome to the Gym CRM System " +
                   "\n1. Manage Trainees " +
@@ -182,6 +185,9 @@ public class ConsoleApp {
                   "\n5. Choose an option: ");
         System.out.println(sb);
     }
+
+
+
 
 
 }
