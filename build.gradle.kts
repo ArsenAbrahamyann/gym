@@ -1,6 +1,6 @@
 plugins {
-    id("java")
-
+    java
+    checkstyle
 }
 
 group = "org.example"
@@ -41,4 +41,8 @@ tasks.test {
     useJUnitPlatform()
 }
 
-
+checkstyle {
+    isIgnoreFailures = false
+    maxWarnings = 0
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+}
