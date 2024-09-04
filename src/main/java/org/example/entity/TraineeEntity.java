@@ -10,11 +10,11 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TraineeEntity implements Serializable {
+public class TraineeEntity {
 
-
-    @Serial
-    private static final long serialVersionUID = 83652714433742173L;
+//
+//    @Serial
+//    private static final long serialVersionUID = 83652714433742173L;
     private String localDateTime;
     private String address;
     private String userId;
