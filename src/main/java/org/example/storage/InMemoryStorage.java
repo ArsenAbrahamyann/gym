@@ -2,6 +2,7 @@ package org.example.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.Getter;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Getter
 public class InMemoryStorage {
     private Map<String, TraineeEntity> traineeStorage = new HashMap<>();
     private Map<String, TrainerEntity> trainerStorage = new HashMap<>();
@@ -69,15 +71,5 @@ public class InMemoryStorage {
         }
     }
 
-    public Map<String, TraineeEntity> getTraineeStorage() {
-        return traineeStorage;
-    }
 
-    public Map<String, TrainerEntity> getTrainerStorage() {
-        return trainerStorage;
-    }
-
-    public Map<String, TrainingEntity> getTrainingStorage() {
-        return trainingStorage;
-    }
 }
