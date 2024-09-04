@@ -10,9 +10,9 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainerEntity implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 3500520733655441205L;
+public class TrainerEntity  {
+//    @Serial
+//    private static final long serialVersionUID = 3500520733655441205L;
     private String userId;
     private String specialization;
 
