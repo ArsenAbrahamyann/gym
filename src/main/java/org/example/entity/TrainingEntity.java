@@ -12,9 +12,9 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainingEntity implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -5517414036571605326L;
+public class TrainingEntity  {
+//    @Serial
+//    private static final long serialVersionUID = -5517414036571605326L;
     private String traineeId;
     private String trainerId;
     private String trainingName;

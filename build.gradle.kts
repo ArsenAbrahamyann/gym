@@ -27,6 +27,8 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
