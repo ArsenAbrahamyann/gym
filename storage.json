@@ -1,0 +1,48 @@
+{
+  "traineeStorage" : {
+    "D F" : {
+      "localDateTime" : "1998-12-12",
+      "address" : "sfdf",
+      "userId" : "D F"
+    },
+    "k k" : {
+      "localDateTime" : "1111-01-01",
+      "address" : "l",
+      "userId" : "k k"
+    }
+  },
+  "trainingStorage" : { },
+  "userStorage" : {
+    "d" : {
+      "firstName" : "d",
+      "lastName" : "d",
+      "password" : "d",
+      "active" : true,
+      "userName" : "d"
+    },
+    "D F" : {
+      "firstName" : "D",
+      "lastName" : "F",
+      "password" : "2cENkfOHLD",
+      "active" : true,
+      "userName" : "D F"
+    },
+    "k k" : {
+      "firstName" : "k",
+      "lastName" : "k",
+      "password" : "IKHQpuwP5R",
+      "active" : true,
+      "userName" : "k k"
+    }
+  },
+  "trainerStorage" : {
+    "AAA" : {
+      "userId" : "AAA",
+      "specialization" : "ds"
+    },
+    "d" : {
+      "userId" : "d",
+      "specialization" : "df"
+    }
+  }
+}
