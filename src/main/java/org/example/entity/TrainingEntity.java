@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.Objects;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TrainingEntity  {
     private String traineeId;
     private String trainerId;

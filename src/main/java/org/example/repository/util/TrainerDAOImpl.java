@@ -1,5 +1,6 @@
 package org.example.repository.util;
 
+import java.util.ArrayList;
 import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
 import org.example.storage.InMemoryStorage;
@@ -40,9 +41,6 @@ public class TrainerDAOImpl implements TrainerDAO {
 
     @Override
     public List<TrainerEntity> getAllTrainers() {
-        return storage.getTrainerStorage().values().stream()
-                .filter(TrainerEntity.class::isInstance)
-                .map(TrainerEntity.class::cast)
-                .collect(Collectors.toList());
+        return new ArrayList<>(storage.getTrainerStorage().values());
     }
 }

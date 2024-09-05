@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.entity.TraineeEntity;
 import org.example.repository.TraineeDAO;
+import org.example.repository.UserDAO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.List;
 @Service
 public class TraineeService {
     private final TraineeDAO traineeDao;
+    private final UserDAO userDAO;
 
-    public TraineeService(TraineeDAO traineeDao) {
+    public TraineeService(TraineeDAO traineeDao,UserDAO userDAO) {
         this.traineeDao = traineeDao;
+        this.userDAO = userDAO;
     }
 
     public void updateTrainee(TraineeEntity traineeEntity) {
@@ -25,8 +28,9 @@ public class TraineeService {
         traineeDao.createTrainee(traineeEntity);
     }
 
-    public void deleteTrainee(String userId) {
-        traineeDao.deleteTrainee(userId);
+    public void deleteTrainee(String traineeId) {
+        userDAO.deleteByUsername(traineeId);
+        traineeDao.deleteTrainee(traineeId);
     }
 
     public TraineeEntity getTrainee(String userId) {

@@ -1,5 +1,7 @@
 package org.example.repository.util;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import org.example.entity.TraineeEntity;
 import org.example.repository.TraineeDAO;
 import org.example.storage.InMemoryStorage;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 public class TraineeDAOImpl implements TraineeDAO {
     private final InMemoryStorage storage;
 
-    @Autowired
+
     public TraineeDAOImpl(InMemoryStorage storage) {
         this.storage = storage;
     }
@@ -40,9 +42,9 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public List<TraineeEntity> getAllTrainees() {
-        return storage.getTraineeStorage().values().stream()
-                .filter(TraineeEntity.class::isInstance)
-                .map(TraineeEntity.class::cast)
-                .collect(Collectors.toList());
+        return new ArrayList<>(storage.getTraineeStorage().values());
     }
+
+
+
 }
