@@ -1,8 +1,14 @@
 package org.example.console;
 
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
+import org.example.entity.UserEntity;
+import org.example.service.TraineeService;
+import org.example.service.TrainerService;
 import org.example.service.TrainingService;
 
 import java.time.Duration;
@@ -10,26 +16,29 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import org.example.service.UserService;
 
 @Slf4j
 public class TrainingConsoleImpl {
     private final TrainingService trainingService;
-    Scanner scanner = new Scanner(System.in);
+    private final TraineeConsoleImpl traineeConsole;
+    private final TrainerConsoleImpl trainerConsole;
+    private final UserConsoleImpl userConsole;
+    private final TraineeService traineeService;
+    private final TrainerService trainerService;
+    private Scanner scanner = new Scanner(System.in);
 
-
-    public TrainingConsoleImpl(TrainingService trainingService) {
+    public TrainingConsoleImpl(TrainingService trainingService, TraineeConsoleImpl traineeConsole,
+                               TrainerConsoleImpl trainerConsole, UserConsoleImpl userConsole,
+                               TraineeService traineeService, TrainerService trainerService) {
         this.trainingService = trainingService;
+        this.traineeConsole = traineeConsole;
+        this.trainerConsole = trainerConsole;
+        this.userConsole = userConsole;
+        this.traineeService = traineeService;
+        this.trainerService = trainerService;
     }
 
-    /**
-     * Sets the Scanner instance used for user input.
-     *
-     * <p> This method allows setting a custom {@link Scanner} for reading user input.
-     * If the provided scanner is null, an {@link IllegalArgumentException} will be thrown.</p>
-     *
-     * @param scanner the {@link Scanner} instance to be set
-     * @throws IllegalArgumentException if the {@code scanner} is null
-     */
     public void setScanner(Scanner scanner) {
         log.info("Entering setScanner method.");
         if (scanner == null) {
@@ -47,31 +56,44 @@ public class TrainingConsoleImpl {
     public void createTraining() {
         log.info("Starting to create a new training.");
         try {
+            TrainingEntity trainingEntity = new TrainingEntity();
+            traineeConsole.viewAllTrainee();
             System.out.print("Enter trainee username: ");
-            String traineeId = scanner.nextLine();
-
-            System.out.print("Enter trainer username: ");
-            String trainerId = scanner.nextLine();
-
-            System.out.print("Enter trainingEntity name: ");
+            String traineeUsername = scanner.nextLine();
+            TraineeEntity trainee = traineeService.getTrainee(traineeUsername);
+            if (trainee == null) {
+                System.out.println("Trainee not found.");
+                return;
+            }
+            trainingEntity.setTraineeId(traineeUsername);
+            trainerConsole.viewAllTrainer();
+            System.out.println("Enter trainer username");
+            String trainerUsername = scanner.nextLine();
+            TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
+            if (trainer == null) {
+                System.out.println("Trainer not found.");
+                return;
+            }
+            trainingEntity.setTrainerId(trainerUsername);
+            System.out.print("Enter training name: ");
             String trainingName = scanner.nextLine();
 
-            System.out.print("Enter trainingEntity type: ");
+            System.out.print("Enter training type: ");
             String trainingTypeName = scanner.nextLine();
             TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity(trainingTypeName);
 
-            System.out.print("Enter trainingEntity date (YYYY-MM-DD): ");
+            System.out.print("Enter training date (YYYY-MM-DD): ");
             String trainingDateInput = scanner.nextLine();
             LocalDate trainingDate;
             try {
                 trainingDate = LocalDate.parse(trainingDateInput);
             } catch (DateTimeParseException e) {
-                log.warn("Invalid trainingEntity date format: {}", trainingDateInput);
+                log.warn("Invalid training date format: {}", trainingDateInput);
                 System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                 return;
             }
 
-            System.out.print("Enter trainingEntity duration (HH:MM): ");
+            System.out.print("Enter training duration (HH:MM): ");
             String trainingDurationInput = scanner.nextLine();
             Duration trainingDuration;
             try {
@@ -83,14 +105,10 @@ public class TrainingConsoleImpl {
                 int minutes = Integer.parseInt(parts[1]);
                 trainingDuration = Duration.ofHours(hours).plusMinutes(minutes);
             } catch (NumberFormatException e) {
-                log.warn("Invalid trainingEntity duration format: {}", trainingDurationInput);
+                log.warn("Invalid training duration format: {}", trainingDurationInput);
                 System.out.println("Invalid duration format. Please use HH:MM.");
                 return;
             }
-
-            TrainingEntity trainingEntity = new TrainingEntity();
-            trainingEntity.setTraineeId(traineeId);
-            trainingEntity.setTrainerId(trainerId);
             trainingEntity.setTrainingName(trainingName);
             trainingEntity.setTrainingTypeEntity(trainingTypeEntity);
             trainingEntity.setTrainingDate(trainingDate.toString());
@@ -113,26 +131,33 @@ public class TrainingConsoleImpl {
     public void updateTraining() {
         log.info("Starting to update training.");
         try {
+            viewAllTrainings();
             System.out.print("Enter the name of the training to update: ");
             String trainingName = scanner.nextLine();
-
             TrainingEntity existingTrainingEntity = getTraining(trainingName);
             if (existingTrainingEntity != null) {
                 log.info("TrainingEntity '{}' found. Proceeding with update.", trainingName);
-
+                traineeConsole.viewAllTrainee();
                 System.out.print("Enter new trainee username: ");
-                String traineeId = scanner.nextLine();
-
+                String traineeUsername = scanner.nextLine();
+                TraineeEntity trainee = traineeService.getTrainee(traineeUsername);
+                if (trainee == null) {
+                    System.out.println("Trainee not found.");
+                    return;
+                }
+                trainerConsole.viewAllTrainer();
                 System.out.print("Enter new trainer username: ");
-                String trainerId = scanner.nextLine();
-
+                String trainerUsername = scanner.nextLine();
+                TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
+                if (trainer == null) {
+                    System.out.println("Trainer not found.");
+                    return;
+                }
                 System.out.print("Enter new training name: ");
                 String newTrainingName = scanner.nextLine();
-
                 System.out.print("Enter new training type: ");
                 String trainingTypeName = scanner.nextLine();
                 TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity(trainingTypeName);
-
                 System.out.print("Enter new training date (YYYY-MM-DD): ");
                 String trainingDateInput = scanner.nextLine();
                 LocalDate trainingDate;
@@ -143,7 +168,6 @@ public class TrainingConsoleImpl {
                     System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                     return;
                 }
-
                 System.out.print("Enter new training duration (HH:MM): ");
                 String trainingDurationInput = scanner.nextLine();
                 Duration trainingDuration;
@@ -161,8 +185,8 @@ public class TrainingConsoleImpl {
                     return;
                 }
 
-                existingTrainingEntity.setTraineeId(traineeId);
-                existingTrainingEntity.setTrainerId(trainerId);
+                existingTrainingEntity.setTraineeId(traineeUsername);
+                existingTrainingEntity.setTrainerId(trainerUsername);
                 existingTrainingEntity.setTrainingName(newTrainingName);
                 existingTrainingEntity.setTrainingTypeEntity(trainingTypeEntity);
                 existingTrainingEntity.setTrainingDate(trainingDate.toString());
@@ -189,18 +213,12 @@ public class TrainingConsoleImpl {
     public void deleteTraining() {
         log.info("Starting to delete training.");
         try {
+            viewAllTrainings();
             System.out.print("Enter the name of the training to delete: ");
             String trainingName = scanner.nextLine();
-
-            TrainingEntity existingTrainingEntity = getTraining(trainingName);
-            if (existingTrainingEntity != null) {
-                trainingService.deleteTraining(trainingName);
-                log.info("TrainingEntity '{}' deleted successfully.", trainingName);
-                System.out.println("TrainingEntity deleted successfully.");
-            } else {
-                log.warn("TrainingEntity '{}' not found.", trainingName);
-                System.out.println("TrainingEntity not found.");
-            }
+            trainingService.deleteTraining(trainingName);
+            log.info("TrainingEntity '{}' deleted successfully.", trainingName);
+            System.out.println("TrainingEntity deleted successfully.");
         } catch (Exception e) {
             log.error("Error occurred while deleting training: ", e);
             System.out.println("An error occurred while deleting the training. Please try again.");
@@ -214,19 +232,20 @@ public class TrainingConsoleImpl {
     public void viewTraining() {
         log.info("Starting to view training details.");
         try {
-            System.out.print("Enter trainingEntity name to view: ");
+            System.out.print("Enter training name to view: ");
             String trainingName = scanner.nextLine();
 
             TrainingEntity trainingEntity = getTraining(trainingName);
             if (trainingEntity != null) {
                 log.info("Displaying details for trainingEntity '{}'.", trainingName);
                 System.out.println("TrainingEntity Details:");
-                System.out.println("TraineeEntity Username: " + trainingEntity.getTraineeId());
-                System.out.println("TrainerEntity Username: " + trainingEntity.getTrainerId());
-                System.out.println("TrainingEntity Name: " + trainingEntity.getTrainingName());
-                System.out.println("TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
-                System.out.println("TrainingEntity Date: " + trainingEntity.getTrainingDate());
-                System.out.println("TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
+                System.out.println("Trainee Username: " + trainingEntity.getTraineeId());
+                System.out.println("Trainer Username: " + trainingEntity.getTrainerId());
+                System.out.println("Training Name: " + trainingEntity.getTrainingName());
+                System.out.println("Training Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
+                System.out.println("Training Date: " + trainingEntity.getTrainingDate());
+                System.out.println("Training Duration: " + trainingEntity.getTrainingDuration().toHours() + " hours " +
+                                   trainingEntity.getTrainingDuration().toMinutesPart() + " minutes");
             } else {
                 log.warn("TrainingEntity '{}' not found.", trainingName);
                 System.out.println("TrainingEntity not found.");
@@ -257,13 +276,15 @@ public class TrainingConsoleImpl {
                     System.out.println("TrainingEntity Name: " + trainingEntity.getTrainingName());
 
                     if (trainingEntity.getTrainingTypeEntity() != null) {
-                        System.out.println("TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
+                        System.out.println(
+                            "TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
                     } else {
                         System.out.println("TrainingEntity Type: Not specified");
                     }
 
                     System.out.println("TrainingEntity Date: " + trainingEntity.getTrainingDate());
-                    System.out.println("TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
+                    System.out.println(
+                        "TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
                     System.out.println("--------");
                 }
             }
@@ -274,18 +295,24 @@ public class TrainingConsoleImpl {
     }
 
     /**
-     * Retrieves a training based on the training name.
+     * Retrieves a training entity based on the training name.
      * Handles possible errors during the retrieval process.
      *
-     * @param trainingName the name of the training
-     * @return the TrainingEntity object if found, null otherwise
+     * @param trainingName the name of the training to retrieve
+     * @return the training entity if found, null otherwise
      */
-    public TrainingEntity getTraining(String trainingName) {
-        log.info("Retrieving training with name: {}", trainingName);
+    private TrainingEntity getTraining(String trainingName) {
         try {
-            return trainingService.getTraining(trainingName);
+            TrainingEntity trainingEntity = trainingService.getTraining(trainingName);
+            if (trainingEntity != null) {
+                log.info("TrainingEntity '{}' retrieved successfully.", trainingName);
+            } else {
+                log.warn("TrainingEntity '{}' not found.", trainingName);
+            }
+            return trainingEntity;
         } catch (Exception e) {
-            log.error("Error occurred while retrieving training '{}': ", trainingName, e);
+            log.error("Error occurred while retrieving trainingEntity '{}': ", trainingName, e);
+            System.out.println("An error occurred while retrieving the training. Please try again.");
             return null;
         }
     }

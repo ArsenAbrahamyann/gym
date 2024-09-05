@@ -1,11 +1,13 @@
 package org.example.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Getter;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
+import org.example.entity.UserEntity;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -19,6 +21,7 @@ public class InMemoryStorage {
     private Map<String, TraineeEntity> traineeStorage = new HashMap<>();
     private Map<String, TrainerEntity> trainerStorage = new HashMap<>();
     private Map<String, TrainingEntity> trainingStorage = new HashMap<>();
+    private Map<String, UserEntity> userStorage = new HashMap<>();
 
     private static final String FILE_PATH = "storage.json";
     private final ObjectMapper objectMapper;
@@ -46,10 +49,11 @@ public class InMemoryStorage {
         }
 
         try {
-            Map<String, Object> loadedData = objectMapper.readValue(file, Map.class);
-            traineeStorage = objectMapper.convertValue(loadedData.get("traineeStorage"), Map.class);
-            trainerStorage = objectMapper.convertValue(loadedData.get("trainerStorage"), Map.class);
-            trainingStorage = objectMapper.convertValue(loadedData.get("trainingStorage"), Map.class);
+            Map<String, Object> loadedData = objectMapper.readValue(file,new TypeReference<Map<String, Object>>() {});
+            traineeStorage = objectMapper.convertValue(loadedData.get("traineeStorage"),new TypeReference<Map<String, TraineeEntity>>() {});
+            trainerStorage = objectMapper.convertValue(loadedData.get("trainerStorage"), new TypeReference<Map<String, TrainerEntity>>() {});
+            trainingStorage = objectMapper.convertValue(loadedData.get("trainingStorage"), new TypeReference<Map<String, TrainingEntity>>() {});
+            userStorage = objectMapper.convertValue(loadedData.get("userStorage"), new TypeReference<Map<String, UserEntity>>() {});
             System.out.println("Data loaded successfully from " + FILE_PATH);
         } catch (IOException e) {
             System.out.println("Error loading file: " + e.getMessage());
@@ -62,6 +66,7 @@ public class InMemoryStorage {
             dataToSave.put("traineeStorage", traineeStorage);
             dataToSave.put("trainerStorage", trainerStorage);
             dataToSave.put("trainingStorage", trainingStorage);
+            dataToSave.put("userStorage", userStorage);
 
             objectMapper.writeValue(writer, dataToSave);
 

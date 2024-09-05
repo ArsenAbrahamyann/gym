@@ -2,6 +2,7 @@ package org.example.console;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
+import org.example.entity.UserEntity;
 import org.example.entity.UserUtils;
 import org.example.service.TraineeService;
 
@@ -9,25 +10,30 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import org.example.service.UserService;
 
+/**
+ * Implementation of console-based operations for managing trainees.
+ * Provides functionality for creating, updating, deleting, and viewing trainees.
+ */
 @Slf4j
 public class TraineeConsoleImpl {
     private final TraineeService traineeService;
-    Scanner scanner = new Scanner(System.in);
+    private final UserConsoleImpl userConsole;
+    private final UserService userService;
+    private Scanner scanner = new Scanner(System.in);
 
-
-    public TraineeConsoleImpl(TraineeService traineeService) {
+    public TraineeConsoleImpl(TraineeService traineeService, UserConsoleImpl userConsole, UserService userService) {
         this.traineeService = traineeService;
+        this.userConsole = userConsole;
+        this.userService = userService;
     }
 
     /**
      * Sets the Scanner instance used for user input.
      *
-     * <p> This method allows setting a custom {@link Scanner} for reading user input.
-     * If the provided scanner is null, an {@link IllegalArgumentException} will be thrown.</p>
-     *
-     * @param scanner the {@link Scanner} instance to be set
-     * @throws IllegalArgumentException if the {@code scanner} is null
+     * @param scanner the Scanner instance to be set
+     * @throws IllegalArgumentException if the scanner is null
      */
     public void setScanner(Scanner scanner) {
         log.info("Entering setScanner method.");
@@ -46,34 +52,47 @@ public class TraineeConsoleImpl {
     public void updateTrainee() {
         log.info("Starting to update trainee.");
         try {
-            System.out.print("Enter username of the traineeEntity to update: ");
+            viewAllTrainee();
+            System.out.print("Enter username of the trainee to update: ");
             String username = scanner.nextLine();
 
-            TraineeEntity traineeEntity = getTrainee(username);
+            TraineeEntity traineeEntity = traineeService.getTrainee(username);
             if (traineeEntity != null) {
-                log.info("TraineeEntity found with username: {}", username);
-                System.out.println();
+                log.info("Trainee found with username: {}", username);
+                UserEntity user = userConsole.getUser(traineeEntity.getUserId()).orElse(null);
+                System.out.println("Enter new firstName: ");
+                String newFirstName = scanner.nextLine();
+                System.out.println("Enter new lastName: ");
+                String newLastName = scanner.nextLine();
+                String newUsername = UserUtils.generateUsername(newFirstName, newLastName);
+                user.setFirstName(newFirstName);
+                user.setLastName(newLastName);
+                user.setUserName(newUsername);
+                userService.updateUser(newUsername, user);
+                userService.deleteUserByUsername(user.getUserName());
                 System.out.print("Enter new date of birth (YYYY-MM-DD): ");
                 String dateOfBirth = scanner.nextLine();
                 LocalDate traineeDateOfBirth;
                 try {
                     traineeDateOfBirth = LocalDate.parse(dateOfBirth);
                 } catch (DateTimeParseException e) {
-                    log.warn("Invalid trainingEntity date format: {}", dateOfBirth);
+                    log.warn("Invalid date format: {}", dateOfBirth);
                     System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                     return;
                 }
                 System.out.print("Enter new address: ");
                 String address = scanner.nextLine();
 
-                traineeEntity.setLocalDateTime(traineeDateOfBirth.toString());
+                traineeEntity.setLocalDateTime(dateOfBirth);
                 traineeEntity.setAddress(address);
+                traineeEntity.setUserId(newUsername);
 
                 traineeService.updateTrainee(traineeEntity);
-                log.info("TraineeEntity updated successfully.");
+                traineeService.deleteTrainee(traineeEntity.getUserId());
+                log.info("Trainee updated successfully.");
             } else {
-                log.warn("TraineeEntity not found with username: {}", username);
-                System.out.println("TraineeEntity not found.");
+                log.warn("Trainee not found with username: {}", username);
+                System.out.println("Trainee not found.");
             }
         } catch (Exception e) {
             log.error("Error occurred while updating trainee: ", e);
@@ -88,39 +107,35 @@ public class TraineeConsoleImpl {
     public void createTrainee() {
         log.info("Starting to create a new trainee.");
         try {
-            System.out.print("Enter first name: ");
-            String firstName = scanner.nextLine();
-            System.out.print("Enter last name: ");
-            String lastName = scanner.nextLine();
+            UserEntity user = userConsole.createUser();
             System.out.print("Enter date of birth (YYYY-MM-DD): ");
             String dateOfBirth = scanner.nextLine();
             LocalDate traineeDateOfBirth;
             try {
                 traineeDateOfBirth = LocalDate.parse(dateOfBirth);
             } catch (DateTimeParseException e) {
-                log.warn("Invalid trainingEntity date format: {}", dateOfBirth);
+                log.warn("Invalid date format: {}", dateOfBirth);
                 System.out.println("Invalid date format. Please use YYYY-MM-DD.");
                 return;
             }
             System.out.print("Enter address: ");
             String address = scanner.nextLine();
 
-            String username = UserUtils.generateUsername(firstName, lastName);
-            String password = UserUtils.generatePassword();
 
             TraineeEntity traineeEntity = new TraineeEntity();
-            traineeEntity.setUserId(username);
-            traineeEntity.setLocalDateTime(traineeDateOfBirth.toString());
+            traineeEntity.setUserId(user.getUserName());
+            traineeEntity.setLocalDateTime(dateOfBirth);
             traineeEntity.setAddress(address);
 
             traineeService.createTrainee(traineeEntity);
-            log.info("TraineeEntity created with username: {} and password: {}", username, password);
+            log.info("Trainee created with username: {} and password: {}", user.getUserName(), user.getPassword());
+            System.out.println(
+                "Trainee created successfully. Username: " + user.getPassword() + ", Password: " + user.getPassword());
         } catch (Exception e) {
             log.error("Error occurred while creating trainee: ", e);
             System.out.println("An error occurred while creating the trainee. Please try again.");
         }
     }
-
 
     /**
      * Deletes an existing trainee based on the username.
@@ -129,17 +144,13 @@ public class TraineeConsoleImpl {
     public void deleteTrainee() {
         log.info("Starting to delete trainee.");
         try {
-            System.out.print("Enter username of the traineeEntity to delete: ");
+            viewAllTrainee();
+            System.out.print("Enter username of the trainee to delete: ");
             String username = scanner.nextLine();
-            TraineeEntity traineeEntity = getTrainee(username);
-            if (traineeEntity != null) {
-                traineeService.deleteTrainee(traineeEntity.getUserId());
-                log.info("TraineeEntity with username: {} deleted successfully.", username);
-                System.out.println("TraineeEntity deleted.");
-            } else {
-                log.warn("TraineeEntity not found with username: {}", username);
-                System.out.println("TraineeEntity not found.");
-            }
+            userService.deleteUserByUsername(username);
+            traineeService.deleteTrainee(username);
+            log.info("Trainee with username: {} deleted successfully.", username);
+            System.out.println("Trainee deleted.");
         } catch (Exception e) {
             log.error("Error occurred while deleting trainee: ", e);
             System.out.println("An error occurred while deleting the trainee. Please try again.");
@@ -153,19 +164,20 @@ public class TraineeConsoleImpl {
     public void viewTrainee() {
         log.info("Starting to view trainee details.");
         try {
-            System.out.print("Enter username of the traineeEntity to view: ");
+            userConsole.viewAllUsers();
+            System.out.print("Enter username of the trainee to view: ");
             String username = scanner.nextLine();
 
-            TraineeEntity traineeEntity = getTrainee(username);
+            TraineeEntity traineeEntity = traineeService.getTrainee(username);
             if (traineeEntity != null) {
-                log.info("Displaying traineeEntity details for username: {}", username);
-                System.out.println("TraineeEntity Details:");
+                log.info("Displaying trainee details for username: {}", username);
+                System.out.println("Trainee Details:");
                 System.out.println("Username: " + traineeEntity.getUserId());
-                System.out.println("Date of Birth: " + traineeEntity.getLocalDateTime().toString());
+                System.out.println("Date of Birth: " + traineeEntity.getLocalDateTime());
                 System.out.println("Address: " + traineeEntity.getAddress());
             } else {
-                log.warn("TraineeEntity not found with username: {}", username);
-                System.out.println("TraineeEntity not found.");
+                log.warn("Trainee not found with username: {}", username);
+                System.out.println("Trainee not found.");
             }
         } catch (Exception e) {
             log.error("Error occurred while viewing trainee details: ", e);
@@ -180,17 +192,17 @@ public class TraineeConsoleImpl {
     public void viewAllTrainee() {
         log.info("Starting to view all trainees.");
         try {
-            List<TraineeEntity> traineeEntities = getAllTrainees();
+            List<TraineeEntity> traineeEntities = traineeService.getAllTrainees();
             if (traineeEntities.isEmpty()) {
-                log.info("No traineeEntities found.");
-                System.out.println("No trainee found.");
+                log.info("No trainees found.");
+                System.out.println("No trainees found.");
             } else {
-                log.info("Displaying details of all traineeEntities.");
+                log.info("Displaying details of all trainees.");
                 System.out.println("All Trainees:");
                 for (TraineeEntity traineeEntity : traineeEntities) {
-                    System.out.println("TraineeEntity: " + traineeEntity.getUserId());
-                    System.out.println("TraineeEntity: " + traineeEntity.getAddress());
-                    System.out.println("TraineeEntity: " + traineeEntity.getLocalDateTime());
+                    System.out.println("Username: " + traineeEntity.getUserId());
+                    System.out.println("Date of Birth: " + traineeEntity.getLocalDateTime());
+                    System.out.println("Address: " + traineeEntity.getAddress());
                     System.out.println("--------");
                 }
             }
@@ -201,53 +213,19 @@ public class TraineeConsoleImpl {
     }
 
     /**
-     * Retrieves a trainee based on the username.
-     * Handles possible errors during the retrieval process.
-     *
-     * @param userId the username of the trainee
-     * @return the TraineeEntity object if found, null otherwise
-     */
-    public TraineeEntity getTrainee(String userId) {
-        log.info("Retrieving trainee with username: {}", userId);
-        try {
-            return traineeService.getTrainee(userId);
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving trainee with username: {}", userId, e);
-            return null;
-        }
-    }
-
-    /**
-     * Retrieves all trainees.
-     * Handles possible errors during the retrieval process.
-     *
-     * @return a list of all trainees
-     */
-    public List<TraineeEntity> getAllTrainees() {
-        log.info("Retrieving all trainees.");
-        try {
-            return traineeService.getAllTrainees();
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving all trainees: ", e);
-            return null;
-        }
-    }
-
-
-    /**
      * Prints the menu for managing trainees.
      */
     public void printMenu() {
         log.info("Displaying menu options for managing trainees.");
         StringBuilder sb = new StringBuilder();
-        sb.append("\nManage TraineeEntity " +
-                  "\n1. Create TraineeEntity " +
-                  "\n2. Update TraineeEntity " +
-                  "\n3. Delete TraineeEntity " +
-                  "\n4. View TraineeEntity " +
+        sb.append("\nManage Trainee " +
+                  "\n1. Create Trainee " +
+                  "\n2. Update Trainee " +
+                  "\n3. Delete Trainee " +
+                  "\n4. View Trainee " +
                   "\n5. View All Trainees " +
                   "\n6. Back to Main Menu" +
-                  "\n Enter your choice: ");
+                  "\nEnter your choice: ");
         System.out.println(sb);
     }
 }
