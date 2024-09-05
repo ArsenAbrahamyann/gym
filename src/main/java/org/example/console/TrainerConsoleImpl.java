@@ -1,20 +1,27 @@
 package org.example.console;
 
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TrainerEntity;
+import org.example.entity.UserEntity;
 import org.example.entity.UserUtils;
 import org.example.service.TrainerService;
 
 import java.util.List;
 import java.util.Scanner;
+import org.example.service.UserService;
 
 @Slf4j
 public class TrainerConsoleImpl {
     private final TrainerService trainerService;
+    private final UserConsoleImpl userConsole;
+    private final UserService userService;
     Scanner scanner = new Scanner(System.in);
 
-    public TrainerConsoleImpl(TrainerService trainerService) {
+    public TrainerConsoleImpl(TrainerService trainerService, UserConsoleImpl userConsole, UserService userService) {
         this.trainerService = trainerService;
+        this.userConsole = userConsole;
+        this.userService = userService;
     }
 
     /**
@@ -43,22 +50,17 @@ public class TrainerConsoleImpl {
     public void createTrainer() {
         log.info("Starting to create a new trainer.");
         try {
-            System.out.print("Enter first name: ");
-            String firstName = scanner.nextLine();
-            System.out.print("Enter last name: ");
-            String lastName = scanner.nextLine();
+            UserEntity user = userConsole.createUser();
             System.out.print("Enter specialization: ");
             String specialization = scanner.nextLine();
 
-            String username = UserUtils.generateUsername(firstName, lastName);
-
             TrainerEntity trainerEntity = new TrainerEntity();
+            trainerEntity.setUserId(user.getUserName());
             trainerEntity.setSpecialization(specialization);
-            trainerEntity.setUserId(username);
 
             trainerService.createTrainer(trainerEntity);
-            log.info("TrainerEntity created with username: {}", username);
-            System.out.println("TrainerEntity created with username: " + username);
+            log.info("TrainerEntity created with userId (username): {}", user.getUserName());
+            System.out.println("TrainerEntity created with userId: " + user.getUserName());
 
         } catch (Exception e) {
             log.error("Error occurred while creating trainer: ", e);
@@ -73,19 +75,31 @@ public class TrainerConsoleImpl {
     public void updateTrainer() {
         log.info("Starting to update trainer.");
         try {
+            viewAllTrainer();
             System.out.print("Enter username of the trainerEntity to update: ");
             String username = scanner.nextLine();
-
             TrainerEntity trainerEntity = getTrainer(username);
             if (trainerEntity != null) {
-                log.info("TrainerEntity found with username: {}", username);
-                System.out.println();
+                log.info("TrainerEntity found with username: {}", trainerEntity.getUserId());
+                UserEntity user = userConsole.getUser(trainerEntity.getUserId()).orElse(null);
+                System.out.println("Enter new firstName: ");
+                String newFirstName = scanner.nextLine();
+                System.out.println("Enter new lastName: ");
+                String newLastName = scanner.nextLine();
+                String newUsername = UserUtils.generateUsername(newFirstName, newLastName);
+                user.setFirstName(newFirstName);
+                user.setLastName(newLastName);
+                user.setUserName(newUsername);
+                userService.updateUser(newUsername, user);
+                userService.deleteUserByUsername(user.getUserName());
                 System.out.print("Enter new specialization: ");
                 String specialization = scanner.nextLine();
 
                 trainerEntity.setSpecialization(specialization);
+                trainerEntity.setUserId(newUsername);
 
-                trainerService.updateTrainer(username,trainerEntity);
+                trainerService.updateTrainer(newUsername, trainerEntity);
+                trainerService.deleteTrainer(trainerEntity.getUserId());
                 log.info("TrainerEntity updated successfully.");
                 System.out.println("TrainerEntity updated.");
             } else {
@@ -105,18 +119,13 @@ public class TrainerConsoleImpl {
     public void deleteTrainer() {
         log.info("Starting to delete trainer.");
         try {
-            System.out.print("Enter username of the trainerEntity to delete: ");
+            viewAllTrainer();
+            System.out.print("Enter username of the trainer to delete: ");
             String username = scanner.nextLine();
-
-            TrainerEntity trainerEntity = getTrainer(username);
-            if (trainerEntity != null) {
-                trainerService.deleteTrainer(trainerEntity.getUserId());
-                log.info("TrainerEntity with username: {} deleted successfully.", username);
-                System.out.println("TrainerEntity deleted.");
-            } else {
-                log.warn("TrainerEntity not found with username: {}", username);
-                System.out.println("TrainerEntity not found.");
-            }
+            userService.deleteUserByUsername(username);
+            trainerService.deleteTrainer(username);
+            log.info("Trainer with username: {} deleted successfully.", username);
+            System.out.println("Trainer deleted.");
         } catch (Exception e) {
             log.error("Error occurred while deleting trainer: ", e);
             System.out.println("An error occurred while deleting the trainer. Please try again.");
@@ -130,6 +139,7 @@ public class TrainerConsoleImpl {
     public void viewTrainer() {
         log.info("Starting to view trainer details.");
         try {
+            userConsole.viewAllUsers();
             System.out.print("Enter username of the trainerEntity to view: ");
             String username = scanner.nextLine();
 

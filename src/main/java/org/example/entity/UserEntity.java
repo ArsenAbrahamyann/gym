@@ -6,6 +6,8 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserEntity {
     private String firstName;
     private String lastName;

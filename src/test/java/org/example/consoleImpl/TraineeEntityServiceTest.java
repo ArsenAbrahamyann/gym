@@ -1,8 +1,10 @@
 package org.example.consoleImpl;
 
 import org.example.console.TraineeConsoleImpl;
+import org.example.console.UserConsoleImpl;
 import org.example.entity.TraineeEntity;
 import org.example.service.TraineeService;
+import org.example.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,13 +26,17 @@ public class TraineeEntityServiceTest {
     @Mock
     private TraineeService traineeService;
     @Mock
+    private UserConsoleImpl userConsole;
+    @Mock
+    private UserService userService;
+    @Mock
     private  Scanner scanner;
     @InjectMocks
     private TraineeConsoleImpl underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new TraineeConsoleImpl(traineeService);
+        underTest = new TraineeConsoleImpl(traineeService,userConsole,userService);
         underTest.setScanner(scanner);
     }
 
