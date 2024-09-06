@@ -9,7 +9,6 @@ import org.example.entity.TrainingTypeEntity;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
-import org.example.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TrainingEntityServiceTest {
+public class TrainingConsoleImplTest {
     @Mock
     private TrainingService trainingService;
     @Mock

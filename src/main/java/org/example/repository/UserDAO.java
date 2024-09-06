@@ -32,7 +32,7 @@ public interface UserDAO {
     void deleteByUsername(String username);
 
     List<UserEntity> findAll();
-    void updateUser(String username, UserEntity userEntity);
+    void updateUser( UserEntity userEntity);
 
 }
 
