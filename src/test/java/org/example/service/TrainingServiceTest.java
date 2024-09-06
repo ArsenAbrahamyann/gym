@@ -1,7 +1,9 @@
 package org.example.service;
 
 import org.example.entity.TrainingEntity;
+import org.example.entity.TrainingTypeEntity;
 import org.example.repository.TrainingDAO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,72 +14,78 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
     @Mock
-    private TrainingDAO trainingDao;
+    private TrainingDAO trainingDAO;
 
     @InjectMocks
     private TrainingService trainingService;
 
+    private TrainingEntity training;
+    private TrainingTypeEntity trainingType;
+
+    @BeforeEach
+    void setUp() {
+        trainingType = new TrainingTypeEntity("Yoga");
+        training = new TrainingEntity(
+            "1",
+            "2",
+            "Morning Yoga",
+            trainingType,
+            "2024-09-10",
+            Duration.ofHours(1)
+        );
+    }
+
     @Test
     void testCreateTraining() {
-        TrainingEntity training = new TrainingEntity("1", "1", "Yoga", null, "2024-09-01", Duration.ofHours(2));
-
         trainingService.createTraining(training);
 
-        verify(trainingDao, times(1)).createTraining(training);
+        verify(trainingDAO, times(1)).createTraining(training);
     }
 
     @Test
     void testUpdateTraining() {
-        TrainingEntity existingTraining = new TrainingEntity("1", "1", "Yoga", null, "2024-09-01", Duration.ofHours(2));
-        String trainingName = "Yoga";
+        trainingService.updateTraining(training.getTrainingName(), training);
 
-        trainingService.updateTraining(trainingName, existingTraining);
-
-        verify(trainingDao, times(1)).updateTraining(trainingName, existingTraining);
+        verify(trainingDAO, times(1)).updateTraining(training.getTrainingName(), training);
     }
 
     @Test
     void testDeleteTraining() {
-        String trainingName = "Yoga";
+        String trainingName = "Morning Yoga";
 
         trainingService.deleteTraining(trainingName);
 
-        verify(trainingDao, times(1)).deleteTraining(trainingName);
+        verify(trainingDAO, times(1)).deleteTraining(trainingName);
     }
 
     @Test
     void testGetTraining() {
-        String trainingName = "Yoga";
-        TrainingEntity training = new TrainingEntity("1", "1", "Yoga", null, "2024-09-01", Duration.ofHours(2));
-
-        when(trainingDao.getTraining(trainingName)).thenReturn(training);
+        String trainingName = "Morning Yoga";
+        when(trainingDAO.getTraining(trainingName)).thenReturn(training);
 
         TrainingEntity result = trainingService.getTraining(trainingName);
 
         assertThat(result).isEqualTo(training);
-        verify(trainingDao, times(1)).getTraining(trainingName);
+        verify(trainingDAO, times(1)).getTraining(trainingName);
     }
 
     @Test
     void testGetAllTrainings() {
         List<TrainingEntity> trainings = Arrays.asList(
-                new TrainingEntity("1", "1", "Yoga", null, "2024-09-01", Duration.ofHours(2)),
-                new TrainingEntity("2", "2", "Pilates", null, "2024-09-02", Duration.ofHours(1))
+            new TrainingEntity("1", "2", "Morning Yoga", trainingType, "2024-09-10", Duration.ofHours(1)),
+            new TrainingEntity("3", "4", "Evening Yoga", trainingType, "2024-09-11", Duration.ofHours(2))
         );
-
-        when(trainingDao.getAllTrainings()).thenReturn(trainings);
+        when(trainingDAO.getAllTrainings()).thenReturn(trainings);
 
         List<TrainingEntity> result = trainingService.getAllTrainings();
 
-        assertThat(result).isEqualTo(trainings);
-        verify(trainingDao, times(1)).getAllTrainings();
+        assertThat(result).hasSize(2).containsExactlyElementsOf(trainings);
+        verify(trainingDAO, times(1)).getAllTrainings();
     }
 }

@@ -1,7 +1,10 @@
 package org.example.console;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
 import org.example.entity.UserEntity;
@@ -9,11 +12,6 @@ import org.example.entity.UserUtils;
 import org.example.entity.dto.TraineeDto;
 import org.example.entity.dto.UserDto;
 import org.example.service.TraineeService;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.Scanner;
 import org.example.service.UserService;
 import org.modelmapper.ModelMapper;
 
@@ -43,7 +41,9 @@ public class TraineeConsoleImpl {
      */
     public void setScanner(Scanner scanner) {
         log.info("Entering setScanner method.");
-        if (scanner == null) {
+        if (scanner
+                ==
+                null) {
             log.error("Attempted to set a null scanner.");
             throw new IllegalArgumentException("Scanner cannot be null.");
         }
@@ -63,7 +63,9 @@ public class TraineeConsoleImpl {
             String username = scanner.nextLine();
 
             TraineeEntity traineeEntity = traineeService.getTrainee(username);
-            if (traineeEntity != null) {
+            if (traineeEntity
+                    !=
+                    null) {
                 log.info("Trainee found with username: {}", username);
                 Optional<UserEntity> userOptional = userConsole.getUser(traineeEntity.getUserId());
                 if (userOptional.isPresent()) {
@@ -79,7 +81,7 @@ public class TraineeConsoleImpl {
                     userDto.setLastName(newLastName);
                     userDto.setUserName(newUsername);
                     userService.updateUser(
-                        modelMapper.map(userDto, UserEntity.class));
+                            modelMapper.map(userDto, UserEntity.class));
 
                     System.out.print("Enter new date of birth (YYYY-MM-DD): ");
                     String dateOfBirth = scanner.nextLine();
@@ -141,7 +143,7 @@ public class TraineeConsoleImpl {
             traineeDto.setAddress(address);
 
             traineeService.createTrainee(
-                modelMapper.map(traineeDto, TraineeEntity.class));
+                    modelMapper.map(traineeDto, TraineeEntity.class));
             log.info("Trainee created successfully with username: {}", userDto.getUserName());
         } catch (Exception e) {
             log.error("Error occurred while creating trainee: ", e);
@@ -149,94 +151,120 @@ public class TraineeConsoleImpl {
         }
     }
 
-        /**
-         * Deletes an existing trainee based on the username.
-         * Handles possible errors during the deletion process.
-         */
-        public void deleteTrainee () {
-            log.info("Starting to delete trainee.");
-            try {
-                viewAllTrainee();
-                System.out.print("Enter username of the trainee to delete: ");
-                String username = scanner.nextLine();
-                userService.deleteUserByUsername(username);
-                traineeService.deleteTrainee(username);
-                log.info("Trainee with username: {} deleted successfully.", username);
-                System.out.println("Trainee deleted.");
-            } catch (Exception e) {
-                log.error("Error occurred while deleting trainee: ", e);
-                System.out.println("An error occurred while deleting the trainee. Please try again.");
-            }
+    /**
+     * Deletes an existing trainee based on the username.
+     * Handles possible errors during the deletion process.
+     */
+    public void deleteTrainee() {
+        log.info("Starting to delete trainee.");
+        try {
+            viewAllTrainee();
+            System.out.print("Enter username of the trainee to delete: ");
+            String username = scanner.nextLine();
+            userService.deleteUserByUsername(username);
+            traineeService.deleteTrainee(username);
+            log.info("Trainee with username: {} deleted successfully.", username);
+            System.out.println("Trainee deleted.");
+        } catch (Exception e) {
+            log.error("Error occurred while deleting trainee: ", e);
+            System.out.println("An error occurred while deleting the trainee. Please try again.");
         }
+    }
 
-        /**
-         * Displays details of a trainee based on the username.
-         * Handles possible errors during the retrieval process.
-         */
-        public void viewTrainee () {
-            log.info("Starting to view trainee details.");
-            try {
-                System.out.print("Enter username of the trainee to view: ");
-                String username = scanner.nextLine();
+    /**
+     * Displays details of a trainee based on the username.
+     * Handles possible errors during the retrieval process.
+     */
+    public void viewTrainee() {
+        log.info("Starting to view trainee details.");
+        try {
+            System.out.print("Enter username of the trainee to view: ");
+            String username = scanner.nextLine();
 
-                TraineeEntity traineeEntity = traineeService.getTrainee(username);
-                if (traineeEntity != null) {
-                    TraineeDto traineeDto = modelMapper.map(traineeEntity, TraineeDto.class);
-                    log.info("Displaying trainee details for username: {}", username);
-                    System.out.println("Trainee Details:");
-                    System.out.println("Username: " + traineeDto.getUserId());
-                    System.out.println("Date of Birth: " + traineeDto.getLocalDateTime());
-                    System.out.println("Address: " + traineeDto.getAddress());
-                } else {
-                    log.warn("Trainee not found with username: {}", username);
-                    System.out.println("Trainee not found.");
+            TraineeEntity traineeEntity = traineeService.getTrainee(username);
+            if (traineeEntity
+                    !=
+                    null) {
+                TraineeDto traineeDto = modelMapper.map(traineeEntity, TraineeDto.class);
+                log.info("Displaying trainee details for username: {}", username);
+                System.out.println("Trainee Details:");
+                System.out.println("Username: "
+                        +
+                        traineeDto.getUserId());
+                System.out.println("Date of Birth: "
+                        +
+                        traineeDto.getLocalDateTime());
+                System.out.println("Address: "
+                        +
+                        traineeDto.getAddress());
+            } else {
+                log.warn("Trainee not found with username: {}", username);
+                System.out.println("Trainee not found.");
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while viewing trainee details: ", e);
+            System.out.println("An error occurred while retrieving the trainee details. Please try again.");
+        }
+    }
+
+    /**
+     * Displays details of all trainees.
+     * Handles possible errors during the retrieval process.
+     */
+    public void viewAllTrainee() {
+        log.info("Starting to view all trainees.");
+        try {
+            List<TraineeEntity> trainees = traineeService.getAllTrainees();
+            if (! trainees.isEmpty()) {
+                log.info("Displaying all trainees.");
+                System.out.println("All Trainees:");
+                for (TraineeEntity traineeEntity : trainees) {
+                    TraineeDto traineeDto = modelMapper.map(traineeEntity,
+                            TraineeDto.class);
+                    System.out.println("Username: "
+                            +
+                            traineeDto.getUserId()
+                            +
+                            ", Date of Birth: "
+                            +
+                            traineeDto.getLocalDateTime()
+                            +
+                            ", Address: "
+                            +
+                            traineeDto.getAddress());
                 }
-            } catch (Exception e) {
-                log.error("Error occurred while viewing trainee details: ", e);
-                System.out.println("An error occurred while retrieving the trainee details. Please try again.");
+            } else {
+                log.warn("No trainees found.");
+                System.out.println("No trainees found.");
             }
+        } catch (Exception e) {
+            log.error("Error occurred while viewing all trainees: ", e);
+            System.out.println("An error occurred while retrieving the list of trainees. Please try again.");
         }
-        /**
-         * Displays details of all trainees.
-         * Handles possible errors during the retrieval process.
-         */
-        public void viewAllTrainee () {
-            log.info("Starting to view all trainees.");
-            try {
-                List<TraineeEntity> trainees = traineeService.getAllTrainees();
-                if (!trainees.isEmpty()) {
-                    log.info("Displaying all trainees.");
-                    System.out.println("All Trainees:");
-                    for (TraineeEntity traineeEntity : trainees) {
-                        TraineeDto traineeDto = modelMapper.map(traineeEntity, TraineeDto.class);  // Using ModelMapper to map entity to DTO
-                        System.out.println("Username: " + traineeDto.getUserId() + ", Date of Birth: " +
-                                           traineeDto.getLocalDateTime() + ", Address: " + traineeDto.getAddress());
-                    }
-                } else {
-                    log.warn("No trainees found.");
-                    System.out.println("No trainees found.");
-                }
-            } catch (Exception e) {
-                log.error("Error occurred while viewing all trainees: ", e);
-                System.out.println("An error occurred while retrieving the list of trainees. Please try again.");
-            }
-        }
+    }
 
-        /**
-         * Prints the menu for managing trainees.
-         */
-        public void printMenu () {
-            log.info("Displaying menu options for managing trainees.");
-            StringBuilder sb = new StringBuilder();
-            sb.append("\nManage Trainee " +
-                      "\n1. Create Trainee " +
-                      "\n2. Update Trainee " +
-                      "\n3. Delete Trainee " +
-                      "\n4. View Trainee " +
-                      "\n5. View All Trainees " +
-                      "\n6. Back to Main Menu" +
-                      "\nEnter your choice: ");
-            System.out.println(sb);
-        }
+    /**
+     * Prints the menu for managing trainees.
+     */
+    public void printMenu() {
+        log.info("Displaying menu options for managing trainees.");
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nManage Trainee "
+                +
+                "\n1. Create Trainee "
+                +
+                "\n2. Update Trainee "
+                +
+                "\n3. Delete Trainee "
+                +
+                "\n4. View Trainee "
+                +
+                "\n5. View All Trainees "
+                +
+                "\n6. Back to Main Menu"
+                +
+                "\nEnter your choice: ");
+        System.out.println(sb);
+    }
 
 }

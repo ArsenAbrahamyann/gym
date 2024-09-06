@@ -13,13 +13,13 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "org.example")
 public class AppConfig {
 
-  /**
-   * Defines an {@link InMemoryStorage} bean that will be managed by the Spring container.
-   *
-   * @return a new instance of {@link InMemoryStorage}.
-   */
-  @Bean
-  public InMemoryStorage inMemoryStorage() {
-    return new InMemoryStorage();
-  }
+    /**
+     * Defines an {@link InMemoryStorage} bean that will be managed by the Spring container.
+     *
+     * @return a new instance of {@link InMemoryStorage}.
+     */
+    @Bean
+    public InMemoryStorage inMemoryStorage() {
+        return new InMemoryStorage();
+    }
 }
