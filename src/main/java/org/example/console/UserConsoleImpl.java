@@ -10,16 +10,47 @@ import org.example.entity.dto.UserDto;
 import org.example.service.UserService;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Implementation of user console operations for managing user data.
+ * This class provides methods for creating, updating, deleting, and viewing user details.
+ */
 @Slf4j
 public class UserConsoleImpl {
     private final UserService userService;
     private final ModelMapper modelMapper = new ModelMapper();
     private Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Constructs a UserConsoleImpl instance with the specified UserService.
+     *
+     * @param userService the UserService instance used for user operations
+     */
     public UserConsoleImpl(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Sets a custom Scanner instance for user input.
+     *
+     * @param scanner the Scanner instance to be set
+     * @throws IllegalArgumentException if the provided Scanner is null
+     */
+    public void setScanner(Scanner scanner) {
+        log.info("Entering setScanner method.");
+        if (scanner
+                == null) {
+            log.error("Attempted to set a null scanner.");
+            throw new IllegalArgumentException("Scanner cannot be null.");
+        }
+        this.scanner = scanner;
+        log.info("Scanner has been successfully set.");
+    }
+
+    /**
+     * Creates a new user based on input from the console and saves it using UserService.
+     *
+     * @return the created UserDto object
+     */
     public UserDto createUser() {
         UserDto userDto = new UserDto();
         log.info("Starting to create a new user.");
@@ -43,7 +74,8 @@ public class UserConsoleImpl {
             userService.saveUser(userEntity);
 
             log.info("User created with username: {}", username);
-            System.out.println("User created with username: " + username);
+            System.out.println("User created with username: "
+                    + username);
         } catch (Exception e) {
             log.error("Error occurred while creating user: ", e);
             System.out.println("An error occurred while creating the user. Please try again.");
@@ -51,91 +83,9 @@ public class UserConsoleImpl {
         return userDto;
     }
 
-    public void updateUser(String username) {
-        log.info("Starting to update user.");
-        try {
-            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
-            if (userEntityOptional.isPresent()) {
-                UserEntity userEntity = userEntityOptional.get();
-                UserDto userDto = modelMapper.map(userEntity, UserDto.class);
-
-                System.out.print("Enter new first name (or press Enter to keep current): ");
-                String firstName = scanner.nextLine();
-                System.out.print("Enter new last name (or press Enter to keep current): ");
-                String lastName = scanner.nextLine();
-                System.out.print("Is active (true/false, or press Enter to keep current): ");
-                String isActiveInput = scanner.nextLine();
-
-                if (!firstName.isEmpty()) {
-                    userDto.setFirstName(firstName);
-                }
-                if (!lastName.isEmpty()) {
-                    userDto.setLastName(lastName);
-                }
-                if (!isActiveInput.isEmpty()) {
-                    userDto.setActive(Boolean.parseBoolean(isActiveInput));
-                }
-
-                UserEntity updatedEntity = modelMapper.map(userDto, UserEntity.class);
-                userService.updateUser(updatedEntity);
-
-                log.info("User updated successfully.");
-                System.out.println("User updated.");
-            } else {
-                log.warn("User not found with username: {}", username);
-                System.out.println("User not found.");
-            }
-        } catch (Exception e) {
-            log.error("Error occurred while updating user: ", e);
-            System.out.println("An error occurred while updating the user. Please try again.");
-        }
-    }
-
-    public void deleteUser(String username) {
-        log.info("Starting to delete user.");
-        try {
-            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
-            if (userEntityOptional.isPresent()) {
-                userService.deleteUserByUsername(username);
-                log.info("User deleted successfully.");
-                System.out.println("User deleted.");
-            } else {
-                log.warn("User not found with username: {}", username);
-                System.out.println("User not found.");
-            }
-        } catch (Exception e) {
-            log.error("Error occurred while deleting user: ", e);
-            System.out.println("An error occurred while deleting the user. Please try again.");
-        }
-    }
-
-    public void viewUser() {
-        log.info("Starting to view user details.");
-        try {
-            System.out.print("Enter username of the user to view: ");
-            String username = scanner.nextLine();
-
-            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
-            if (userEntityOptional.isPresent()) {
-                UserEntity userEntity = userEntityOptional.get();
-                UserDto userDto = modelMapper.map(userEntity, UserDto.class);  // Convert to DTO
-
-                log.info("Displaying user details for username: {}", username);
-                System.out.println("User Details:");
-                System.out.println("Username: " + userDto.getUserName());
-                System.out.println("First Name: " + userDto.getFirstName());
-                System.out.println("Last Name: " + userDto.getLastName());
-                System.out.println("Active: " + userDto.isActive());
-            } else {
-                log.warn("User not found with username: {}", username);
-                System.out.println("User not found.");
-            }
-        } catch (Exception e) {
-            log.error("Error occurred while viewing user details: ", e);
-            System.out.println("An error occurred while retrieving the user details. Please try again.");
-        }
-    }
-
+    /**
+     * Views the details of all users.
+     */
     public void viewAllUsers() {
         log.info("Starting to view all users.");
         try {
@@ -148,10 +98,14 @@ public class UserConsoleImpl {
                 System.out.println("All Users:");
                 for (UserEntity userEntity : userEntities) {
                     UserDto userDto = modelMapper.map(userEntity, UserDto.class);  // Convert to DTO
-                    System.out.println("Username: " + userDto.getUserName());
-                    System.out.println("First Name: " + userDto.getFirstName());
-                    System.out.println("Last Name: " + userDto.getLastName());
-                    System.out.println("Active: " + userDto.isActive());
+                    System.out.println("Username: "
+                            + userDto.getUserName());
+                    System.out.println("First Name: "
+                            + userDto.getFirstName());
+                    System.out.println("Last Name: "
+                            + userDto.getLastName());
+                    System.out.println("Active: "
+                            + userDto.isActive());
                     System.out.println("--------");
                 }
             }
@@ -160,6 +114,13 @@ public class UserConsoleImpl {
             System.out.println("An error occurred while retrieving the users. Please try again.");
         }
     }
+
+    /**
+     * Retrieves a user entity based on the specified username.
+     *
+     * @param username the username of the user to retrieve
+     * @return an Optional containing the UserEntity if found, or an empty Optional if not found
+     */
     public Optional<UserEntity> getUser(String username) {
         log.info("Retrieving User with username: {}", username);
         try {

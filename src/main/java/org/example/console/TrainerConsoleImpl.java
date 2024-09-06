@@ -1,5 +1,7 @@
 package org.example.console;
 
+import java.util.List;
+import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
@@ -7,12 +9,16 @@ import org.example.entity.UserUtils;
 import org.example.entity.dto.TrainerDto;
 import org.example.entity.dto.UserDto;
 import org.example.service.TrainerService;
-
-import java.util.List;
-import java.util.Scanner;
 import org.example.service.UserService;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Implementation of the console-based user interface for managing trainers.
+ * <p>
+ * This class provides functionality for creating, updating, deleting, and viewing trainers.
+ * It interacts with the {@link TrainerService} and {@link UserService} to perform these operations.
+ * </p>
+ */
 @Slf4j
 public class TrainerConsoleImpl {
     private final TrainerService trainerService;
@@ -21,24 +27,34 @@ public class TrainerConsoleImpl {
     private final ModelMapper modelMapper = new ModelMapper();
     Scanner scanner = new Scanner(System.in);
 
-    public TrainerConsoleImpl(TrainerService trainerService, UserConsoleImpl userConsole, UserService userService) {
+    /**
+     * Constructs a TrainerConsoleImpl with the specified services and user console.
+     *
+     * @param trainerService the service for managing trainers
+     * @param userConsole    the console for managing users
+     * @param userService    the service for managing users
+     */
+    public TrainerConsoleImpl(TrainerService trainerService, UserConsoleImpl userConsole,
+                              UserService userService) {
         this.trainerService = trainerService;
         this.userConsole = userConsole;
         this.userService = userService;
     }
 
     /**
-     * Sets the Scanner instance used for user input.
-     *
-     * <p> This method allows setting a custom {@link Scanner} for reading user input.
-     * If the provided scanner is null, an {@link IllegalArgumentException} will be thrown.</p>
+     * Sets the {@link Scanner} instance used for user input.
+     * <p>
+     * This method allows setting a custom {@link Scanner} for reading user input.
+     * If the provided scanner is null, an {@link IllegalArgumentException} will be thrown.
+     * </p>
      *
      * @param scanner the {@link Scanner} instance to be set
      * @throws IllegalArgumentException if the {@code scanner} is null
      */
     public void setScanner(Scanner scanner) {
         log.info("Entering setScanner method.");
-        if (scanner == null) {
+        if (scanner
+                == null) {
             log.error("Attempted to set a null scanner.");
             throw new IllegalArgumentException("Scanner cannot be null.");
         }
@@ -48,7 +64,11 @@ public class TrainerConsoleImpl {
 
     /**
      * Creates a new trainer by taking input from the console.
+     * <p>
+     * This method invokes {@link UserConsoleImpl#createUser()} to create a user,
+     * then collects additional trainer-specific information, and saves the new trainer using the {@link TrainerService}.
      * Handles possible errors during the creation process.
+     * </p>
      */
     public void createTrainer() {
         log.info("Starting to create a new trainer.");
@@ -64,7 +84,8 @@ public class TrainerConsoleImpl {
             TrainerEntity trainerEntity = modelMapper.map(trainerDto, TrainerEntity.class);
             trainerService.createTrainer(trainerEntity);
             log.info("TrainerEntity created with userId (username): {}", userDto.getUserName());
-            System.out.println("TrainerEntity created with userId: " + userDto.getUserName());
+            System.out.println("TrainerEntity created with userId: "
+                    + userDto.getUserName());
 
         } catch (Exception e) {
             log.error("Error occurred while creating trainer: ", e);
@@ -74,7 +95,11 @@ public class TrainerConsoleImpl {
 
     /**
      * Updates an existing trainer based on the username.
+     * <p>
+     * This method first displays all trainers and prompts the user to enter the username of the trainer to be updated.
+     * It updates the trainer's details including username and specialization.
      * Handles possible errors during the update process.
+     * </p>
      */
     public void updateTrainer() {
         log.info("Starting to update trainer.");
@@ -84,7 +109,8 @@ public class TrainerConsoleImpl {
             String username = scanner.nextLine();
             TrainerEntity trainerEntity = getTrainer(username);
             TrainerDto updatedTrainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
-            if (updatedTrainerDto != null) {
+            if (updatedTrainerDto
+                    != null) {
                 log.info("TrainerEntity found with username: {}", updatedTrainerDto.getUserId());
                 UserEntity user = userConsole.getUser(updatedTrainerDto.getUserId()).orElse(null);
                 UserDto userDto = modelMapper.map(user, UserDto.class);
@@ -122,7 +148,11 @@ public class TrainerConsoleImpl {
 
     /**
      * Deletes an existing trainer based on the username.
+     * <p>
+     * This method first displays all trainers and prompts the user to enter the username of the trainer to be deleted.
+     * It then deletes the trainer using the {@link TrainerService} and the associated user using the {@link UserService}.
      * Handles possible errors during the deletion process.
+     * </p>
      */
     public void deleteTrainer() {
         log.info("Starting to delete trainer.");
@@ -142,8 +172,12 @@ public class TrainerConsoleImpl {
 
     /**
      * Displays details of a trainer based on the username.
+     * <p>
+     * This method prompts the user to enter the username of the trainer to be viewed and then displays the trainer's details.
      * Handles possible errors during the retrieval process.
+     * </p>
      */
+
     public void viewTrainer() {
         log.info("Starting to view trainer details.");
         try {
@@ -152,12 +186,15 @@ public class TrainerConsoleImpl {
             String username = scanner.nextLine();
 
             TrainerEntity trainerEntity = getTrainer(username);
-            if (trainerEntity != null) {
+            if (trainerEntity
+                    != null) {
                 TrainerDto trainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
                 log.info("Displaying trainerEntity details for username: {}", username);
                 System.out.println("TrainerEntity Details:");
-                System.out.println("Username: " + trainerDto.getUserId());
-                System.out.println("Specialization: " + trainerDto.getSpecialization());
+                System.out.println("Username: "
+                        + trainerDto.getUserId());
+                System.out.println("Specialization: "
+                        + trainerDto.getSpecialization());
             } else {
                 log.warn("TrainerEntity not found with username: {}", username);
                 System.out.println("TrainerEntity not found.");
@@ -170,7 +207,10 @@ public class TrainerConsoleImpl {
 
     /**
      * Displays details of all trainers.
+     * <p>
+     * This method retrieves and displays the details of all trainers.
      * Handles possible errors during the retrieval process.
+     * </p>
      */
     public void viewAllTrainer() {
         log.info("Starting to view all trainers.");
@@ -184,8 +224,10 @@ public class TrainerConsoleImpl {
                 System.out.println("All Trainers:");
                 for (TrainerEntity trainerEntity : trainerEntities) {
                     TrainerDto trainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
-                    System.out.println("Username: " + trainerDto.getUserId());
-                    System.out.println("Specialization: " + trainerDto.getSpecialization());
+                    System.out.println("Username: "
+                            + trainerDto.getUserId());
+                    System.out.println("Specialization: "
+                            + trainerDto.getSpecialization());
                     System.out.println("--------");
                 }
             }
@@ -197,10 +239,14 @@ public class TrainerConsoleImpl {
 
     /**
      * Retrieves a trainer based on the username.
+     * <p>
+     * This method uses the {@link TrainerService} to get a trainer by username.
      * Handles possible errors during the retrieval process.
+     * </p>
      *
-     * @param userId the username of the trainer
-     * @return the TrainerEntity object if found, null otherwise
+     * @param userId the username of the trainer to retrieve
+     * @return the {@link TrainerEntity} associated with the given username
+     * @throws Exception if an error occurs during the retrieval process
      */
     public TrainerEntity getTrainer(String userId) {
         log.info("Retrieving trainer with username: {}", userId);
@@ -214,9 +260,13 @@ public class TrainerConsoleImpl {
 
     /**
      * Retrieves all trainers.
+     * <p>
+     * This method uses the {@link TrainerService} to get all trainers.
      * Handles possible errors during the retrieval process.
+     * </p>
      *
-     * @return a list of all trainers
+     * @return a list of {@link TrainerEntity} objects representing all trainers
+     * @throws Exception if an error occurs during the retrieval process
      */
     public List<TrainerEntity> getAllTrainers() {
         log.info("Retrieving all trainers.");
@@ -233,15 +283,18 @@ public class TrainerConsoleImpl {
      */
     public void printMenu() {
         log.info("Displaying menu options for managing trainers.");
-        StringBuilder sb = new StringBuilder();
-        sb.append("\nManage TrainerEntity " +
-                  "\n1. Create TrainerEntity " +
-                  "\n2. Update TrainerEntity " +
-                  "\n3. Delete TrainerEntity " +
-                  "\n4. View TrainerEntity " +
-                  "\n5. View All Trainers " +
-                  "\n6. Back to Main Menu" +
-                  "\nEnter your choice: ");
-        System.out.println(sb);
+        String s = """
+
+                Manage TrainerEntity
+                1. Create TrainerEntity
+                2. Update TrainerEntity
+                3. Delete TrainerEntity
+                4. View TrainerEntity
+                5. View All Trainers
+                6. Back to Main Menu
+                Enter your choice:
+                """;
+
+        System.out.println(s);
     }
 }

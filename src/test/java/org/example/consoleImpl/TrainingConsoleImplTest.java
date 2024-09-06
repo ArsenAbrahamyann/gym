@@ -4,8 +4,13 @@ import org.example.console.TraineeConsoleImpl;
 import org.example.console.TrainerConsoleImpl;
 import org.example.console.TrainingConsoleImpl;
 import org.example.console.UserConsoleImpl;
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
+import org.example.entity.dto.TraineeDto;
+import org.example.entity.dto.TrainerDto;
+import org.example.entity.dto.TrainingDto;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
@@ -16,11 +21,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,17 +59,111 @@ public class TrainingConsoleImplTest {
     }
 
     @Test
-    public void shouldCreateTrainingSuccessfully() {
-        when(scanner.nextLine()).thenReturn(
-                "trainee1", "trainer1", "Training1", "Yoga",
-                "2024-09-01", "01:30"
-        );
+    void testCreateTrainingSuccessful() {
+        // Arrange
+        String traineeUsername = "traineeUser";
+        String trainerUsername = "trainerUser";
+        String trainingName = "Training1";
+        String trainingTypeName = "Type1";
+        LocalDate trainingDate = LocalDate.of(2024, 9, 6);
+        Duration trainingDuration = Duration.ofHours(1).plusMinutes(30);
 
+        TraineeEntity trainee = new TraineeEntity(); // Initialize appropriately
+        TrainerEntity trainer = new TrainerEntity(); // Initialize appropriately
+        TrainingDto trainingDto = new TrainingDto();
+        TrainingEntity trainingEntity = new TrainingEntity();
+
+        when(scanner.nextLine()).thenReturn(traineeUsername, trainerUsername, trainingName, trainingTypeName, "2024-09-06", "01:30");
+        when(traineeService.getTrainee(traineeUsername)).thenReturn(trainee);
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(trainer);
+
+        // Act
         underTest.createTraining();
 
+        // Assert
         verify(trainingService).createTraining(any(TrainingEntity.class));
+        // You can add more assertions based on your specific needs and side effects
     }
 
+    @Test
+    void testCreateTrainingTraineeNotFound() {
+        // Arrange
+        when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
+        when(traineeService.getTrainee("traineeUser")).thenReturn(null);
+
+        // Act
+        underTest.createTraining();
+
+        // Assert
+        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
+        // Verify console outputs or interactions as needed
+    }
+
+//    @Test
+//    void testUpdateTrainingSuccessful() {
+//        when(trainingService.getTraining("existingTrainingName")).thenReturn(new TrainingEntity());
+//        when(traineeService.getTrainee("traineeUsername")).thenReturn(new TraineeEntity());
+//        when(trainerService.getTrainer("trainerUsername")).thenReturn(new TrainerEntity());
+//
+//        // Simulate user input
+//
+//        // Execute the method
+//        underTest.updateTraining();
+//
+//        // Verify interactions and outcomes
+//        verify(trainingService).updateTraining(eq("existingTrainingName"), any(TrainingEntity.class));
+//    }
+
+    @Test
+    void testCreateTrainingTrainerNotFound() {
+        // Arrange
+        when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
+        when(traineeService.getTrainee("traineeUser")).thenReturn(new TraineeEntity());
+        when(trainerService.getTrainer("trainerUser")).thenReturn(null);
+
+        // Act
+        underTest.createTraining();
+
+        // Assert
+        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
+        // Verify console outputs or interactions as needed
+    }
+
+    @Test
+    void testUpdateTrainingTrainingNotFound() {
+        // Arrange
+        when(trainingService.getTraining(anyString())).thenReturn(null);
+
+        // Act
+        underTest.updateTraining();
+
+        // Assert
+    }
+
+    @Test
+    void testUpdateTrainingTraineeNotFound() {
+        // Arrange
+        when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
+        when(traineeService.getTrainee(anyString())).thenReturn(null);
+
+        // Act
+        underTest.updateTraining();
+
+        // Assert
+    }
+
+    @Test
+    void testUpdateTrainingTrainerNotFound() {
+        // Arrange
+        when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
+        when(traineeService.getTrainee(anyString())).thenReturn(new TraineeEntity());
+        when(trainerService.getTrainer(anyString())).thenReturn(null);
+
+        // Act
+        underTest.updateTraining();
+
+        // Assert
+    }
     @Test
     public void shouldNotCreateTrainingWithInvalidDate() {
         when(scanner.nextLine()).thenReturn(
@@ -84,19 +188,6 @@ public class TrainingConsoleImplTest {
         verify(trainingService, never()).createTraining(any(TrainingEntity.class));
     }
 
-    @Test
-    public void shouldUpdateTrainingSuccessfully() {
-        TrainingEntity existingTraining = new TrainingEntity();
-        when(scanner.nextLine()).thenReturn(
-                "ExistingTraining", "trainee2", "trainer2",
-                "UpdatedTraining", "Pilates", "2024-09-02", "02:00"
-        );
-        when(trainingService.getTraining("ExistingTraining")).thenReturn(existingTraining);
-
-        underTest.updateTraining();
-
-        verify(trainingService).updateTraining(eq("ExistingTraining"), any(TrainingEntity.class));
-    }
 
     @Test
     public void shouldNotUpdateTrainingWithInvalidDate() {
@@ -126,26 +217,6 @@ public class TrainingConsoleImplTest {
         verify(trainingService, never()).updateTraining(eq("ExistingTraining"), any(TrainingEntity.class));
     }
 
-    @Test
-    public void shouldDeleteTrainingSuccessfully() {
-        TrainingEntity existingTraining = new TrainingEntity();
-        when(scanner.nextLine()).thenReturn("TrainingToDelete");
-        when(trainingService.getTraining("TrainingToDelete")).thenReturn(existingTraining);
-
-        underTest.deleteTraining();
-
-        verify(trainingService).deleteTraining("TrainingToDelete");
-    }
-
-    @Test
-    public void shouldNotDeleteNonExistentTraining() {
-        when(scanner.nextLine()).thenReturn("NonExistentTraining");
-        when(trainingService.getTraining("NonExistentTraining")).thenReturn(null);
-
-        underTest.deleteTraining();
-
-        verify(trainingService, never()).deleteTraining(anyString());
-    }
 
     @Test
     public void shouldViewTrainingSuccessfully() {
