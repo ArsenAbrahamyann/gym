@@ -46,7 +46,7 @@ public class UserService {
     public List<UserEntity> findAllUsers() {
         return userDAO.findAll();
     }
-    public void updateUser(String username, UserEntity userEntity) {
-        userDAO.updateUser(username, userEntity);
+    public void updateUser( UserEntity userEntity) {
+        userDAO.updateUser( userEntity);
     }
 }

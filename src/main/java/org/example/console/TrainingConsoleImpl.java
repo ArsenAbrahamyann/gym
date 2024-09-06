@@ -7,6 +7,9 @@ import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
+import org.example.entity.dto.TraineeDto;
+import org.example.entity.dto.TrainerDto;
+import org.example.entity.dto.TrainingDto;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
@@ -17,6 +20,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 import org.example.service.UserService;
+import org.modelmapper.ModelMapper;
 
 @Slf4j
 public class TrainingConsoleImpl {
@@ -26,6 +30,7 @@ public class TrainingConsoleImpl {
     private final UserConsoleImpl userConsole;
     private final TraineeService traineeService;
     private final TrainerService trainerService;
+    private final ModelMapper modelMapper = new ModelMapper();
     private Scanner scanner = new Scanner(System.in);
 
     public TrainingConsoleImpl(TrainingService trainingService, TraineeConsoleImpl traineeConsole,
@@ -56,7 +61,7 @@ public class TrainingConsoleImpl {
     public void createTraining() {
         log.info("Starting to create a new training.");
         try {
-            TrainingEntity trainingEntity = new TrainingEntity();
+            TrainingDto trainingDto = new TrainingDto();
             traineeConsole.viewAllTrainee();
             System.out.print("Enter trainee username: ");
             String traineeUsername = scanner.nextLine();
@@ -65,16 +70,16 @@ public class TrainingConsoleImpl {
                 System.out.println("Trainee not found.");
                 return;
             }
-            trainingEntity.setTraineeId(traineeUsername);
+            trainingDto.setTraineeId(traineeUsername);
             trainerConsole.viewAllTrainer();
-            System.out.println("Enter trainer username");
+            System.out.print("Enter trainer username: ");
             String trainerUsername = scanner.nextLine();
             TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
             if (trainer == null) {
                 System.out.println("Trainer not found.");
                 return;
             }
-            trainingEntity.setTrainerId(trainerUsername);
+            trainingDto.setTrainerId(trainerUsername);
             System.out.print("Enter training name: ");
             String trainingName = scanner.nextLine();
 
@@ -109,15 +114,15 @@ public class TrainingConsoleImpl {
                 System.out.println("Invalid duration format. Please use HH:MM.");
                 return;
             }
-            trainingEntity.setTrainingName(trainingName);
-            trainingEntity.setTrainingTypeEntity(trainingTypeEntity);
-            trainingEntity.setTrainingDate(trainingDate.toString());
-            trainingEntity.setTrainingDuration(trainingDuration);
+            trainingDto.setTrainingName(trainingName);
+            trainingDto.setTrainingTypeEntity(trainingTypeEntity);
+            trainingDto.setTrainingDate(trainingDate.toString());
+            trainingDto.setTrainingDuration(trainingDuration);
 
+            TrainingEntity trainingEntity = modelMapper.map(trainingDto, TrainingEntity.class);
             trainingService.createTraining(trainingEntity);
             log.info("TrainingEntity '{}' created successfully.", trainingName);
             System.out.println("TrainingEntity created successfully.");
-
         } catch (Exception e) {
             log.error("Error occurred while creating training: ", e);
             System.out.println("An error occurred while creating the training. Please try again.");
@@ -137,22 +142,27 @@ public class TrainingConsoleImpl {
             TrainingEntity existingTrainingEntity = getTraining(trainingName);
             if (existingTrainingEntity != null) {
                 log.info("TrainingEntity '{}' found. Proceeding with update.", trainingName);
+                TraineeDto traineeDto;
+                TrainerDto trainerDto;
+
                 traineeConsole.viewAllTrainee();
                 System.out.print("Enter new trainee username: ");
                 String traineeUsername = scanner.nextLine();
-                TraineeEntity trainee = traineeService.getTrainee(traineeUsername);
-                if (trainee == null) {
+                traineeDto =modelMapper.map(traineeService.getTrainee(traineeUsername), TraineeDto.class);
+                if (traineeDto == null) {
                     System.out.println("Trainee not found.");
                     return;
                 }
+
                 trainerConsole.viewAllTrainer();
                 System.out.print("Enter new trainer username: ");
                 String trainerUsername = scanner.nextLine();
-                TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
-                if (trainer == null) {
+                trainerDto = modelMapper.map(trainerService.getTrainer(trainerUsername), TrainerDto.class);
+                if (trainerDto == null) {
                     System.out.println("Trainer not found.");
                     return;
                 }
+
                 System.out.print("Enter new training name: ");
                 String newTrainingName = scanner.nextLine();
                 System.out.print("Enter new training type: ");
@@ -185,14 +195,16 @@ public class TrainingConsoleImpl {
                     return;
                 }
 
-                existingTrainingEntity.setTraineeId(traineeUsername);
-                existingTrainingEntity.setTrainerId(trainerUsername);
-                existingTrainingEntity.setTrainingName(newTrainingName);
-                existingTrainingEntity.setTrainingTypeEntity(trainingTypeEntity);
-                existingTrainingEntity.setTrainingDate(trainingDate.toString());
-                existingTrainingEntity.setTrainingDuration(trainingDuration);
+                TrainingDto updatedTrainingDto = new TrainingDto();
+                updatedTrainingDto.setTraineeId(traineeUsername);
+                updatedTrainingDto.setTrainerId(trainerUsername);
+                updatedTrainingDto.setTrainingName(newTrainingName);
+                updatedTrainingDto.setTrainingTypeEntity(trainingTypeEntity);
+                updatedTrainingDto.setTrainingDate(trainingDate.toString());
+                updatedTrainingDto.setTrainingDuration(trainingDuration);
 
-                trainingService.updateTraining(trainingName, existingTrainingEntity);
+                TrainingEntity updatedTrainingEntity = modelMapper.map(updatedTrainingDto, TrainingEntity.class);
+                trainingService.updateTraining(trainingName, updatedTrainingEntity);
                 log.info("TrainingEntity '{}' updated successfully.", trainingName);
                 System.out.println("TrainingEntity updated successfully.");
             } else {
@@ -237,22 +249,14 @@ public class TrainingConsoleImpl {
 
             TrainingEntity trainingEntity = getTraining(trainingName);
             if (trainingEntity != null) {
-                log.info("Displaying details for trainingEntity '{}'.", trainingName);
-                System.out.println("TrainingEntity Details:");
-                System.out.println("Trainee Username: " + trainingEntity.getTraineeId());
-                System.out.println("Trainer Username: " + trainingEntity.getTrainerId());
-                System.out.println("Training Name: " + trainingEntity.getTrainingName());
-                System.out.println("Training Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
-                System.out.println("Training Date: " + trainingEntity.getTrainingDate());
-                System.out.println("Training Duration: " + trainingEntity.getTrainingDuration().toHours() + " hours " +
-                                   trainingEntity.getTrainingDuration().toMinutesPart() + " minutes");
+                TrainingDto trainingDto = modelMapper.map(trainingEntity, TrainingDto.class);
+                System.out.println(trainingDto);
             } else {
-                log.warn("TrainingEntity '{}' not found.", trainingName);
-                System.out.println("TrainingEntity not found.");
+                System.out.println("Training not found.");
             }
         } catch (Exception e) {
-            log.error("Error occurred while viewing training details: ", e);
-            System.out.println("An error occurred while retrieving the training details. Please try again.");
+            log.error("Error occurred while viewing training: ", e);
+            System.out.println("An error occurred while viewing the training. Please try again.");
         }
     }
 
@@ -261,36 +265,20 @@ public class TrainingConsoleImpl {
      * Handles possible errors during the retrieval process.
      */
     public void viewAllTrainings() {
-        log.info("Starting to view all trainings.");
+        log.info("Fetching all trainings.");
         try {
-            List<TrainingEntity> trainingEntities = getAllTrainings();
-            if (trainingEntities == null || trainingEntities.isEmpty()) {
-                log.info("No trainingEntities found.");
-                System.out.println("No trainingEntities found.");
+            List<TrainingEntity> trainingEntities = trainingService.getAllTrainings();
+            if (trainingEntities.isEmpty()) {
+                System.out.println("No trainings found.");
             } else {
-                log.info("Displaying details of all trainingEntities.");
-                System.out.println("All Trainings:");
-                for (TrainingEntity trainingEntity : trainingEntities) {
-                    System.out.println("TraineeEntity Username: " + trainingEntity.getTraineeId());
-                    System.out.println("TrainerEntity Username: " + trainingEntity.getTrainerId());
-                    System.out.println("TrainingEntity Name: " + trainingEntity.getTrainingName());
-
-                    if (trainingEntity.getTrainingTypeEntity() != null) {
-                        System.out.println(
-                            "TrainingEntity Type: " + trainingEntity.getTrainingTypeEntity().getTrainingTypeName());
-                    } else {
-                        System.out.println("TrainingEntity Type: Not specified");
-                    }
-
-                    System.out.println("TrainingEntity Date: " + trainingEntity.getTrainingDate());
-                    System.out.println(
-                        "TrainingEntity Duration: " + formatDuration(trainingEntity.getTrainingDuration()));
-                    System.out.println("--------");
-                }
+                trainingEntities.forEach(trainingEntity -> {
+                    TrainingDto trainingDto = modelMapper.map(trainingEntity, TrainingDto.class);
+                    System.out.println(trainingDto);
+                });
             }
         } catch (Exception e) {
             log.error("Error occurred while viewing all trainings: ", e);
-            System.out.println("An error occurred while retrieving the trainings. Please try again.");
+            System.out.println("An error occurred while viewing all trainings. Please try again.");
         }
     }
 
