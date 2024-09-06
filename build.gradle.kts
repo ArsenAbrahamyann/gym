@@ -22,6 +22,10 @@ dependencies {
     implementation("org.springframework:spring-beans:5.3.28")
     implementation("org.slf4j:slf4j-api:1.7.36")
 
+    implementation("org.modelmapper:modelmapper:3.2.0")
+
+
+
     runtimeOnly("org.slf4j:slf4j-simple:1.7.36")
 
     compileOnly("org.projectlombok:lombok:1.18.30")

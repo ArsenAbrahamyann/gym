@@ -6,19 +6,22 @@ import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.UserEntity;
 import org.example.entity.UserUtils;
+import org.example.entity.dto.UserDto;
 import org.example.service.UserService;
+import org.modelmapper.ModelMapper;
 
 @Slf4j
 public class UserConsoleImpl {
     private final UserService userService;
+    private final ModelMapper modelMapper = new ModelMapper();
     private Scanner scanner = new Scanner(System.in);
 
     public UserConsoleImpl(UserService userService) {
         this.userService = userService;
     }
 
-    public UserEntity createUser() {
-        UserEntity userEntity = new UserEntity();
+    public UserDto createUser() {
+        UserDto userDto = new UserDto();
         log.info("Starting to create a new user.");
         try {
             System.out.print("Enter first name: ");
@@ -30,33 +33,32 @@ public class UserConsoleImpl {
             System.out.print("Is active (true/false): ");
             boolean isActive = Boolean.parseBoolean(scanner.nextLine());
 
-            userEntity.setFirstName(firstName);
-            userEntity.setLastName(lastName);
-            userEntity.setUserName(username);
-            userEntity.setPassword(password);
-            userEntity.setActive(isActive);
+            userDto.setFirstName(firstName);
+            userDto.setLastName(lastName);
+            userDto.setUserName(username);
+            userDto.setPassword(password);
+            userDto.setActive(isActive);
 
+            UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
             userService.saveUser(userEntity);
-            log.info("UserEntity created with username: {}", username);
-            System.out.println("UserEntity created with username: " + username);
 
-
+            log.info("User created with username: {}", username);
+            System.out.println("User created with username: " + username);
         } catch (Exception e) {
             log.error("Error occurred while creating user: ", e);
             System.out.println("An error occurred while creating the user. Please try again.");
         }
-        return userEntity;
+        return userDto;
     }
 
     public void updateUser(String username) {
         log.info("Starting to update user.");
         try {
-            UserEntity userEntity = userService.findUserByUsername(username)
-                .orElse(null);
+            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
+            if (userEntityOptional.isPresent()) {
+                UserEntity userEntity = userEntityOptional.get();
+                UserDto userDto = modelMapper.map(userEntity, UserDto.class);
 
-            if (userEntity != null) {
-                log.info("UserEntity found with username: {}", username);
-                System.out.println();
                 System.out.print("Enter new first name (or press Enter to keep current): ");
                 String firstName = scanner.nextLine();
                 System.out.print("Enter new last name (or press Enter to keep current): ");
@@ -65,21 +67,23 @@ public class UserConsoleImpl {
                 String isActiveInput = scanner.nextLine();
 
                 if (!firstName.isEmpty()) {
-                    userEntity.setFirstName(firstName);
+                    userDto.setFirstName(firstName);
                 }
                 if (!lastName.isEmpty()) {
-                    userEntity.setLastName(lastName);
+                    userDto.setLastName(lastName);
                 }
                 if (!isActiveInput.isEmpty()) {
-                    userEntity.setActive(Boolean.parseBoolean(isActiveInput));
+                    userDto.setActive(Boolean.parseBoolean(isActiveInput));
                 }
 
-                userService.updateUser(username,userEntity);
-                log.info("UserEntity updated successfully.");
-                System.out.println("UserEntity updated.");
+                UserEntity updatedEntity = modelMapper.map(userDto, UserEntity.class);
+                userService.updateUser(updatedEntity);
+
+                log.info("User updated successfully.");
+                System.out.println("User updated.");
             } else {
-                log.warn("UserEntity not found with username: {}", username);
-                System.out.println("UserEntity not found.");
+                log.warn("User not found with username: {}", username);
+                System.out.println("User not found.");
             }
         } catch (Exception e) {
             log.error("Error occurred while updating user: ", e);
@@ -90,18 +94,14 @@ public class UserConsoleImpl {
     public void deleteUser(String username) {
         log.info("Starting to delete user.");
         try {
-
-
-            UserEntity userEntity = userService.findUserByUsername(username)
-                .orElse(null);
-
-            if (userEntity != null) {
+            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
+            if (userEntityOptional.isPresent()) {
                 userService.deleteUserByUsername(username);
-                log.info("UserEntity with username: {} deleted successfully.", username);
-                System.out.println("UserEntity deleted.");
+                log.info("User deleted successfully.");
+                System.out.println("User deleted.");
             } else {
-                log.warn("UserEntity not found with username: {}", username);
-                System.out.println("UserEntity not found.");
+                log.warn("User not found with username: {}", username);
+                System.out.println("User not found.");
             }
         } catch (Exception e) {
             log.error("Error occurred while deleting user: ", e);
@@ -115,19 +115,20 @@ public class UserConsoleImpl {
             System.out.print("Enter username of the user to view: ");
             String username = scanner.nextLine();
 
-            UserEntity userEntity = userService.findUserByUsername(username)
-                .orElse(null);
+            Optional<UserEntity> userEntityOptional = userService.findUserByUsername(username);
+            if (userEntityOptional.isPresent()) {
+                UserEntity userEntity = userEntityOptional.get();
+                UserDto userDto = modelMapper.map(userEntity, UserDto.class);  // Convert to DTO
 
-            if (userEntity != null) {
                 log.info("Displaying user details for username: {}", username);
-                System.out.println("UserEntity Details:");
-                System.out.println("Username: " + userEntity.getUserName());
-                System.out.println("First Name: " + userEntity.getFirstName());
-                System.out.println("Last Name: " + userEntity.getLastName());
-                System.out.println("Active: " + userEntity.isActive());
+                System.out.println("User Details:");
+                System.out.println("Username: " + userDto.getUserName());
+                System.out.println("First Name: " + userDto.getFirstName());
+                System.out.println("Last Name: " + userDto.getLastName());
+                System.out.println("Active: " + userDto.isActive());
             } else {
-                log.warn("UserEntity not found with username: {}", username);
-                System.out.println("UserEntity not found.");
+                log.warn("User not found with username: {}", username);
+                System.out.println("User not found.");
             }
         } catch (Exception e) {
             log.error("Error occurred while viewing user details: ", e);
@@ -146,10 +147,11 @@ public class UserConsoleImpl {
                 log.info("Displaying details of all users.");
                 System.out.println("All Users:");
                 for (UserEntity userEntity : userEntities) {
-                    System.out.println("Username: " + userEntity.getUserName());
-                    System.out.println("First Name: " + userEntity.getFirstName());
-                    System.out.println("Last Name: " + userEntity.getLastName());
-                    System.out.println("Active: " + userEntity.isActive());
+                    UserDto userDto = modelMapper.map(userEntity, UserDto.class);  // Convert to DTO
+                    System.out.println("Username: " + userDto.getUserName());
+                    System.out.println("First Name: " + userDto.getFirstName());
+                    System.out.println("Last Name: " + userDto.getLastName());
+                    System.out.println("Active: " + userDto.isActive());
                     System.out.println("--------");
                 }
             }
@@ -158,7 +160,6 @@ public class UserConsoleImpl {
             System.out.println("An error occurred while retrieving the users. Please try again.");
         }
     }
-
     public Optional<UserEntity> getUser(String username) {
         log.info("Retrieving User with username: {}", username);
         try {

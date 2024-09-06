@@ -1,21 +1,24 @@
 package org.example.console;
 
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
 import org.example.entity.UserUtils;
+import org.example.entity.dto.TrainerDto;
+import org.example.entity.dto.UserDto;
 import org.example.service.TrainerService;
 
 import java.util.List;
 import java.util.Scanner;
 import org.example.service.UserService;
+import org.modelmapper.ModelMapper;
 
 @Slf4j
 public class TrainerConsoleImpl {
     private final TrainerService trainerService;
     private final UserConsoleImpl userConsole;
     private final UserService userService;
+    private final ModelMapper modelMapper = new ModelMapper();
     Scanner scanner = new Scanner(System.in);
 
     public TrainerConsoleImpl(TrainerService trainerService, UserConsoleImpl userConsole, UserService userService) {
@@ -50,17 +53,18 @@ public class TrainerConsoleImpl {
     public void createTrainer() {
         log.info("Starting to create a new trainer.");
         try {
-            UserEntity user = userConsole.createUser();
+            UserDto userDto = userConsole.createUser();
             System.out.print("Enter specialization: ");
             String specialization = scanner.nextLine();
 
-            TrainerEntity trainerEntity = new TrainerEntity();
-            trainerEntity.setUserId(user.getUserName());
-            trainerEntity.setSpecialization(specialization);
+            TrainerDto trainerDto = new TrainerDto();
+            trainerDto.setUserId(userDto.getUserName());
+            trainerDto.setSpecialization(specialization);
 
+            TrainerEntity trainerEntity = modelMapper.map(trainerDto, TrainerEntity.class);
             trainerService.createTrainer(trainerEntity);
-            log.info("TrainerEntity created with userId (username): {}", user.getUserName());
-            System.out.println("TrainerEntity created with userId: " + user.getUserName());
+            log.info("TrainerEntity created with userId (username): {}", userDto.getUserName());
+            System.out.println("TrainerEntity created with userId: " + userDto.getUserName());
 
         } catch (Exception e) {
             log.error("Error occurred while creating trainer: ", e);
@@ -76,30 +80,34 @@ public class TrainerConsoleImpl {
         log.info("Starting to update trainer.");
         try {
             viewAllTrainer();
-            System.out.print("Enter username of the trainerEntity to update: ");
+            System.out.print("Enter username of the trainer to update: ");
             String username = scanner.nextLine();
             TrainerEntity trainerEntity = getTrainer(username);
-            if (trainerEntity != null) {
-                log.info("TrainerEntity found with username: {}", trainerEntity.getUserId());
-                UserEntity user = userConsole.getUser(trainerEntity.getUserId()).orElse(null);
+            TrainerDto updatedTrainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
+            if (updatedTrainerDto != null) {
+                log.info("TrainerEntity found with username: {}", updatedTrainerDto.getUserId());
+                UserEntity user = userConsole.getUser(updatedTrainerDto.getUserId()).orElse(null);
+                UserDto userDto = modelMapper.map(user, UserDto.class);
                 System.out.println("Enter new firstName: ");
                 String newFirstName = scanner.nextLine();
                 System.out.println("Enter new lastName: ");
                 String newLastName = scanner.nextLine();
                 String newUsername = UserUtils.generateUsername(newFirstName, newLastName);
-                user.setFirstName(newFirstName);
-                user.setLastName(newLastName);
-                user.setUserName(newUsername);
-                userService.updateUser(newUsername, user);
-                userService.deleteUserByUsername(user.getUserName());
+                userDto.setFirstName(newFirstName);
+                userDto.setLastName(newLastName);
+                userDto.setUserName(newUsername);
+                UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
+                userService.updateUser(userEntity);
+                userService.deleteUserByUsername(userDto.getUserName());
                 System.out.print("Enter new specialization: ");
                 String specialization = scanner.nextLine();
 
-                trainerEntity.setSpecialization(specialization);
-                trainerEntity.setUserId(newUsername);
+                updatedTrainerDto.setSpecialization(specialization);
+                updatedTrainerDto.setUserId(newUsername);
 
-                trainerService.updateTrainer(newUsername, trainerEntity);
-                trainerService.deleteTrainer(trainerEntity.getUserId());
+                TrainerEntity trainer = modelMapper.map(updatedTrainerDto, TrainerEntity.class);
+                trainerService.updateTrainer(newUsername, trainer);
+                trainerService.deleteTrainer(trainer.getUserId());
                 log.info("TrainerEntity updated successfully.");
                 System.out.println("TrainerEntity updated.");
             } else {
@@ -140,15 +148,16 @@ public class TrainerConsoleImpl {
         log.info("Starting to view trainer details.");
         try {
             userConsole.viewAllUsers();
-            System.out.print("Enter username of the trainerEntity to view: ");
+            System.out.print("Enter username of the trainer to view: ");
             String username = scanner.nextLine();
 
             TrainerEntity trainerEntity = getTrainer(username);
             if (trainerEntity != null) {
+                TrainerDto trainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
                 log.info("Displaying trainerEntity details for username: {}", username);
                 System.out.println("TrainerEntity Details:");
-                System.out.println("Username: " + trainerEntity.getUserId());
-                System.out.println("Specialization: " + trainerEntity.getSpecialization());
+                System.out.println("Username: " + trainerDto.getUserId());
+                System.out.println("Specialization: " + trainerDto.getSpecialization());
             } else {
                 log.warn("TrainerEntity not found with username: {}", username);
                 System.out.println("TrainerEntity not found.");
@@ -174,8 +183,9 @@ public class TrainerConsoleImpl {
                 log.info("Displaying details of all trainerEntities.");
                 System.out.println("All Trainers:");
                 for (TrainerEntity trainerEntity : trainerEntities) {
-                    System.out.println("Username: " + trainerEntity.getUserId());
-                    System.out.println("Specialization: " + trainerEntity.getSpecialization());
+                    TrainerDto trainerDto = modelMapper.map(trainerEntity, TrainerDto.class);
+                    System.out.println("Username: " + trainerDto.getUserId());
+                    System.out.println("Specialization: " + trainerDto.getSpecialization());
                     System.out.println("--------");
                 }
             }
