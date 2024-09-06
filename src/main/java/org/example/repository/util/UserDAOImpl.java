@@ -43,7 +43,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void updateUser(String username, UserEntity userEntity) {
-        storage.getUserStorage().put(username, userEntity);
+    public void updateUser( UserEntity userEntity) {
+        storage.getUserStorage().put(userEntity.getUserName(), userEntity);
     }
 }
