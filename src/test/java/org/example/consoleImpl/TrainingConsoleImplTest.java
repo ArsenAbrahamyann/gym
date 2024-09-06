@@ -8,8 +8,6 @@ import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
-import org.example.entity.dto.TraineeDto;
-import org.example.entity.dto.TrainerDto;
 import org.example.entity.dto.TrainingDto;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
@@ -21,16 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +54,6 @@ public class TrainingConsoleImplTest {
 
     @Test
     void testCreateTrainingSuccessful() {
-        // Arrange
         String traineeUsername = "traineeUser";
         String trainerUsername = "trainerUser";
         String trainingName = "Training1";
@@ -68,8 +61,8 @@ public class TrainingConsoleImplTest {
         LocalDate trainingDate = LocalDate.of(2024, 9, 6);
         Duration trainingDuration = Duration.ofHours(1).plusMinutes(30);
 
-        TraineeEntity trainee = new TraineeEntity(); // Initialize appropriately
-        TrainerEntity trainer = new TrainerEntity(); // Initialize appropriately
+        TraineeEntity trainee = new TraineeEntity();
+        TrainerEntity trainer = new TrainerEntity();
         TrainingDto trainingDto = new TrainingDto();
         TrainingEntity trainingEntity = new TrainingEntity();
 
@@ -77,92 +70,54 @@ public class TrainingConsoleImplTest {
         when(traineeService.getTrainee(traineeUsername)).thenReturn(trainee);
         when(trainerService.getTrainer(trainerUsername)).thenReturn(trainer);
 
-        // Act
         underTest.createTraining();
 
-        // Assert
         verify(trainingService).createTraining(any(TrainingEntity.class));
-        // You can add more assertions based on your specific needs and side effects
     }
 
     @Test
     void testCreateTrainingTraineeNotFound() {
-        // Arrange
         when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
         when(traineeService.getTrainee("traineeUser")).thenReturn(null);
 
-        // Act
         underTest.createTraining();
 
-        // Assert
         verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-        // Verify console outputs or interactions as needed
     }
-
-//    @Test
-//    void testUpdateTrainingSuccessful() {
-//        when(trainingService.getTraining("existingTrainingName")).thenReturn(new TrainingEntity());
-//        when(traineeService.getTrainee("traineeUsername")).thenReturn(new TraineeEntity());
-//        when(trainerService.getTrainer("trainerUsername")).thenReturn(new TrainerEntity());
-//
-//        // Simulate user input
-//
-//        // Execute the method
-//        underTest.updateTraining();
-//
-//        // Verify interactions and outcomes
-//        verify(trainingService).updateTraining(eq("existingTrainingName"), any(TrainingEntity.class));
-//    }
 
     @Test
     void testCreateTrainingTrainerNotFound() {
-        // Arrange
         when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
         when(traineeService.getTrainee("traineeUser")).thenReturn(new TraineeEntity());
         when(trainerService.getTrainer("trainerUser")).thenReturn(null);
 
-        // Act
         underTest.createTraining();
 
-        // Assert
         verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-        // Verify console outputs or interactions as needed
     }
 
     @Test
     void testUpdateTrainingTrainingNotFound() {
-        // Arrange
         when(trainingService.getTraining(anyString())).thenReturn(null);
 
-        // Act
         underTest.updateTraining();
-
-        // Assert
     }
 
     @Test
     void testUpdateTrainingTraineeNotFound() {
-        // Arrange
         when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
         when(traineeService.getTrainee(anyString())).thenReturn(null);
 
-        // Act
         underTest.updateTraining();
-
-        // Assert
     }
 
     @Test
     void testUpdateTrainingTrainerNotFound() {
-        // Arrange
         when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
         when(traineeService.getTrainee(anyString())).thenReturn(new TraineeEntity());
         when(trainerService.getTrainer(anyString())).thenReturn(null);
 
-        // Act
         underTest.updateTraining();
-
-        // Assert
     }
     @Test
     public void shouldNotCreateTrainingWithInvalidDate() {
