@@ -1,97 +1,99 @@
-//package org.example.storage;
-//
-//import org.example.entity.TraineeEntity;
-//import org.example.entity.TrainerEntity;
-//import org.example.entity.TrainingEntity;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.io.*;
-//import java.lang.reflect.Field;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//import static org.assertj.core.api.Fail.fail;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.mockito.Mockito.*;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class InMemoryStorageTest {
-//    @InjectMocks
-//    private InMemoryStorage inMemoryStorage;
-//
-//    @BeforeEach
-//    void setUp() {
-//        inMemoryStorage = new InMemoryStorage();
-//    }
-//
-//    @Test
-//    void testLoadFromFileWhenFileExists() throws Exception {
-//        Map<String, Object> mockData = new HashMap<>();
-//        mockData.put("traineeStorage", new HashMap<String, TraineeEntity>());
-//        mockData.put("trainerStorage", new HashMap<String, TrainerEntity>());
-//        mockData.put("trainingStorage", new HashMap<String, TrainingEntity>());
-//
-//        File tempFile = File.createTempFile("storage", ".ser");
-//        setPrivateField(inMemoryStorage, "FILE_PATH", tempFile.getAbsolutePath());
-//
-//        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile))) {
-//            oos.writeObject(mockData);
-//        }
-//
-//        inMemoryStorage.loadFromFile();
-//
-//    }
-//
-//    @Test
-//    void testSaveToFile() throws Exception {
-//        File tempFile = File.createTempFile("storage", ".ser");
-//        setPrivateField(inMemoryStorage, "FILE_PATH", tempFile.getAbsolutePath());
-//
-//        inMemoryStorage.saveToFile();
-//
-//        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
-//            Map<String, Object> data = (Map<String, Object>) ois.readObject();
-//            assertNotNull(data);
-//        } catch (ClassNotFoundException e) {
-//            fail("Failed to read the file: " + e.getMessage());
-//        }
-//    }
-//
-//    @Test
-//    void testLoadFromFileWhenFileDoesNotExist() throws Exception {
-//        File file = new File(getPrivateField(inMemoryStorage, "FILE_PATH").toString());
-//        if (file.exists()) {
-//            file.delete();
-//        }
-//
-//        inMemoryStorage.loadFromFile();
-//
-//    }
-//
-//    @Test
-//    void testSaveToFileHandlesException() throws Exception {
-//        File tempFile = File.createTempFile("storage", ".ser");
-//        setPrivateField(inMemoryStorage, "FILE_PATH", tempFile.getAbsolutePath());
-//
-//        doThrow(new IOException("Mocked IOException")).when(inMemoryStorage).saveToFile();
-//
-//        inMemoryStorage.saveToFile();
-//
-//    }
-//
-//    private void setPrivateField(Object obj, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
-//        Field field = obj.getClass().getDeclaredField(fieldName);
-//        field.setAccessible(true);
-//        field.set(obj, value);
-//    }
-//
-//    private Object getPrivateField(Object obj, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-//        Field field = obj.getClass().getDeclaredField(fieldName);
-//        field.setAccessible(true);
-//        return field.get(obj);
-//    }
-//}
+package org.example.storage;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
+import org.example.entity.TrainingEntity;
+import org.example.entity.UserEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+public class InMemoryStorageTest {
+    private InMemoryStorage inMemoryStorage;
+
+    @TempDir
+    Path tempDir;
+
+    @BeforeEach
+    void setUp() {
+        inMemoryStorage = new InMemoryStorage() {
+            @Override
+            public void saveToFile() {
+                try (FileWriter writer = new FileWriter(tempDir.resolve("storage.json").toFile())) {
+                    Map<String, Object> dataToSave = new HashMap<>();
+                    dataToSave.put("traineeStorage", getTraineeStorage());
+                    dataToSave.put("trainerStorage", getTrainerStorage());
+                    dataToSave.put("trainingStorage", getTrainingStorage());
+                    dataToSave.put("userStorage", getUserStorage());
+
+                    getObjectMapper().writeValue(writer, dataToSave);
+
+                    System.out.println("Data saved successfully to " + tempDir.resolve("storage.json"));
+                } catch (IOException e) {
+                    System.out.println("Error saving data to file: " + e.getMessage());
+                }
+            }
+
+            @Override
+            public void loadFromFile() {
+                File file = tempDir.resolve("storage.json").toFile();
+                if (!file.exists()) {
+                    System.out.println("File does not exist. Starting fresh.");
+                    return;
+                }
+
+                try {
+                    Map<String, Object> loadedData = getObjectMapper().readValue(file, new TypeReference<Map<String, Object>>() {});
+                    setTraineeStorage(getObjectMapper().convertValue(loadedData.get("traineeStorage"), new TypeReference<Map<String, TraineeEntity>>() {}));
+                    setTrainerStorage(getObjectMapper().convertValue(loadedData.get("trainerStorage"), new TypeReference<Map<String, TrainerEntity>>() {}));
+                    setTrainingStorage(getObjectMapper().convertValue(loadedData.get("trainingStorage"), new TypeReference<Map<String, TrainingEntity>>() {}));
+                    setUserStorage(getObjectMapper().convertValue(loadedData.get("userStorage"), new TypeReference<Map<String, UserEntity>>() {}));
+                    System.out.println("Data loaded successfully from " + tempDir.resolve("storage.json"));
+                } catch (IOException e) {
+                    System.out.println("Error loading file: " + e.getMessage());
+                }
+            }
+        };
+    }
+
+    @Test
+    void testSaveToFile() throws IOException {
+        TraineeEntity trainee = new TraineeEntity("2024-09-03T10:00:00", "123 Main St", "1");
+        inMemoryStorage.getTraineeStorage().put("1", trainee);
+
+        inMemoryStorage.saveToFile();
+
+        File file = tempDir.resolve("storage.json").toFile();
+        assertThat(file).exists();
+        assertThat(file.length()).isGreaterThan(0);
+    }
+
+    @Test
+    void testLoadFromFile() throws IOException {
+        File file = tempDir.resolve("storage.json").toFile();
+        try (FileWriter writer = new FileWriter(file)) {
+            Map<String, Object> dataToSave = new HashMap<>();
+            Map<String, TraineeEntity> traineeStorage = new HashMap<>();
+            traineeStorage.put("1", new TraineeEntity("2024-09-03T10:00:00", "123 Main St", "1"));
+            dataToSave.put("traineeStorage", traineeStorage);
+            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(writer, dataToSave);
+        }
+
+        inMemoryStorage.loadFromFile();
+
+        assertThat(inMemoryStorage.getTraineeStorage()).hasSize(1);
+        assertThat(inMemoryStorage.getTraineeStorage().get("1")).isNotNull();
+        assertThat(inMemoryStorage.getTraineeStorage().get("1").getUserId()).isEqualTo("1");
+    }
+}

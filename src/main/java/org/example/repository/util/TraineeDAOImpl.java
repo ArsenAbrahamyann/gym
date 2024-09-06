@@ -1,20 +1,15 @@
 package org.example.repository.util;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 import org.example.entity.TraineeEntity;
 import org.example.repository.TraineeDAO;
 import org.example.storage.InMemoryStorage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class TraineeDAOImpl implements TraineeDAO {
     private final InMemoryStorage storage;
-
 
     public TraineeDAOImpl(InMemoryStorage storage) {
         this.storage = storage;
@@ -44,7 +39,6 @@ public class TraineeDAOImpl implements TraineeDAO {
     public List<TraineeEntity> getAllTrainees() {
         return new ArrayList<>(storage.getTraineeStorage().values());
     }
-
 
 
 }
