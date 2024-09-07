@@ -1,13 +1,12 @@
-package org.example.repository.util;
+package org.example.repository.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class TrainerDAOImpl implements TrainerDAO {
@@ -31,11 +30,6 @@ public class TrainerDAOImpl implements TrainerDAO {
     @Override
     public TrainerEntity getTrainer(String userId) {
         return storage.getTrainerStorage().get(userId);
-    }
-
-    @Override
-    public void deleteTrainer(String userId) {
-        storage.getTrainerStorage().remove(userId);
     }
 
     @Override

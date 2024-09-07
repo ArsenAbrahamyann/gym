@@ -1,39 +1,28 @@
 package org.example.service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.example.entity.TrainingEntity;
 import org.example.repository.TrainingDAO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Service class for managing training entities.
  * <p>
- * This service provides operations for creating, updating, deleting, and retrieving training entities.
- * It interacts with the data access object (DAO) for persistence and retrieval of training data.
+ * This service provides methods for creating, updating, deleting, and retrieving training entities.
+ * It interacts with the {@link TrainingDAO} to handle persistence and retrieval of training data.
  * </p>
  */
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class TrainingService {
     private final TrainingDAO trainingDao;
 
     /**
-     * Constructs a new {@link TrainingService} instance with the provided DAO.
-     *
-     * @param trainingDao the DAO for managing training entities
-     */
-    public TrainingService(TrainingDAO trainingDao) {
-        this.trainingDao = trainingDao;
-    }
-
-    /**
-     * Creates a new training entity.
+     * Creates a new training entity in the data store.
      * <p>
-     * This method persists a new training entity in the data store. The training entity must
-     * include all necessary details for creation.
+     * This method persists the provided training entity. The entity must include all necessary details
+     * required for creation. Once created, the training entity is stored in the data store for future retrieval.
      * </p>
      *
      * @param trainingEntity the training entity to be created
@@ -43,36 +32,10 @@ public class TrainingService {
     }
 
     /**
-     * Updates an existing training entity.
-     * <p>
-     * This method updates the details of an existing training entity in the data store.
-     * The training entity must include the updated details, and the training name is used
-     * to identify which entity to update.
-     * </p>
-     *
-     * @param trainingName the name of the training to be updated
-     * @param existingTrainingEntity the training entity with updated details
-     */
-    public void updateTraining(String trainingName, TrainingEntity existingTrainingEntity) {
-        trainingDao.updateTraining(trainingName, existingTrainingEntity);
-    }
-
-    /**
-     * Deletes a training entity by its name.
-     * <p>
-     * This method removes a training entity from the data store based on the provided training name.
-     * </p>
-     *
-     * @param trainingName the name of the training to be deleted
-     */
-    public void deleteTraining(String trainingName) {
-        trainingDao.deleteTraining(trainingName);
-    }
-
-    /**
      * Retrieves a training entity by its name.
      * <p>
-     * This method fetches a training entity from the data store based on the provided training name.
+     * This method fetches the training entity from the data store based on the provided training name.
+     * If no training entity is found with the given name, the method returns null.
      * </p>
      *
      * @param trainingName the name of the training to retrieve
@@ -83,9 +46,9 @@ public class TrainingService {
     }
 
     /**
-     * Retrieves all training entities.
+     * Retrieves all training entities from the data store.
      * <p>
-     * This method fetches the list of all training entities from the data store.
+     * This method fetches a list of all training entities currently stored in the data store.
      * </p>
      *
      * @return a list of all training entities

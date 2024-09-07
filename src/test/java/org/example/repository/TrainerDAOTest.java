@@ -59,15 +59,7 @@ public class TrainerDAOTest {
         verify(trainerDAO, times(1)).getTrainer("userId1");
     }
 
-    @Test
-    void testDeleteTrainer() {
-        // When
-        doNothing().when(trainerDAO).deleteTrainer(anyString());
 
-        // Then
-        trainerDAO.deleteTrainer("userId1");
-        verify(trainerDAO, times(1)).deleteTrainer("userId1");
-    }
 
     @Test
     void testGetAllTrainers() {

@@ -1,14 +1,12 @@
-package org.example.repository.util;
+package org.example.repository.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.example.entity.TrainingEntity;
 import org.example.repository.TrainingDAO;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 @Repository
 public class TrainingDAOImpl implements TrainingDAO {
@@ -25,22 +23,8 @@ public class TrainingDAOImpl implements TrainingDAO {
     }
 
     @Override
-    public void updateTraining(String trainingName, TrainingEntity trainingEntity) {
-        if (storage.getTrainingStorage().containsKey(trainingName)) {
-            storage.getTrainingStorage().put(trainingName, trainingEntity);
-        } else {
-            throw new NoSuchElementException("TrainingEntity with name " + trainingName + " not found.");
-        }
-    }
-
-    @Override
-    public void deleteTraining(String trainingName) {
-        storage.getTrainingStorage().remove(trainingName);
-    }
-
-    @Override
     public TrainingEntity getTraining(String trainingName) {
-        return  storage.getTrainingStorage().get(trainingName);
+        return storage.getTrainingStorage().get(trainingName);
     }
 
     @Override

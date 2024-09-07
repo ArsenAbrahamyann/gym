@@ -42,21 +42,6 @@ public class TrainingDAOTest {
         verify(trainingDAO, times(1)).createTraining(training1);
     }
 
-    @Test
-    void testUpdateTraining() {
-        doNothing().when(trainingDAO).updateTraining(anyString(), any(TrainingEntity.class));
-
-        trainingDAO.updateTraining("Morning Cardio", training1);
-        verify(trainingDAO, times(1)).updateTraining("Morning Cardio", training1);
-    }
-
-    @Test
-    void testDeleteTraining() {
-        doNothing().when(trainingDAO).deleteTraining(anyString());
-
-        trainingDAO.deleteTraining("Morning Cardio");
-        verify(trainingDAO, times(1)).deleteTraining("Morning Cardio");
-    }
 
     @Test
     void testGetTraining() {

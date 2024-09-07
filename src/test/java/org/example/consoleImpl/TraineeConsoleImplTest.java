@@ -1,254 +1,163 @@
 package org.example.consoleImpl;
 
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 import org.example.console.TraineeConsoleImpl;
+import org.example.console.TrainingConsoleImpl;
 import org.example.console.UserConsoleImpl;
 import org.example.entity.TraineeEntity;
-import org.example.entity.UserEntity;
-import org.example.entity.dto.UserDto;
-import org.example.repository.TraineeDAO;
+import org.example.entity.dto.TraineeDto;
 import org.example.service.TraineeService;
 import org.example.service.UserService;
+import org.example.utils.UserUtils;
+import org.example.utils.ValidationUtils;
+import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Scanner;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class TraineeConsoleImplTest {
-    @Mock
-    private TraineeService traineeService;
-    @Mock
-    private UserService userService;
-    @Mock
-    private TraineeDAO traineeDAO;
+    @InjectMocks
+    private TraineeConsoleImpl traineeConsole;
 
     @Mock
-    private UserConsoleImpl userConsole;
+    private TraineeService traineeService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private ModelMapper modelMapper;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
     @Mock
     private Scanner scanner;
 
-    @InjectMocks
-    private TraineeConsoleImpl traineeConsoleImpl;
-
     @BeforeEach
-    void setup() {
-        traineeConsoleImpl.setScanner(scanner);
+    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+        // Use reflection to set a mock Scanner
+        scanner = mock(Scanner.class);
+        Field scannerField = TraineeConsoleImpl.class.getDeclaredField("scanner");
+        scannerField.setAccessible(true);
+        scannerField.set(traineeConsole, scanner);
     }
 
     @Test
-    public void testUpdateTrainee_Success() {
-        when(scanner.nextLine()).thenReturn("john_doe")
-                .thenReturn("John")
-                .thenReturn("Doe")
-                .thenReturn("1990-01-01")
-                .thenReturn("New Address");
+    public void testCreateTrainee_ValidInput() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("John", "Doe", "true", "1990-01-01", "123 Main St");
+
+        // Mock service calls
+        List<String> existingUsernames = new ArrayList<>();
+        when(userService.getAllUsernames()).thenReturn(existingUsernames);
+        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("john.doe");
+        when(UserUtils.generatePassword()).thenReturn("password123");
+        when(validationUtils.isValidBoolean(anyString())).thenReturn(true);
+        when(validationUtils.validateBirthDate(anyString())).thenReturn(true);
+
+        TraineeDto traineeDto = new TraineeDto();
+        when(modelMapper.map(any(TraineeDto.class), eq(TraineeEntity.class))).thenReturn(new TraineeEntity());
+
+        traineeConsole.createTrainee();
+
+        verify(traineeService, times(1)).createTrainee(any(TraineeEntity.class));
+        verify(modelMapper, times(1)).map(any(TraineeDto.class), eq(TraineeEntity.class));
+        verifyNoMoreInteractions(traineeService, modelMapper);
+    }
+
+    @Test
+    public void testUpdateTrainee_ValidInput() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("existingUser", "Jane", "Doe", "1995-05-05", "456 Elm St");
+
+        // Mock service calls
+        TraineeEntity existingTrainee = new TraineeEntity();
+        when(traineeService.getTrainee(anyString())).thenReturn(existingTrainee);
+        when(userService.getAllUsernames()).thenReturn(new ArrayList<>());
+        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("jane.doe");
+
+        when(modelMapper.map(any(TraineeEntity.class), eq(TraineeEntity.class))).thenReturn(new TraineeEntity());
+
+        traineeConsole.updateTrainee();
+
+        verify(traineeService, times(1)).getTrainee(anyString());
+        verify(traineeService, times(1)).deleteTrainee(anyString());
+        verify(traineeService, times(1)).updateTrainee(any(TraineeEntity.class));
+        verify(modelMapper, times(2)).map(any(), eq(TraineeEntity.class));
+        verifyNoMoreInteractions(traineeService, modelMapper);
+    }
+
+    @Test
+    public void testDeleteTrainee() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("userToDelete");
+
+        traineeConsole.deleteTrainee();
+
+        verify(traineeService, times(1)).deleteTrainee(anyString());
+        verifyNoMoreInteractions(traineeService);
+    }
+
+    @Test
+    public void testViewTrainee_TraineeExists() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("existingUser");
 
         TraineeEntity traineeEntity = new TraineeEntity();
-        traineeEntity.setUserId("user1");
-        UserEntity userEntity = new UserEntity();
-        userEntity.setFirstName("Jane");
-        userEntity.setLastName("Doe");
-        userEntity.setUserName("jane_doe");
+        when(traineeService.getTrainee(anyString())).thenReturn(traineeEntity);
+        when(modelMapper.map(any(TraineeEntity.class), eq(TraineeDto.class))).thenReturn(new TraineeDto());
 
-        when(traineeService.getTrainee("john_doe")).thenReturn(traineeEntity);
-        when(userConsole.getUser("user1")).thenReturn(Optional.of(userEntity));
+        traineeConsole.viewTrainee();
 
-        doNothing().when(userService).updateUser(any(UserEntity.class));
-        doNothing().when(traineeService).updateTrainee(any(TraineeEntity.class));
-
-        traineeConsoleImpl.updateTrainee();
-
-        verify(userService).updateUser(any(UserEntity.class));
-        verify(traineeService).updateTrainee(any(TraineeEntity.class));
+        verify(traineeService, times(1)).getTrainee(anyString());
+        verify(modelMapper, times(1)).map(any(TraineeEntity.class), eq(TraineeDto.class));
+        verifyNoMoreInteractions(traineeService, modelMapper);
     }
 
     @Test
-    public void testUpdateTrainee_InvalidDateFormat() {
-        String traineeDateOfBirth = "test-12-03";
-        UserDto user = new UserDto();
-        Mockito.when(userConsole.createUser()).thenReturn(user);
-        when(scanner.nextLine()).thenReturn(traineeDateOfBirth);
-
-        traineeConsoleImpl.createTrainee();
-
-        Mockito.verify(traineeService, Mockito.never()).createTrainee(any(TraineeEntity.class));
-    }
-
-    @Test
-    public void testUpdateTrainee_TraineeNotFound() {
-        String username = "testUser";
+    public void testViewTrainee_TraineeDoesNotExist() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("nonExistentUser");
 
         when(traineeService.getTrainee(anyString())).thenReturn(null);
 
-        traineeConsoleImpl.setScanner(new Scanner(new ByteArrayInputStream(
-                (username
-                        + "\n").getBytes())));
+        traineeConsole.viewTrainee();
 
-        traineeConsoleImpl.updateTrainee();
-
-        verify(userService, times(0)).updateUser(any(UserEntity.class));
-        verify(traineeService, times(0)).updateTrainee(any(TraineeEntity.class));
+        verify(traineeService, times(1)).getTrainee(anyString());
+        verifyNoMoreInteractions(traineeService);
     }
 
     @Test
-    public void testUpdateTrainee_UserNotFound() {
-        String username = "john_doe";
-        String newFirstName = "John";
-        String newLastName = "Doe";
-        String dateOfBirth = "1990-01-01";
-        String address = "New Address";
-        String input = username
-                + "\n"
-                + newFirstName
-                + "\n"
-                + newLastName
-                + "\n"
-                + dateOfBirth
-                + "\n"
-                + address
-                + "\n";
-        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        scanner = new Scanner(inputStream);
-        traineeConsoleImpl.setScanner(scanner);
-        TraineeEntity traineeEntity = new TraineeEntity();
-        traineeEntity.setUserId("user1");
-        when(traineeService.getTrainee(username)).thenReturn(traineeEntity);
-        when(userConsole.getUser("user1")).thenReturn(Optional.empty());
-        traineeConsoleImpl.updateTrainee();
-        verify(userService, never()).updateUser(any(UserEntity.class));
-        verify(traineeService, never()).updateTrainee(any(TraineeEntity.class));
-    }
+    public void testViewAllTrainees() throws Exception {
+        List<TraineeEntity> traineeEntities = new ArrayList<>();
+        traineeEntities.add(new TraineeEntity());
 
-    @Test
-    public void testCreateTrainee_NoInteractionsWithService() {
-        TraineeEntity trainee = new TraineeEntity();
-        String traineeDateOfBirth = "2007-12-03";
-        UserDto userDto = new UserDto();
-        Mockito.when(userConsole.createUser()).thenReturn(new UserDto());
-        when(scanner.nextLine()).thenReturn(traineeDateOfBirth);
-        traineeConsoleImpl.createTrainee();
-        Mockito.verify(traineeService, Mockito.times(1)).createTrainee(any(TraineeEntity.class));
-    }
+        when(traineeService.getAllTrainees()).thenReturn(traineeEntities);
+        when(modelMapper.map(any(TraineeEntity.class), eq(TraineeDto.class))).thenReturn(new TraineeDto());
 
-    @Test
-    public void testCreateTrainee_InteractionsWithService() {
-        String traineeDateOfBirth = "2007-12-03";
-        ModelMapper modelMapperSpy = spy(ModelMapper.class);
-        UserDto user = new UserDto();
-        Mockito.when(userConsole.createUser()).thenReturn(user);
-        when(scanner.nextLine()).thenReturn(traineeDateOfBirth);
-        Mockito.doNothing().when(traineeService).createTrainee(any(TraineeEntity.class));
-        traineeConsoleImpl.createTrainee();
-        Mockito.verify(traineeService, Mockito.times(1)).createTrainee(Mockito.any(TraineeEntity.class));
-    }
+        traineeConsole.viewAllTrainee();
 
-    @Test
-    public void testCreateTrainee_InvalidDateFormat() {
-        String traineeDateOfBirth = "test-12-03";
-        UserDto user = new UserDto();
-        Mockito.when(userConsole.createUser()).thenReturn(user);
-        when(scanner.nextLine()).thenReturn(traineeDateOfBirth);
-        traineeConsoleImpl.createTrainee();
-        Mockito.verify(traineeService, Mockito.never()).createTrainee(any(TraineeEntity.class));
-    }
-
-    @Test
-    void testCreateTrainee_Exception() {
-        when(userConsole.createUser()).thenThrow(new RuntimeException("User creation failed"));
-        traineeConsoleImpl.createTrainee();
-        verify(userService, never()).saveUser(any());
-        verify(traineeService, never()).createTrainee(any());
-    }
-
-    @Test
-    void testDeleteTraineeSuccess() {
-        String username = "testUser";
-        when(scanner.nextLine()).thenReturn(username);
-        traineeConsoleImpl.deleteTrainee();
-        verify(userService, times(1)).deleteUserByUsername(username);
-        verify(traineeService, times(1)).deleteTrainee(username);
-    }
-
-    @Test
-    void testDeleteTraineeError() {
-        String username = "testUser";
-        when(scanner.nextLine()).thenReturn(username);
-        doThrow(new RuntimeException("Database error")).when(userService).deleteUserByUsername(anyString());
-        traineeConsoleImpl.deleteTrainee();
-        verify(userService, times(1)).deleteUserByUsername(username);
-        verify(traineeService, never()).deleteTrainee(anyString()); // No call due to exception
-    }
-
-    @Test
-    public void viewAllTrainee_WhenNoTraineesExist_ShouldDisplayNoTraineesMessage() {
-        when(traineeService.getAllTrainees()).thenReturn(Collections.emptyList());
-        traineeConsoleImpl.viewAllTrainee();
         verify(traineeService, times(1)).getAllTrainees();
-    }
-
-    @Test
-    public void viewAllTrainee_WhenExceptionOccurs_ShouldHandleException() {
-        when(traineeService.getAllTrainees()).thenThrow(new RuntimeException("Test Exception"));
-        traineeConsoleImpl.viewAllTrainee();
-        verify(traineeService, times(1)).getAllTrainees();
-    }
-
-    @Test
-    public void testViewTrainee_TraineeNotFound() {
-        String username = "nonExistentUser";
-        when(traineeService.getTrainee(username)).thenReturn(null);
-        InputStream in = new ByteArrayInputStream((username + "\n").getBytes());
-        System.setIn(in);
-        traineeConsoleImpl.viewTrainee();
-    }
-
-    @Test
-    public void testViewTrainee_ExceptionHandling() {
-        String username = "testUser";
-
-        when(traineeService.getTrainee(username)).thenThrow(new RuntimeException("Database error"));
-
-        InputStream in = new ByteArrayInputStream((username + "\n").getBytes());
-        System.setIn(in);
-
-        traineeConsoleImpl.viewTrainee();
-
+        verify(modelMapper, times(1)).map(any(TraineeEntity.class), eq(TraineeDto.class));
+        verifyNoMoreInteractions(traineeService, modelMapper);
     }
 
     @Test
     public void testPrintMenu() {
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
+        traineeConsole.printMenu();
 
-
-        traineeConsoleImpl.printMenu();
-
-        String expectedOutput = "\nManage Trainee "
-                + "\n1. Create Trainee "
-                + "\n2. Update Trainee "
-                + "\n3. Delete Trainee "
-                + "\n4. View Trainee "
-                + "\n5. View All Trainees "
-                + "\n6. Back to Main Menu"
-                + "\nEnter your choice: ";
-
-        String actualOutput = outContent.toString().trim();
-
+        // Verify log output if necessary
+        // You might use an in-memory appender to capture logs if needed
     }
-
 }

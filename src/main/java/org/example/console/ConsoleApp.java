@@ -1,6 +1,7 @@
 package org.example.console;
 
 import java.util.Scanner;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,27 +15,12 @@ import lombok.extern.slf4j.Slf4j;
  * modules.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class ConsoleApp {
     private final TraineeConsoleImpl traineeConsole;
     private final TrainerConsoleImpl trainerConsole;
     private final TrainingConsoleImpl trainingConsole;
-    private final Scanner scanner;
-
-    /**
-     * Constructs a {@code ConsoleApp} with the specified console implementations
-     * for managing trainees, trainers, and trainings.
-     *
-     * @param traineeConsole  the implementation for trainee management
-     * @param trainerConsole  the implementation for trainer management
-     * @param trainingConsole the implementation for training management
-     */
-    public ConsoleApp(TraineeConsoleImpl traineeConsole, TrainerConsoleImpl trainerConsole,
-                      TrainingConsoleImpl trainingConsole) {
-        this.traineeConsole = traineeConsole;
-        this.trainerConsole = trainerConsole;
-        this.trainingConsole = trainingConsole;
-        this.scanner = new Scanner(System.in);
-    }
+    private final Scanner scanner = new Scanner(System.in);
 
     /**
      * Runs the main loop of the console application. Displays the main menu
@@ -132,15 +118,12 @@ public class ConsoleApp {
                         trainerConsole.updateTrainer();
                         break;
                     case 3:
-                        trainerConsole.deleteTrainer();
-                        break;
-                    case 4:
                         trainerConsole.viewTrainer();
                         break;
-                    case 5:
+                    case 4:
                         trainerConsole.viewAllTrainer();
                         break;
-                    case 6:
+                    case 5:
                         return;
                     default:
                         log.warn("Invalid trainer choice selected: {}", choice);
@@ -170,18 +153,12 @@ public class ConsoleApp {
                         trainingConsole.createTraining();
                         break;
                     case 2:
-                        trainingConsole.updateTraining();
-                        break;
-                    case 3:
-                        trainingConsole.deleteTraining();
-                        break;
-                    case 4:
                         trainingConsole.viewTraining();
                         break;
-                    case 5:
+                    case 3:
                         trainingConsole.viewAllTrainings();
                         break;
-                    case 6:
+                    case 4:
                         return;
                     default:
                         log.warn("Invalid training choice selected: {}", choice);

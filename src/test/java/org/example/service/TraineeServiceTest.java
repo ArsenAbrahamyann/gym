@@ -2,7 +2,6 @@ package org.example.service;
 
 import org.example.entity.TraineeEntity;
 import org.example.repository.TraineeDAO;
-import org.example.repository.UserDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,80 +23,87 @@ public class TraineeServiceTest {
     @Mock
     private TraineeDAO traineeDao;
 
-    @Mock
-    private UserDAO userDAO;
-
     @InjectMocks
     private TraineeService traineeService;
 
-    private TraineeEntity trainee;
+    private TraineeEntity traineeEntity;
 
     @BeforeEach
     void setUp() {
-        trainee = new TraineeEntity("2024-09-03T10:00:00", "123 Main St", "1");
+        // Setup a sample TraineeEntity
+        traineeEntity = new TraineeEntity();
+        traineeEntity.setUserId("trainee123");
+        traineeEntity.setFirstName("John");
+        traineeEntity.setLastName("Doe");
     }
 
     @Test
     void testCreateTrainee() {
-        traineeService.createTrainee(trainee);
+        // Act
+        traineeService.createTrainee(traineeEntity);
 
-        verify(traineeDao, times(1)).createTrainee(trainee);
+        // Assert
+        verify(traineeDao, times(1)).createTrainee(traineeEntity);
     }
 
     @Test
     void testUpdateTrainee() {
-        traineeService.updateTrainee(trainee);
+        // Act
+        traineeService.updateTrainee(traineeEntity);
 
-        verify(traineeDao, times(1)).updateTrainee(trainee.getUserId(), trainee);
+        // Assert
+        verify(traineeDao, times(1)).updateTrainee(traineeEntity.getUserId(), traineeEntity);
     }
 
     @Test
     void testDeleteTrainee() {
-        String userId = "1";
+        String username = "trainee123";
 
-        traineeService.deleteTrainee(userId);
+        // Act
+        traineeService.deleteTrainee(username);
 
-        verify(userDAO, times(1)).deleteByUsername(userId);
-        verify(traineeDao, times(1)).deleteTrainee(userId);
+        // Assert
+        verify(traineeDao, times(1)).deleteTrainee(username);
     }
 
     @Test
     void testGetTrainee() {
-        String userId = "1";
-        when(traineeDao.getTrainee(userId)).thenReturn(trainee);
+        String userId = "trainee123";
+        when(traineeDao.getTrainee(userId)).thenReturn(traineeEntity);
 
+        // Act
         TraineeEntity result = traineeService.getTrainee(userId);
 
-        assertThat(result).isEqualTo(trainee);
+        // Assert
+        assertNotNull(result);
+        assertEquals(traineeEntity, result);
         verify(traineeDao, times(1)).getTrainee(userId);
     }
 
     @Test
     void testGetAllTrainees() {
-        List<TraineeEntity> trainees = Arrays.asList(
-            new TraineeEntity("2024-09-03T10:00:00", "123 Main St", "1"),
-            new TraineeEntity("2024-09-03T11:00:00", "456 Elm St", "2")
-        );
-        when(traineeDao.getAllTrainees()).thenReturn(trainees);
+        List<TraineeEntity> traineeList = Arrays.asList(traineeEntity, new TraineeEntity());
+        when(traineeDao.getAllTrainees()).thenReturn(traineeList);
 
+        // Act
         List<TraineeEntity> result = traineeService.getAllTrainees();
 
-        assertThat(result).hasSize(2).containsExactlyElementsOf(trainees);
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
         verify(traineeDao, times(1)).getAllTrainees();
     }
 
     @Test
-    void testDeleteTrainee_UserDaoFails() {
-        String userId = "1";
-        doThrow(new RuntimeException("User deletion failed")).when(userDAO).deleteByUsername(userId);
+    void testGetTraineeNotFound() {
+        String userId = "nonExistingTrainee";
+        when(traineeDao.getTrainee(userId)).thenReturn(null);
 
-        try {
-            traineeService.deleteTrainee(userId);
-        } catch (RuntimeException e) {
-            assertThat(e).hasMessageContaining("User deletion failed");
-        }
+        // Act
+        TraineeEntity result = traineeService.getTrainee(userId);
 
-        verify(userDAO, times(1)).deleteByUsername(userId);
-        verify(traineeDao, never()).deleteTrainee(userId);
+        // Assert
+        assertNull(result);
+        verify(traineeDao, times(1)).getTrainee(userId);
     }
 }

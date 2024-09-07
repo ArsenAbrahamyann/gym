@@ -1,70 +1,84 @@
 package org.example.consoleImpl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
-
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.util.List;
 import org.example.console.UserConsoleImpl;
-import org.example.entity.UserEntity;
-import org.example.entity.UserUtils;
-import org.example.entity.dto.UserDto;
 import org.example.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Scanner;
-
-
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class UserConsoleImplTest {
     @Mock
     private UserService userService;
 
-    @Mock
-    private UserUtils userUtils;
-    @Mock
-    private Scanner scanner;
-
-
     @InjectMocks
-    private UserConsoleImpl userConsole;
-
-
-    @BeforeEach
-    void setUp() {
-        userConsole.setScanner(scanner);
-
-    }
+    private UserConsoleImpl userConsoleImpl;
 
 
     @Test
-    void testCreateUserException() {
-        // Arrange
-        when(scanner.nextLine()).thenThrow(new RuntimeException("Scanner error"));
+    public void testPrintAllUsername() {
+        // Given
+        List<String> usernames = List.of("user1", "user2", "user3");
+        Mockito.when(userService.getAllUsernames()).thenReturn(usernames);
 
-        // Act
-        UserDto result = userConsole.createUser();
+        // Capture the output
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
 
-        // Assert
-        assertNotNull(result);
-        // Check that the default values are used
-        assertNull(result.getFirstName());
-        assertNull(result.getLastName());
-        assertNull(result.getUserName());
-        assertNull(result.getPassword());
-        assertFalse(result.isActive());
+        // When
+        userConsoleImpl.printAllUsername();
 
-        // Verify that the error message was printed
-        // You can use a custom stream to capture System.out prints or verify log messages
+        // Then
+        String output = outContent.toString().trim();
+        assert(output.contains("user1"));
+        assert(output.contains("user2"));
+        assert(output.contains("user3"));
+
+        // Verify the interaction with the userService
+        verify(userService, times(1)).getAllUsernames();
+
+        // Reset System.out
+        System.setOut(originalOut);
+    }
+
+    @Test
+    public void testUserConsoleImplConstructor() {
+        assertDoesNotThrow(() -> {
+            // Use reflection to create an instance of UserConsoleImpl
+            Constructor<UserConsoleImpl> constructor = UserConsoleImpl.class.getDeclaredConstructor(UserService.class);
+            constructor.setAccessible(true);
+            constructor.newInstance(userService);
+        });
+    }
+
+    @Test
+    public void testPrintAllUsernameExceptionHandling() {
+        // Given
+        Mockito.when(userService.getAllUsernames()).thenThrow(RuntimeException.class);
+
+        // Capture the output
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        // When
+        assertThrows(RuntimeException.class, () -> userConsoleImpl.printAllUsername());
+
+        // Reset System.out
+        System.setOut(originalOut);
     }
 }
