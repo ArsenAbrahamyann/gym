@@ -1,9 +1,8 @@
 package org.example.entity;
 
-import lombok.*;
-
-import java.io.Serial;
-import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -13,5 +12,5 @@ public class UserEntity {
     private String lastName;
     private String UserName;
     private String password;
-    private boolean isActive;
+    private String isActive;
 }

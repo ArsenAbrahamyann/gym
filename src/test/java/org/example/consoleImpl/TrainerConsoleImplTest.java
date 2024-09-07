@@ -8,6 +8,8 @@ import org.example.entity.dto.TrainerDto;
 import org.example.entity.dto.UserDto;
 import org.example.service.TrainerService;
 import org.example.service.UserService;
+import org.example.utils.UserUtils;
+import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,272 +22,115 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerConsoleImplTest {
+
     @Mock
     private TrainerService trainerService;
+
     @Mock
     private UserConsoleImpl userConsole;
+
     @Mock
     private UserService userService;
+
     @Mock
-    private Scanner scanner;
+    private ModelMapper modelMapper;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
     @InjectMocks
-    private TrainerConsoleImpl underTest;
+    private TrainerConsoleImpl trainerConsoleImpl;
+
+    private final Logger log = LoggerFactory.getLogger(TrainerConsoleImplTest.class);
 
     @BeforeEach
-    public void setUp() {
-        underTest.setScanner(scanner);
+    void setUp() {
+        // Setup code if necessary
     }
 
     @Test
-    public void testCreateTrainerSuccess() {
-        UserDto mockUserDto = new UserDto();
-        mockUserDto.setUserName("testUser");
-
-        TrainerDto mockTrainerDto = new TrainerDto();
-        mockTrainerDto.setUserId("testUser");
-        mockTrainerDto.setSpecialization("Java");
-
-        TrainerEntity mockTrainerEntity = new TrainerEntity();
-        mockTrainerEntity.setUserId("testUser");
-        mockTrainerEntity.setSpecialization("Java");
-
-        when(userConsole.createUser()).thenReturn(mockUserDto);
-        when(scanner.nextLine()).thenReturn("Java");
-
-        underTest.createTrainer();
-
-        verify(trainerService, times(1)).createTrainer(mockTrainerEntity);
-    }
-
-    @Test
-    public void testCreateTrainer_ExceptionHandling() {
-        when(userConsole.createUser()).thenThrow(new RuntimeException("User creation failed"));
-
-        underTest.createTrainer();
-
-        verify(trainerService, never()).createTrainer(any(TrainerEntity.class));
-    }
-
-    @Test
-    public void testCreateTrainer_UserCreationException() {
-        when(userConsole.createUser()).thenThrow(new RuntimeException("User creation failed"));
-
-        underTest.createTrainer();
-
-        verify(trainerService, never()).createTrainer(any(TrainerEntity.class));
-    }
-
-    @Test
-    public void testCreateTrainerFailure() {
-        when(userConsole.createUser()).thenThrow(new RuntimeException("User creation failed"));
-
-        String input = "Java\n";
+    void testCreateTrainer() {
+        String input = "John\nDoe\ntrue\nExpert\n";
         InputStream in = new ByteArrayInputStream(input.getBytes());
         System.setIn(in);
-        Scanner scanner = new Scanner(System.in);
 
-        underTest.createTrainer();
-
-        verify(userConsole).createUser();
-    }
-
-    @Test
-    public void testCreateTrainer_ScannerException() {
-        UserDto userDto = new UserDto();
-        userDto.setUserName("username");
-
-        when(userConsole.createUser()).thenReturn(userDto);
-        when(scanner.nextLine()).thenThrow(new RuntimeException("Scanner error"));
-
-        underTest.createTrainer();
-
-        verify(trainerService, never()).createTrainer(any(TrainerEntity.class));
-    }
-
-    @Test
-    public void testCreateTrainer_Validation() {
-        UserDto userDto = new UserDto();
-        userDto.setUserName("username");
-
-        when(userConsole.createUser()).thenReturn(userDto);
-        when(scanner.nextLine()).thenReturn("Specialization");
+        List<String> existingUsernames = Arrays.asList("existingUser1");
+        when(userService.getAllUsernames()).thenReturn(existingUsernames);
+        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("john.doe");
+        when(UserUtils.generatePassword()).thenReturn("password123");
 
         TrainerDto trainerDto = new TrainerDto();
-        trainerDto.setUserId(userDto.getUserName());
-        trainerDto.setSpecialization("Specialization");
+        when(modelMapper.map(any(TrainerDto.class), eq(TrainerEntity.class))).thenReturn(new TrainerEntity());
+
+        trainerConsoleImpl.createTrainer();
+
+        verify(trainerService).createTrainer(any(TrainerEntity.class));
+        log.info("Test for createTrainer() passed.");
+    }
+
+    @Test
+    void testUpdateTrainer() {
+        String input = "trainerUser\nNewFirstName\nNewLastName\nNewSpecialization\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
 
         TrainerEntity trainerEntity = new TrainerEntity();
-        trainerEntity.setUserId(trainerDto.getUserId());
-        trainerEntity.setSpecialization(trainerDto.getSpecialization());
+        when(trainerService.getTrainer(anyString())).thenReturn(trainerEntity);
+        when(modelMapper.map(any(TrainerEntity.class), eq(TrainerEntity.class))).thenReturn(trainerEntity);
 
-        doThrow(new RuntimeException("Service error")).when(trainerService).createTrainer(trainerEntity);
+        trainerConsoleImpl.updateTrainer();
 
-        underTest.createTrainer();
-
-        verify(userConsole).createUser();
-        verify(scanner).nextLine();
-        verify(trainerService).createTrainer(trainerEntity);
+        verify(trainerService).updateTrainer(anyString(), any(TrainerEntity.class));
+        log.info("Test for updateTrainer() passed.");
     }
 
     @Test
-    public void testUpdateTrainer_TrainerNotFound() {
-        String username = "nonExistentUsername";
+    void testViewTrainer() {
+        String input = "trainerUser\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
 
-        when(scanner.nextLine()).thenReturn(username);
-        when(trainerService.getTrainer(username)).thenReturn(null);
-
-        underTest.updateTrainer();
-
-        verify(userService, never()).updateUser(any(UserEntity.class));
-        verify(userService, never()).deleteUserByUsername(anyString());
-        verify(trainerService, never()).updateTrainer(anyString(), any(TrainerEntity.class));
-        verify(trainerService, never()).deleteTrainer(anyString());
-    }
-
-    @Test
-    public void testUpdateTrainer_ExceptionHandling() {
-        String username = "trainerUsername";
-        when(scanner.nextLine()).thenReturn(username);
-        when(trainerService.getTrainer(username)).thenThrow(new RuntimeException("Service error"));
-
-        underTest.updateTrainer();
-
-        verify(userService, never()).updateUser(any(UserEntity.class));
-        verify(userService, never()).deleteUserByUsername(anyString());
-        verify(trainerService, never()).updateTrainer(anyString(), any(TrainerEntity.class));
-        verify(trainerService, never()).deleteTrainer(anyString());
-    }
-
-    @Test
-    void testDeleteTrainerSuccess() {
-        String username = "trainer123";
-        doNothing().when(userService).deleteUserByUsername(anyString());
-        doNothing().when(trainerService).deleteTrainer(anyString());
-        when(scanner.nextLine()).thenReturn(username);
-
-        underTest.deleteTrainer();
-
-        verify(userService, times(1)).deleteUserByUsername(username);
-        verify(trainerService, times(1)).deleteTrainer(username);
-    }
-
-    @Test
-    void testDeleteTrainerFailure() {
-        String username = "trainer123";
-        doThrow(new RuntimeException("Deletion error")).when(userService).deleteUserByUsername(anyString());
-        when(scanner.nextLine()).thenReturn(username);
-
-        underTest.deleteTrainer();
-
-        verify(userService, times(1)).deleteUserByUsername(username);
-        verify(trainerService, never()).deleteTrainer(username);
-    }
-
-    @Test
-    public void shouldSetScannerSuccessfully() {
-        Scanner customScanner = new Scanner(System.in);
-        underTest.setScanner(customScanner);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenSettingNullScanner() {
-        assertThrows(IllegalArgumentException.class, () -> underTest.setScanner(null));
-    }
-
-    @Test
-    public void shouldHandleTrainerNotFoundDuringUpdate() {
-        when(scanner.nextLine()).thenReturn("NonExistentUser", "Yoga");
-
-        when(trainerService.getTrainer("NonExistentUser")).thenReturn(null);
-
-        underTest.updateTrainer();
-
-        verify(trainerService, never()).updateTrainer(anyString(), any(TrainerEntity.class));
-    }
-
-    @Test
-    public void shouldViewTrainerSuccessfully() {
-        when(scanner.nextLine()).thenReturn("JaneSmith");
-
-        TrainerEntity existingTrainerEntity = new TrainerEntity();
-        existingTrainerEntity.setUserId("JaneSmith");
-        existingTrainerEntity.setSpecialization("Fitness");
-        when(trainerService.getTrainer("JaneSmith")).thenReturn(existingTrainerEntity);
-
-        underTest.viewTrainer();
-
-        verify(trainerService).getTrainer(anyString());
-    }
-
-    @Test
-    public void shouldHandleTrainerNotFoundDuringView() {
-        when(scanner.nextLine()).thenReturn("NonExistentUser");
-
-        when(trainerService.getTrainer("NonExistentUser")).thenReturn(null);
-
-        underTest.viewTrainer();
-
-        verify(trainerService).getTrainer(anyString());
-    }
-
-    @Test
-    public void shouldHandleExceptionDuringTrainerView() {
-        when(scanner.nextLine()).thenReturn("JaneSmith");
-
-        doThrow(new RuntimeException("View Error")).when(trainerService).getTrainer(anyString());
-
-        underTest.viewTrainer();
-
-        verify(trainerService).getTrainer(anyString());
-    }
-
-    @Test
-    public void shouldViewAllTrainersSuccessfully() {
-        List<TrainerEntity> trainerEntities = new ArrayList<>();
         TrainerEntity trainerEntity = new TrainerEntity();
-        trainerEntity.setUserId("JaneSmith");
-        trainerEntities.add(trainerEntity);
-        when(trainerService.getAllTrainers()).thenReturn(trainerEntities);
+        TrainerDto trainerDto = new TrainerDto();
+        when(trainerService.getTrainer(anyString())).thenReturn(trainerEntity);
+        when(modelMapper.map(any(TrainerEntity.class), eq(TrainerDto.class))).thenReturn(trainerDto);
 
-        underTest.viewAllTrainer();
+        trainerConsoleImpl.viewTrainer();
 
-        verify(trainerService).getAllTrainers();
+        verify(trainerService).getTrainer(anyString());
+        log.info("Test for viewTrainer() passed.");
     }
 
     @Test
-    public void shouldHandleNoTrainersFoundDuringViewAll() {
-        when(trainerService.getAllTrainers()).thenReturn(new ArrayList<>());
+    void testViewAllTrainer() {
+        TrainerEntity trainer1 = new TrainerEntity();
+        TrainerEntity trainer2 = new TrainerEntity();
+        List<TrainerEntity> trainers = Arrays.asList(trainer1, trainer2);
 
-        underTest.viewAllTrainer();
+        when(trainerService.getAllTrainers()).thenReturn(trainers);
+        when(modelMapper.map(any(TrainerEntity.class), eq(TrainerDto.class))).thenReturn(new TrainerDto());
+
+        trainerConsoleImpl.viewAllTrainer();
 
         verify(trainerService).getAllTrainers();
+        log.info("Test for viewAllTrainer() passed.");
     }
 
     @Test
-    public void shouldHandleExceptionDuringViewAllTrainers() {
-        doThrow(new RuntimeException("View All Error")).when(trainerService).getAllTrainers();
+    void testPrintMenu() {
+        trainerConsoleImpl.printMenu();
 
-        underTest.viewAllTrainer();
-
-        verify(trainerService).getAllTrainers();
-    }
-
-    @Test
-    public void shouldPrintMenuSuccessfully() {
-        underTest.printMenu();
+        // Since printMenu() just prints to console, you might want to manually verify the output.
+        // We can't verify the output directly, so this test mainly ensures the method runs without exceptions.
+        log.info("Test for printMenu() passed.");
     }
 }

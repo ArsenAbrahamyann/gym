@@ -1,8 +1,7 @@
 package org.example.repository;
 
-import org.example.entity.TrainerEntity;
-
 import java.util.List;
+import org.example.entity.TrainerEntity;
 
 public interface TrainerDAO {
     void createTrainer(TrainerEntity trainerEntity);
@@ -10,8 +9,6 @@ public interface TrainerDAO {
     void updateTrainer(String userId, TrainerEntity trainerEntity);
 
     TrainerEntity getTrainer(String userId);
-
-    void deleteTrainer(String userId);
 
     List<TrainerEntity> getAllTrainers();
 }

@@ -1,7 +1,6 @@
 package org.example.service;
 import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
-import org.example.repository.UserDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,91 +8,107 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerServiceTest {
     @Mock
-    private TrainerDAO trainerDAO;
-
-    @Mock
-    private UserDAO userDAO;
+    private TrainerDAO trainerDAO;  // Mocked dependency
 
     @InjectMocks
-    private TrainerService trainerService;
+    private TrainerService trainerService;  // Inject mocks into this service
 
-    private TrainerEntity trainer;
+    private TrainerEntity trainerEntity;
 
     @BeforeEach
     void setUp() {
-        trainer = new TrainerEntity("1", "Yoga Instructor");
+        // Set up a sample TrainerEntity object for testing
+        trainerEntity = new TrainerEntity();
+        trainerEntity.setUserId("trainer1");
+        trainerEntity.setSpecialization("Yoga");
     }
 
     @Test
     void testCreateTrainer() {
-        trainerService.createTrainer(trainer);
+        // Call the method under test
+        trainerService.createTrainer(trainerEntity);
 
-        verify(trainerDAO, times(1)).createTrainer(trainer);
+        // Verify if trainerDAO's createTrainer() was called with the correct argument
+        verify(trainerDAO, times(1)).createTrainer(trainerEntity);
     }
 
     @Test
     void testUpdateTrainer() {
-        trainerService.updateTrainer(trainer.getUserId(), trainer);
+        // Call the method under test
+        trainerService.updateTrainer("trainer1", trainerEntity);
 
-        verify(trainerDAO, times(1)).updateTrainer(trainer.getUserId(), trainer);
+        // Verify if trainerDAO's updateTrainer() was called with the correct arguments
+        verify(trainerDAO, times(1)).updateTrainer(eq("trainer1"), any(TrainerEntity.class));
     }
 
     @Test
-    void testDeleteTrainer() {
-        String trainerId = "1";
+    void testGetTrainer_Found() {
+        // Mock the behavior of trainerDAO
+        when(trainerDAO.getTrainer("trainer1")).thenReturn(trainerEntity);
 
-        trainerService.deleteTrainer(trainerId);
+        // Call the method under test
+        TrainerEntity result = trainerService.getTrainer("trainer1");
 
-        verify(userDAO, times(1)).deleteByUsername(trainerId);
-        verify(trainerDAO, times(1)).deleteTrainer(trainerId);
+        // Verify the result and mock interaction
+        assertNotNull(result);
+        assertEquals("trainer1", result.getUserId());
+        assertEquals("Yoga", result.getSpecialization());
+
+        verify(trainerDAO, times(1)).getTrainer("trainer1");
     }
 
     @Test
-    void testGetTrainer() {
-        String userId = "1";
-        when(trainerDAO.getTrainer(userId)).thenReturn(trainer);
+    void testGetTrainer_NotFound() {
+        // Mock the behavior of trainerDAO to return null
+        when(trainerDAO.getTrainer("trainer1")).thenReturn(null);
 
-        TrainerEntity result = trainerService.getTrainer(userId);
+        // Call the method under test
+        TrainerEntity result = trainerService.getTrainer("trainer1");
 
-        assertThat(result).isEqualTo(trainer);
-        verify(trainerDAO, times(1)).getTrainer(userId);
+        // Verify that no trainer is returned and interaction is correct
+        assertNull(result);
+        verify(trainerDAO, times(1)).getTrainer("trainer1");
     }
 
     @Test
     void testGetAllTrainers() {
-        List<TrainerEntity> trainers = Arrays.asList(
-            new TrainerEntity("1", "Yoga Instructor"),
-            new TrainerEntity("2", "Pilates Instructor")
-        );
+        // Create a list of trainers to return
+        List<TrainerEntity> trainers = new ArrayList<>();
+        trainers.add(trainerEntity);
         when(trainerDAO.getAllTrainers()).thenReturn(trainers);
 
+        // Call the method under test
         List<TrainerEntity> result = trainerService.getAllTrainers();
 
-        assertThat(result).hasSize(2).containsExactlyElementsOf(trainers);
+        // Verify the result and interaction with the mock
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("trainer1", result.get(0).getUserId());
+
         verify(trainerDAO, times(1)).getAllTrainers();
     }
 
     @Test
-    void testDeleteTrainer_UserDaoFails() {
-        String trainerId = "1";
-        doThrow(new RuntimeException("User deletion failed")).when(userDAO).deleteByUsername(trainerId);
+    void testReflectionForScannerField() throws NoSuchFieldException, IllegalAccessException {
+        // Using reflection to access private final field trainerDAO in TrainerService class
+        java.lang.reflect.Field field = trainerService.getClass().getDeclaredField("trainerDAO");
+        field.setAccessible(true);
 
-        try {
-            trainerService.deleteTrainer(trainerId);
-        } catch (RuntimeException e) {
-            assertThat(e).hasMessageContaining("User deletion failed");
-        }
-
-        verify(userDAO, times(1)).deleteByUsername(trainerId);
-        verify(trainerDAO, never()).deleteTrainer(trainerId);
+        // Check if the injected mock is correctly set
+        TrainerDAO injectedTrainerDAO = (TrainerDAO) field.get(trainerService);
+        assertNotNull(injectedTrainerDAO);
+        assertSame(trainerDAO, injectedTrainerDAO);
     }
 }
