@@ -1,6 +1,5 @@
 package org.example.service;
 
-import org.example.entity.UserEntity;
 import org.example.repository.UserDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,90 +8,65 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     @Mock
-    private UserDAO userDAO;
+    private UserDAO userDao;
 
     @InjectMocks
     private UserService userService;
 
-    private UserEntity user;
-
     @BeforeEach
-    void setUp() {
-        user = new UserEntity(
-            "John",
-            "Doe",
-            "john.doe",
-            "password123",
-            true
-        );
+    void setUp() throws Exception {
+        // Optional: Use reflection to test internals (e.g., check final field assignment).
+        Field userDaoField = UserService.class.getDeclaredField("userDao");
+        userDaoField.setAccessible(true);
+        userDaoField.set(userService, userDao);
     }
 
     @Test
-    void testSaveUser() {
-        userService.saveUser(user);
+    public void testGetAllUsernames_ReturnsUsernames() {
+        // Arrange: mock the behavior of userDao
+        List<String> mockUsernames = Arrays.asList("user1", "user2", "user3");
+        when(userDao.findAllUsernames()).thenReturn(mockUsernames);
 
-        verify(userDAO, times(1)).save(user);
+        // Act: call the method to be tested
+        List<String> usernames = userService.getAllUsernames();
+
+        // Assert: verify the expected result
+        assertEquals(mockUsernames, usernames);
     }
 
     @Test
-    void testFindUserByUsername() {
-        String username = "john.doe";
-        when(userDAO.findByUsername(username)).thenReturn(Optional.of(user));
+    public void testGetAllUsernames_EmptyList() {
+        // Arrange: mock the behavior of userDao to return an empty list
+        when(userDao.findAllUsernames()).thenReturn(Arrays.asList());
 
-        Optional<UserEntity> result = userService.findUserByUsername(username);
+        // Act: call the method to be tested
+        List<String> usernames = userService.getAllUsernames();
 
-        assertThat(result).isPresent().contains(user);
-        verify(userDAO, times(1)).findByUsername(username);
+        // Assert: verify the expected result
+        assertEquals(0, usernames.size());
     }
 
     @Test
-    void testFindUserByUsername_NotFound() {
-        String username = "nonexistent.user";
-        when(userDAO.findByUsername(username)).thenReturn(Optional.empty());
+    public void testGetAllUsernames_SingleUser() {
+        // Arrange: mock the behavior of userDao to return one user
+        List<String> mockUsernames = Arrays.asList("user1");
+        when(userDao.findAllUsernames()).thenReturn(mockUsernames);
 
-        Optional<UserEntity> result = userService.findUserByUsername(username);
+        // Act: call the method to be tested
+        List<String> usernames = userService.getAllUsernames();
 
-        assertThat(result).isNotPresent();
-        verify(userDAO, times(1)).findByUsername(username);
-    }
-
-    @Test
-    void testDeleteUserByUsername() {
-        String username = "john.doe";
-
-        userService.deleteUserByUsername(username);
-
-        verify(userDAO, times(1)).deleteByUsername(username);
-    }
-
-    @Test
-    void testFindAllUsers() {
-        List<UserEntity> users = Arrays.asList(
-            new UserEntity("John", "Doe", "john.doe", "password123", true),
-            new UserEntity("Jane", "Doe", "jane.doe", "password456", true)
-        );
-        when(userDAO.findAll()).thenReturn(users);
-
-        List<UserEntity> result = userService.findAllUsers();
-
-        assertThat(result).hasSize(2).containsExactlyElementsOf(users);
-        verify(userDAO, times(1)).findAll();
-    }
-
-    @Test
-    void testUpdateUser() {
-        userService.updateUser(user);
-
-        verify(userDAO, times(1)).updateUser(user);
+        // Assert: verify the expected result
+        assertEquals(1, usernames.size());
+        assertEquals("user1", usernames.get(0));
     }
 }

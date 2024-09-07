@@ -1,41 +1,29 @@
 package org.example.service;
 
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.example.entity.TrainerEntity;
 import org.example.repository.TrainerDAO;
-import org.example.repository.UserDAO;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
- * Service class for managing trainers.
+ * Service class responsible for managing trainer entities.
  * <p>
- * This service provides operations for creating, updating, deleting, and retrieving trainer entities.
- * It interacts with the data access objects (DAOs) for persistence and retrieval of trainer data.
+ * This service provides methods for creating, updating, deleting, and retrieving trainer entities.
+ * It interacts with the {@link TrainerDAO} to handle persistence and retrieval of trainer data.
  * </p>
  */
 @Service
+@RequiredArgsConstructor
 public class TrainerService {
 
     private final TrainerDAO trainerDAO;
-    private final UserDAO userDAO;
 
     /**
-     * Constructs a new {@link TrainerService} instance with the provided DAOs.
-     *
-     * @param trainerDAO the DAO for managing trainer entities
-     * @param userDAO the DAO for managing user entities
-     */
-    public TrainerService(TrainerDAO trainerDAO, UserDAO userDAO) {
-        this.trainerDAO = trainerDAO;
-        this.userDAO = userDAO;
-    }
-
-    /**
-     * Creates a new trainer entity.
+     * Creates a new trainer entity in the data store.
      * <p>
-     * This method persists a new trainer entity in the data store. The trainer entity must
-     * include all necessary details for creation.
+     * This method persists the provided trainer entity. The entity must include all necessary details
+     * required for creation. It is stored in the data store for future retrieval and management.
      * </p>
      *
      * @param trainerEntity the trainer entity to be created
@@ -45,37 +33,26 @@ public class TrainerService {
     }
 
     /**
-     * Updates an existing trainer entity.
+     * Updates an existing trainer entity in the data store.
      * <p>
-     * This method updates the trainer details in the data store. The trainer entity must contain
-     * a valid user ID and the new details to be updated.
+     * This method updates the details of an existing trainer entity. The trainer entity must include a valid
+     * user ID and the new details to be updated. The update is performed using the provided user ID to locate
+     * the existing record.
      * </p>
      *
-     * @param userId the ID of the trainer to be updated
+     * @param userId        the ID of the trainer to be updated
      * @param trainerEntity the trainer entity with updated details
      */
     public void updateTrainer(String userId, TrainerEntity trainerEntity) {
         trainerDAO.updateTrainer(userId, trainerEntity);
-    }
 
-    /**
-     * Deletes a trainer entity by its ID.
-     * <p>
-     * This method removes a trainer entity from both the trainer data store and the user data store.
-     * The trainer ID is used to identify the entity to be deleted.
-     * </p>
-     *
-     * @param trainerId the ID of the trainer to be deleted
-     */
-    public void deleteTrainer(String trainerId) {
-        userDAO.deleteByUsername(trainerId);
-        trainerDAO.deleteTrainer(trainerId);
     }
 
     /**
      * Retrieves a trainer entity by its ID.
      * <p>
-     * This method fetches the trainer entity from the data store based on the provided trainer ID.
+     * This method fetches the trainer entity from the data store using the provided user ID. If no trainer is
+     * found with the given ID, the method returns null.
      * </p>
      *
      * @param userId the ID of the trainer to retrieve
@@ -86,9 +63,9 @@ public class TrainerService {
     }
 
     /**
-     * Retrieves all trainer entities.
+     * Retrieves all trainer entities from the data store.
      * <p>
-     * This method fetches the list of all trainer entities from the data store.
+     * This method fetches a list of all trainer entities currently stored in the data store.
      * </p>
      *
      * @return a list of all trainer entities
@@ -96,4 +73,6 @@ public class TrainerService {
     public List<TrainerEntity> getAllTrainers() {
         return trainerDAO.getAllTrainers();
     }
+
+
 }

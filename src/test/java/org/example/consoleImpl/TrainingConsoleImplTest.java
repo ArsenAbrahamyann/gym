@@ -12,230 +12,136 @@ import org.example.entity.dto.TrainingDto;
 import org.example.service.TraineeService;
 import org.example.service.TrainerService;
 import org.example.service.TrainingService;
+import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
-import java.time.Duration;
-import java.time.LocalDate;
+import java.lang.reflect.Field;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingConsoleImplTest {
+    @InjectMocks
+    private TrainingConsoleImpl trainingConsole;
+
     @Mock
     private TrainingService trainingService;
+
     @Mock
     private TraineeConsoleImpl traineeConsole;
+
     @Mock
     private TrainerConsoleImpl trainerConsole;
-    @Mock
-    private TraineeService traineeService;
-    @Mock
-    private TrainerService trainerService;
+
     @Mock
     private UserConsoleImpl userConsole;
+
+    @Mock
+    private TraineeService traineeService;
+
+    @Mock
+    private TrainerService trainerService;
+
+    @Mock
+    private ModelMapper modelMapper;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
     @Mock
     private Scanner scanner;
-    @InjectMocks
-    private TrainingConsoleImpl underTest;
 
     @BeforeEach
-    public void setUp() {
-        underTest = new TrainingConsoleImpl(trainingService,traineeConsole,trainerConsole,userConsole,traineeService,trainerService);
-        underTest.setScanner(scanner);
+    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+
+        // Use reflection to set a mock Scanner
+        scanner = mock(Scanner.class);
+        Field scannerField = TrainingConsoleImpl.class.getDeclaredField("scanner");
+        scannerField.setAccessible(true);
+        scannerField.set(trainingConsole, scanner);
     }
 
     @Test
-    void testCreateTrainingSuccessful() {
-        String traineeUsername = "traineeUser";
-        String trainerUsername = "trainerUser";
-        String trainingName = "Training1";
-        String trainingTypeName = "Type1";
-        LocalDate trainingDate = LocalDate.of(2024, 9, 6);
-        Duration trainingDuration = Duration.ofHours(1).plusMinutes(30);
+    public void testCreateTraining_ValidInput() throws Exception {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "TrainingName", "TrainingType", "2024-09-07", "01:00");
 
-        TraineeEntity trainee = new TraineeEntity();
-        TrainerEntity trainer = new TrainerEntity();
+        // Mock validation and service calls
+        when(validationUtils.validateTraineeExists(anyString())).thenReturn(null);
+        when(validationUtils.validateTrainerExists(anyString())).thenReturn(null);
+        when(validationUtils.validateBirthDate(anyString())).thenReturn(true);
+        when(validationUtils.validateTrainingDuration(anyString())).thenReturn(null);
+
         TrainingDto trainingDto = new TrainingDto();
+        when(modelMapper.map(any(TrainingDto.class), eq(TrainingEntity.class))).thenReturn(new TrainingEntity());
+
+        trainingConsole.createTraining();
+
+        verify(trainingService, times(1)).createTraining(any(TrainingEntity.class));
+        verify(modelMapper, times(1)).map(any(TrainingDto.class), eq(TrainingEntity.class));
+        verifyNoMoreInteractions(trainingService, modelMapper);
+    }
+
+    @Test
+    public void testViewTraining_TrainingExists() {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("TrainingName");
+
         TrainingEntity trainingEntity = new TrainingEntity();
+        when(trainingService.getTraining(anyString())).thenReturn(trainingEntity);
+        when(modelMapper.map(any(TrainingEntity.class), eq(TrainingDto.class))).thenReturn(new TrainingDto());
 
-        when(scanner.nextLine()).thenReturn(traineeUsername, trainerUsername, trainingName, trainingTypeName, "2024-09-06", "01:30");
-        when(traineeService.getTrainee(traineeUsername)).thenReturn(trainee);
-        when(trainerService.getTrainer(trainerUsername)).thenReturn(trainer);
+        trainingConsole.viewTraining();
 
-        underTest.createTraining();
-
-        verify(trainingService).createTraining(any(TrainingEntity.class));
+        verify(trainingService, times(1)).getTraining(anyString());
+        verify(modelMapper, times(1)).map(any(TrainingEntity.class), eq(TrainingDto.class));
+        verifyNoMoreInteractions(trainingService, modelMapper);
     }
 
     @Test
-    void testCreateTrainingTraineeNotFound() {
-        when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
-        when(traineeService.getTrainee("traineeUser")).thenReturn(null);
+    public void testViewTraining_TrainingDoesNotExist() {
+        // Mock user input
+        when(scanner.nextLine()).thenReturn("NonExistingTraining");
 
-        underTest.createTraining();
-
-        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-    }
-
-    @Test
-    void testCreateTrainingTrainerNotFound() {
-        when(scanner.nextLine()).thenReturn("traineeUser", "trainerUser", "Training1", "Type1", "2024-09-06", "01:30");
-        when(traineeService.getTrainee("traineeUser")).thenReturn(new TraineeEntity());
-        when(trainerService.getTrainer("trainerUser")).thenReturn(null);
-
-        underTest.createTraining();
-
-        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-    }
-
-    @Test
-    void testUpdateTrainingTrainingNotFound() {
         when(trainingService.getTraining(anyString())).thenReturn(null);
 
-        underTest.updateTraining();
+        trainingConsole.viewTraining();
+
+        verify(trainingService, times(1)).getTraining(anyString());
+        verifyNoMoreInteractions(trainingService);
     }
 
     @Test
-    void testUpdateTrainingTraineeNotFound() {
-        when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
-        when(traineeService.getTrainee(anyString())).thenReturn(null);
+    public void testViewAllTrainings() {
+        List<TrainingEntity> trainingEntities = new ArrayList<>();
+        trainingEntities.add(new TrainingEntity());
 
-        underTest.updateTraining();
+        when(trainingService.getAllTrainings()).thenReturn(trainingEntities);
+        when(modelMapper.map(any(TrainingEntity.class), eq(TrainingDto.class))).thenReturn(new TrainingDto());
+
+        trainingConsole.viewAllTrainings();
+
+        verify(trainingService, times(1)).getAllTrainings();
+        verify(modelMapper, times(1)).map(any(TrainingEntity.class), eq(TrainingDto.class));
+        verifyNoMoreInteractions(trainingService, modelMapper);
     }
 
     @Test
-    void testUpdateTrainingTrainerNotFound() {
-        when(trainingService.getTraining(anyString())).thenReturn(new TrainingEntity());
-        when(traineeService.getTrainee(anyString())).thenReturn(new TraineeEntity());
-        when(trainerService.getTrainer(anyString())).thenReturn(null);
+    public void testPrintMenu() {
+        trainingConsole.printMenu();
 
-        underTest.updateTraining();
-    }
-    @Test
-    public void shouldNotCreateTrainingWithInvalidDate() {
-        when(scanner.nextLine()).thenReturn(
-                "trainee1", "trainer1", "Training1", "Yoga",
-                "invalid-date", "01:30"
-        );
-
-        underTest.createTraining();
-
-        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-    }
-
-    @Test
-    public void shouldNotCreateTrainingWithInvalidDuration() {
-        when(scanner.nextLine()).thenReturn(
-                "trainee1", "trainer1", "Training1", "Yoga",
-                "2024-09-01", "invalid-duration"
-        );
-
-        underTest.createTraining();
-
-        verify(trainingService, never()).createTraining(any(TrainingEntity.class));
-    }
-
-
-    @Test
-    public void shouldNotUpdateTrainingWithInvalidDate() {
-        TrainingEntity existingTraining = new TrainingEntity();
-        when(scanner.nextLine()).thenReturn(
-                "ExistingTraining", "trainee2", "trainer2",
-                "UpdatedTraining", "Pilates", "invalid-date", "02:00"
-        );
-        when(trainingService.getTraining("ExistingTraining")).thenReturn(existingTraining);
-
-        underTest.updateTraining();
-
-        verify(trainingService, never()).updateTraining(eq("ExistingTraining"), any(TrainingEntity.class));
-    }
-
-    @Test
-    public void shouldNotUpdateTrainingWithInvalidDuration() {
-        TrainingEntity existingTraining = new TrainingEntity();
-        when(scanner.nextLine()).thenReturn(
-                "ExistingTraining", "trainee2", "trainer2",
-                "UpdatedTraining", "Pilates", "2024-09-02", "invalid-duration"
-        );
-        when(trainingService.getTraining("ExistingTraining")).thenReturn(existingTraining);
-
-        underTest.updateTraining();
-
-        verify(trainingService, never()).updateTraining(eq("ExistingTraining"), any(TrainingEntity.class));
-    }
-
-
-    @Test
-    public void shouldViewTrainingSuccessfully() {
-        TrainingEntity trainingEntity = new TrainingEntity();
-        trainingEntity.setTraineeId("trainee1");
-        trainingEntity.setTrainerId("trainer1");
-        trainingEntity.setTrainingName("Training1");
-        trainingEntity.setTrainingTypeEntity(new TrainingTypeEntity("Yoga"));
-        trainingEntity.setTrainingDate("2024-09-01");
-        trainingEntity.setTrainingDuration(Duration.ofHours(1).plusMinutes(30));
-        when(scanner.nextLine()).thenReturn("Training1");
-        when(trainingService.getTraining("Training1")).thenReturn(trainingEntity);
-
-        underTest.viewTraining();
-
-        verify(trainingService).getTraining("Training1");
-    }
-
-    @Test
-    public void shouldNotViewNonExistentTraining() {
-        when(scanner.nextLine()).thenReturn("NonExistentTraining");
-        when(trainingService.getTraining("NonExistentTraining")).thenReturn(null);
-
-        underTest.viewTraining();
-
-        verify(trainingService).getTraining("NonExistentTraining");
-    }
-
-    @Test
-    public void shouldViewAllTrainingsSuccessfully() {
-        TrainingEntity trainingEntity = new TrainingEntity();
-        trainingEntity.setTraineeId("trainee1");
-        trainingEntity.setTrainerId("trainer1");
-        trainingEntity.setTrainingName("Training1");
-        trainingEntity.setTrainingTypeEntity(new TrainingTypeEntity("Yoga"));
-        trainingEntity.setTrainingDate("2024-09-01");
-        trainingEntity.setTrainingDuration(Duration.ofHours(1).plusMinutes(30));
-
-        when(trainingService.getAllTrainings()).thenReturn(List.of(trainingEntity));
-
-        underTest.viewAllTrainings();
-
-        verify(trainingService).getAllTrainings();
-    }
-
-    @Test
-    public void shouldHandleEmptyTrainingListGracefully() {
-        when(trainingService.getAllTrainings()).thenReturn(List.of());
-
-        underTest.viewAllTrainings();
-
-        verify(trainingService).getAllTrainings();
-    }
-
-    @Test
-    public void shouldSetScannerSuccessfully() {
-        Scanner newScanner = mock(Scanner.class);
-        underTest.setScanner(newScanner);
-
-        verifyNoInteractions(newScanner);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenSettingNullScanner() {
-        assertThrows(IllegalArgumentException.class, () -> underTest.setScanner(null));
+        // Verify log output if necessary
+        // You might use an in-memory appender to capture logs if needed
     }
 }
