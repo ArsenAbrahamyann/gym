@@ -1,4 +1,4 @@
-package org.example.repository.util;
+package org.example.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,11 +2,9 @@ package org.example.storage;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
-import org.example.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,7 +25,7 @@ public class InMemoryStorageTest {
 
     @BeforeEach
     void setUp() {
-        inMemoryStorage = new InMemoryStorage() {
+        inMemoryStorage = new InMemoryStorage(new ObjectMapper()) {
             @Override
             public void saveToFile() {
                 try (FileWriter writer = new FileWriter(tempDir.resolve("storage.json").toFile())) {
@@ -35,7 +33,6 @@ public class InMemoryStorageTest {
                     dataToSave.put("traineeStorage", getTraineeStorage());
                     dataToSave.put("trainerStorage", getTrainerStorage());
                     dataToSave.put("trainingStorage", getTrainingStorage());
-                    dataToSave.put("userStorage", getUserStorage());
 
                     getObjectMapper().writeValue(writer, dataToSave);
 
@@ -58,7 +55,6 @@ public class InMemoryStorageTest {
                     setTraineeStorage(getObjectMapper().convertValue(loadedData.get("traineeStorage"), new TypeReference<Map<String, TraineeEntity>>() {}));
                     setTrainerStorage(getObjectMapper().convertValue(loadedData.get("trainerStorage"), new TypeReference<Map<String, TrainerEntity>>() {}));
                     setTrainingStorage(getObjectMapper().convertValue(loadedData.get("trainingStorage"), new TypeReference<Map<String, TrainingEntity>>() {}));
-                    setUserStorage(getObjectMapper().convertValue(loadedData.get("userStorage"), new TypeReference<Map<String, UserEntity>>() {}));
                     System.out.println("Data loaded successfully from " + tempDir.resolve("storage.json"));
                 } catch (IOException e) {
                     System.out.println("Error loading file: " + e.getMessage());
