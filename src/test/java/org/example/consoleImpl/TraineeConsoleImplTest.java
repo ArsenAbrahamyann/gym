@@ -1,15 +1,13 @@
 package org.example.consoleImpl;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
-
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-
 import org.example.console.TraineeConsoleImpl;
-import org.example.console.TrainingConsoleImpl;
 import org.example.console.UserConsoleImpl;
 import org.example.entity.TraineeEntity;
 import org.example.entity.dto.TraineeDto;
@@ -17,13 +15,26 @@ import org.example.service.TraineeService;
 import org.example.service.UserService;
 import org.example.utils.UserUtils;
 import org.example.utils.ValidationUtils;
-import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 public class TraineeConsoleImplTest {
     @InjectMocks
@@ -34,6 +45,8 @@ public class TraineeConsoleImplTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private UserConsoleImpl userConsole;
 
     @Mock
     private ModelMapper modelMapper;
@@ -46,7 +59,6 @@ public class TraineeConsoleImplTest {
 
     @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        // Use reflection to set a mock Scanner
         scanner = mock(Scanner.class);
         Field scannerField = TraineeConsoleImpl.class.getDeclaredField("scanner");
         scannerField.setAccessible(true);
@@ -54,53 +66,96 @@ public class TraineeConsoleImplTest {
     }
 
     @Test
-    public void testCreateTrainee_ValidInput() throws Exception {
-        // Mock user input
-        when(scanner.nextLine()).thenReturn("John", "Doe", "true", "1990-01-01", "123 Main St");
+    void testCreateTrainee_ValidInput() {
+        when(scanner.nextLine()).thenReturn("John", "Doe", "true", "2000-01-01", "123 Main St");
 
-        // Mock service calls
         List<String> existingUsernames = new ArrayList<>();
+        existingUsernames.add("existingUser1");
+        existingUsernames.add("existingUser2");
+
         when(userService.getAllUsernames()).thenReturn(existingUsernames);
-        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("john.doe");
-        when(UserUtils.generatePassword()).thenReturn("password123");
-        when(validationUtils.isValidBoolean(anyString())).thenReturn(true);
-        when(validationUtils.validateBirthDate(anyString())).thenReturn(true);
 
-        TraineeDto traineeDto = new TraineeDto();
-        when(modelMapper.map(any(TraineeDto.class), eq(TraineeEntity.class))).thenReturn(new TraineeEntity());
+        try (MockedStatic<UserUtils> mockedUserUtils = mockStatic(UserUtils.class)) {
+            mockedUserUtils.when(() -> UserUtils.generateUsername("John", "Doe", existingUsernames))
+                    .thenReturn("john.doe");
+            mockedUserUtils.when(UserUtils::generatePassword)
+                    .thenReturn("password123");
 
-        traineeConsole.createTrainee();
+            TraineeDto mockTraineeDto = new TraineeDto();
+            mockTraineeDto.setUserId("john.doe");
+            mockTraineeDto.setDateOfBirth("2000-01-01");
+            mockTraineeDto.setAddress("123 Main St");
+            mockTraineeDto.setUserName("john.doe");
+            mockTraineeDto.setFirstName("John");
+            mockTraineeDto.setLastName("Doe");
+            mockTraineeDto.setPassword("password123");
+            mockTraineeDto.setIsActive("true");
 
-        verify(traineeService, times(1)).createTrainee(any(TraineeEntity.class));
-        verify(modelMapper, times(1)).map(any(TraineeDto.class), eq(TraineeEntity.class));
-        verifyNoMoreInteractions(traineeService, modelMapper);
+            TraineeEntity mockTraineeEntity = new TraineeEntity();
+            when(modelMapper.map(any(TraineeDto.class), eq(TraineeEntity.class))).thenReturn(mockTraineeEntity);
+
+            traineeConsole.createTrainee();
+
+            verify(userService).getAllUsernames();
+            verify(validationUtils).isValidBoolean("true");
+            verify(validationUtils).validateBirthDate("2000-01-01");
+            verify(modelMapper).map(any(TraineeDto.class), eq(TraineeEntity.class));
+            verify(traineeService).createTrainee(mockTraineeEntity);
+
+            System.out.println("Test for createTrainee() passed.");
+        }
     }
 
     @Test
-    public void testUpdateTrainee_ValidInput() throws Exception {
-        // Mock user input
-        when(scanner.nextLine()).thenReturn("existingUser", "Jane", "Doe", "1995-05-05", "456 Elm St");
-
-        // Mock service calls
+    void testUpdateTrainee() {
+        String updateUsername = "trainee1";
         TraineeEntity existingTrainee = new TraineeEntity();
-        when(traineeService.getTrainee(anyString())).thenReturn(existingTrainee);
-        when(userService.getAllUsernames()).thenReturn(new ArrayList<>());
-        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("jane.doe");
+        existingTrainee.setUserId(updateUsername);
+        existingTrainee.setFirstName("John");
+        existingTrainee.setLastName("Doe");
+        existingTrainee.setDateOfBirth("2000-01-01");
+        existingTrainee.setAddress("123 Main St");
 
-        when(modelMapper.map(any(TraineeEntity.class), eq(TraineeEntity.class))).thenReturn(new TraineeEntity());
+        TraineeEntity traineeDto = new TraineeEntity();
+        TraineeEntity updatedTrainee = new TraineeEntity();
+        updatedTrainee.setUserId("jane.smith");
+
+        List<String> allUsernames = Arrays.asList("trainee1", "trainee2");
+
+        when(scanner.nextLine()).thenReturn(updateUsername, "Jane", "Smith", "1999-12-31", "456 Elm St");
+        when(traineeService.getTrainee(updateUsername)).thenReturn(existingTrainee);
+        when(userService.getAllUsernames()).thenReturn(allUsernames);
+        when(modelMapper.map(existingTrainee, TraineeEntity.class)).thenReturn(traineeDto);
+        when(modelMapper.map(traineeDto, TraineeEntity.class)).thenReturn(updatedTrainee);
+
+        doNothing().when(traineeService).deleteTrainee(updateUsername);
+        doNothing().when(traineeService).updateTrainee(updatedTrainee);
+        doNothing().when(userConsole).printAllUsername();
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
 
         traineeConsole.updateTrainee();
 
-        verify(traineeService, times(1)).getTrainee(anyString());
-        verify(traineeService, times(1)).deleteTrainee(anyString());
-        verify(traineeService, times(1)).updateTrainee(any(TraineeEntity.class));
-        verify(modelMapper, times(2)).map(any(), eq(TraineeEntity.class));
-        verifyNoMoreInteractions(traineeService, modelMapper);
+        verify(traineeService).getTrainee(updateUsername);
+        verify(userService).getAllUsernames();
+        verify(validationUtils).validateBirthDate("1999-12-31");
+        verify(traineeService).deleteTrainee(updateUsername);
+        verify(traineeService).updateTrainee(updatedTrainee);
+        verify(userConsole).printAllUsername();
+
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("Enter new firstName:"));
+        assertTrue(output.contains("Enter new lastName:"));
+        assertTrue(output.contains("Enter new date of birth (YYYY-MM-DD):"));
+        assertTrue(output.contains("Enter new address:"));
+
+        System.setOut(originalOut);
     }
 
     @Test
-    public void testDeleteTrainee() throws Exception {
-        // Mock user input
+    public void testDeleteTrainee() {
         when(scanner.nextLine()).thenReturn("userToDelete");
 
         traineeConsole.deleteTrainee();
@@ -110,24 +165,67 @@ public class TraineeConsoleImplTest {
     }
 
     @Test
-    public void testViewTrainee_TraineeExists() throws Exception {
-        // Mock user input
-        when(scanner.nextLine()).thenReturn("existingUser");
-
+    void testViewTraineeWhenTraineeIsFound() {
+        // Arrange
+        String username = "trainee1";
         TraineeEntity traineeEntity = new TraineeEntity();
-        when(traineeService.getTrainee(anyString())).thenReturn(traineeEntity);
-        when(modelMapper.map(any(TraineeEntity.class), eq(TraineeDto.class))).thenReturn(new TraineeDto());
+        traineeEntity.setUserId(username);
+        traineeEntity.setDateOfBirth("2000-01-01");
+        traineeEntity.setAddress("123 Main St");
+
+        TraineeDto traineeDto = new TraineeDto();
+        traineeDto.setUserId(username);
+        traineeDto.setDateOfBirth("2000-01-01");
+        traineeDto.setAddress("123 Main St");
+
+        when(scanner.nextLine()).thenReturn(username);
+        when(traineeService.getTrainee(username)).thenReturn(traineeEntity);
+        when(modelMapper.map(traineeEntity, TraineeDto.class)).thenReturn(traineeDto);
+        doNothing().when(userConsole).printAllUsername();
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
 
         traineeConsole.viewTrainee();
 
-        verify(traineeService, times(1)).getTrainee(anyString());
-        verify(modelMapper, times(1)).map(any(TraineeEntity.class), eq(TraineeDto.class));
-        verifyNoMoreInteractions(traineeService, modelMapper);
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("Username: trainee1"));
+        assertTrue(output.contains("Date of Birth: 2000-01-01"));
+        assertTrue(output.contains("Address: 123 Main St"));
+
+        System.setOut(originalOut);
+
+        verify(traineeService).getTrainee(username);
+        verify(userConsole).printAllUsername();
+        verify(modelMapper).map(traineeEntity, TraineeDto.class);
     }
 
     @Test
-    public void testViewTrainee_TraineeDoesNotExist() throws Exception {
-        // Mock user input
+    void testViewTraineeWhenTraineeIsNotFound() {
+        String username = "trainee2";
+
+        when(scanner.nextLine()).thenReturn(username);
+        when(traineeService.getTrainee(username)).thenReturn(null);
+        doNothing().when(userConsole).printAllUsername();
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        traineeConsole.viewTrainee();
+
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("Trainee not found."));
+
+        System.setOut(originalOut);
+
+        verify(traineeService).getTrainee(username);
+        verify(userConsole).printAllUsername();
+    }
+
+    @Test
+    public void testViewTrainee_TraineeDoesNotExist() {
         when(scanner.nextLine()).thenReturn("nonExistentUser");
 
         when(traineeService.getTrainee(anyString())).thenReturn(null);
@@ -139,7 +237,7 @@ public class TraineeConsoleImplTest {
     }
 
     @Test
-    public void testViewAllTrainees() throws Exception {
+    public void testViewAllTrainees() {
         List<TraineeEntity> traineeEntities = new ArrayList<>();
         traineeEntities.add(new TraineeEntity());
 
@@ -156,8 +254,5 @@ public class TraineeConsoleImplTest {
     @Test
     public void testPrintMenu() {
         traineeConsole.printMenu();
-
-        // Verify log output if necessary
-        // You might use an in-memory appender to capture logs if needed
     }
 }

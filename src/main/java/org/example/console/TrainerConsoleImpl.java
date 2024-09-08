@@ -109,6 +109,10 @@ public class TrainerConsoleImpl {
         String newSpecialization = scanner.nextLine();
 
         TrainerEntity trainer = trainerService.getTrainer(updateUsername);
+        if (trainer == null) {
+            log.error("Trainer not found with username: {}", updateUsername);
+            return;
+        }
         TrainerEntity trainerDto = modelMapper.map(trainer, TrainerEntity.class);
 
         trainerDto.setSpecialization(newSpecialization);
