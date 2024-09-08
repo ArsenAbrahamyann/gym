@@ -3,20 +3,20 @@ package org.example.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TrainingEntity;
-import org.example.repository.TrainingDAO;
+import org.example.repository.TrainingDao;
 import org.springframework.stereotype.Service;
 
 /**
  * Service class for managing training entities.
  * <p>
  * This service provides methods for creating, updating, deleting, and retrieving training entities.
- * It interacts with the {@link TrainingDAO} to handle persistence and retrieval of training data.
+ * It interacts with the {@link TrainingDao} to handle persistence and retrieval of training data.
  * </p>
  */
 @Service
 @RequiredArgsConstructor
 public class TrainingService {
-    private final TrainingDAO trainingDao;
+    private final TrainingDao trainingDao;
 
     /**
      * Creates a new training entity in the data store.

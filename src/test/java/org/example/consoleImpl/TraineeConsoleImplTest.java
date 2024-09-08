@@ -85,7 +85,7 @@ public class TraineeConsoleImplTest {
             mockTraineeDto.setUserId("john.doe");
             mockTraineeDto.setDateOfBirth("2000-01-01");
             mockTraineeDto.setAddress("123 Main St");
-            mockTraineeDto.setUserName("john.doe");
+            mockTraineeDto.setUsername("john.doe");
             mockTraineeDto.setFirstName("John");
             mockTraineeDto.setLastName("Doe");
             mockTraineeDto.setPassword("password123");

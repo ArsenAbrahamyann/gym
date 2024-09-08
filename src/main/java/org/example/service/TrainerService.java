@@ -3,21 +3,21 @@ package org.example.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TrainerEntity;
-import org.example.repository.TrainerDAO;
+import org.example.repository.TrainerDao;
 import org.springframework.stereotype.Service;
 
 /**
  * Service class responsible for managing trainer entities.
  * <p>
  * This service provides methods for creating, updating, deleting, and retrieving trainer entities.
- * It interacts with the {@link TrainerDAO} to handle persistence and retrieval of trainer data.
+ * It interacts with the {@link TrainerDao} to handle persistence and retrieval of trainer data.
  * </p>
  */
 @Service
 @RequiredArgsConstructor
 public class TrainerService {
 
-    private final TrainerDAO trainerDAO;
+    private final TrainerDao trainerDao;
 
     /**
      * Creates a new trainer entity in the data store.
@@ -29,7 +29,7 @@ public class TrainerService {
      * @param trainerEntity the trainer entity to be created
      */
     public void createTrainer(TrainerEntity trainerEntity) {
-        trainerDAO.createTrainer(trainerEntity);
+        trainerDao.createTrainer(trainerEntity);
     }
 
     /**
@@ -44,7 +44,7 @@ public class TrainerService {
      * @param trainerEntity the trainer entity with updated details
      */
     public void updateTrainer(String userId, TrainerEntity trainerEntity) {
-        trainerDAO.updateTrainer(userId, trainerEntity);
+        trainerDao.updateTrainer(userId, trainerEntity);
     }
 
     /**
@@ -58,7 +58,7 @@ public class TrainerService {
      * @return the trainer entity if found, or null if not found
      */
     public TrainerEntity getTrainer(String userId) {
-        return trainerDAO.getTrainer(userId);
+        return trainerDao.getTrainer(userId);
     }
 
     /**
@@ -70,7 +70,7 @@ public class TrainerService {
      * @return a list of all trainer entities
      */
     public List<TrainerEntity> getAllTrainers() {
-        return trainerDAO.getAllTrainers();
+        return trainerDao.getAllTrainers();
     }
 
 

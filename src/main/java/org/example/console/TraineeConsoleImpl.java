@@ -45,37 +45,37 @@ public class TraineeConsoleImpl {
     @SneakyThrows
     public void createTrainee() {
         log.info("Starting to create a new trainee.");
+        TraineeDto traineeDto = new TraineeDto();
 
         System.out.print("Enter first name: ");
         String firstName = scanner.nextLine();
+        traineeDto.setFirstName(firstName);
 
         System.out.print("Enter last name: ");
         String lastName = scanner.nextLine();
+        traineeDto.setLastName(lastName);
 
         List<String> existingUsernames = userService.getAllUsernames();
         String username = UserUtils.generateUsername(firstName, lastName, existingUsernames);
         String password = UserUtils.generatePassword();
+        traineeDto.setUserId(username);
+        traineeDto.setUsername(username);
+        traineeDto.setPassword(password);
 
         System.out.print("Is active (true/false): ");
         String isActive = scanner.nextLine();
         validationUtils.isValidBoolean(isActive);
+        traineeDto.setIsActive(isActive);
 
         System.out.print("Enter date of birth (YYYY-MM-DD): ");
         String dateOfBirth = scanner.nextLine();
         validationUtils.validateBirthDate(dateOfBirth);
+        traineeDto.setDateOfBirth(dateOfBirth);
 
         System.out.print("Enter address: ");
         String address = scanner.nextLine();
-
-        TraineeDto traineeDto = new TraineeDto();
-        traineeDto.setUserId(username);
-        traineeDto.setDateOfBirth(dateOfBirth);
         traineeDto.setAddress(address);
-        traineeDto.setUserName(username);
-        traineeDto.setFirstName(firstName);
-        traineeDto.setLastName(lastName);
-        traineeDto.setPassword(password);
-        traineeDto.setIsActive(isActive);
+
 
         TraineeEntity traineeEntity = modelMapper.map(traineeDto, TraineeEntity.class);
 

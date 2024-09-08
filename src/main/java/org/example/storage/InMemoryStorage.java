@@ -41,6 +41,17 @@ public class InMemoryStorage {
     @Value(value = "${storage.file.path}")
     private String filePath;
 
+    /**
+     * Constructs an instance of {@code InMemoryStorage} with the specified {@link ObjectMapper}.
+     * <p>
+     * The provided {@link ObjectMapper} is configured to use a pretty-printing format
+     * and is set to enable indentation for JSON serialization.
+     * </p>
+     *
+     * @param objectMapper the {@link ObjectMapper} used for JSON serialization and deserialization.
+     *                      It is expected to be configured for pretty-printing and indentation.
+     * @throws IllegalArgumentException if {@code objectMapper} is {@code null}.
+     */
     public InMemoryStorage(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         objectMapper.writerWithDefaultPrettyPrinter();
