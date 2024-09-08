@@ -3,17 +3,17 @@ package org.example.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.entity.TrainerEntity;
-import org.example.repository.TrainerDAO;
+import org.example.repository.TrainerDao;
 import org.example.storage.InMemoryStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class TrainerDAOImpl implements TrainerDAO {
+public class TrainerDaoImpl implements TrainerDao {
     private final InMemoryStorage storage;
 
     @Autowired
-    public TrainerDAOImpl(InMemoryStorage storage) {
+    public TrainerDaoImpl(InMemoryStorage storage) {
         this.storage = storage;
     }
 

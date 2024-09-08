@@ -3,7 +3,7 @@ package org.example.service;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
-import org.example.repository.UserDAO;
+import org.example.repository.UserDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     @Mock
-    private UserDAO userDao;
+    private UserDao userDao;
 
     @InjectMocks
     private UserService userService;

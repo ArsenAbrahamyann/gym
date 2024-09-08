@@ -3,7 +3,7 @@ package org.example.service;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.entity.TrainerEntity;
-import org.example.repository.TrainerDAO;
+import org.example.repository.TrainerDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class TrainerServiceTest {
     @Mock
-    private TrainerDAO trainerDAO;
+    private TrainerDao trainerDAO;
 
     @InjectMocks
     private TrainerService trainerService;
@@ -94,8 +94,8 @@ public class TrainerServiceTest {
         java.lang.reflect.Field field = trainerService.getClass().getDeclaredField("trainerDAO");
         field.setAccessible(true);
 
-        TrainerDAO injectedTrainerDAO = (TrainerDAO) field.get(trainerService);
-        assertNotNull(injectedTrainerDAO);
-        assertSame(trainerDAO, injectedTrainerDAO);
+        TrainerDao injectedTrainerDao = (TrainerDao) field.get(trainerService);
+        assertNotNull(injectedTrainerDao);
+        assertSame(trainerDAO, injectedTrainerDao);
     }
 }

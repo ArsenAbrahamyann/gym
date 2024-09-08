@@ -19,9 +19,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TrainingDAOTest {
+public class TrainingDaoTest {
     @Mock
-    private TrainingDAO trainingDAO;
+    private TrainingDao trainingDAO;
 
     private TrainingEntity training1;
     private TrainingEntity training2;

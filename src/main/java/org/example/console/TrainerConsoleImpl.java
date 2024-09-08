@@ -45,32 +45,31 @@ public class TrainerConsoleImpl {
     @SneakyThrows
     public void createTrainer() {
         log.info("Starting to create a new trainer.");
+        TrainerDto trainerDto = new TrainerDto();
 
         System.out.print("Enter first name: ");
         String firstName = scanner.nextLine();
+        trainerDto.setFirstName(firstName);
 
         System.out.print("Enter last name: ");
         String lastName = scanner.nextLine();
+        trainerDto.setLastName(lastName);
 
         List<String> existingUsernames = userService.getAllUsernames();
         String username = UserUtils.generateUsername(firstName, lastName, existingUsernames);
         String password = UserUtils.generatePassword();
+        trainerDto.setUserId(username);
+        trainerDto.setPassword(password);
+        trainerDto.setUsername(username);
 
         System.out.print("Is active (true/false): ");
         String isActive = scanner.nextLine();
         validationUtils.isValidBoolean(isActive);
+        trainerDto.setIsActive(isActive);
 
         System.out.print("Enter specialization: ");
         String specialization = scanner.nextLine();
-
-        TrainerDto trainerDto = new TrainerDto();
-        trainerDto.setUserId(username);
         trainerDto.setSpecialization(specialization);
-        trainerDto.setIsActive(isActive);
-        trainerDto.setPassword(password);
-        trainerDto.setLastName(lastName);
-        trainerDto.setFirstName(firstName);
-        trainerDto.setUserName(username);
 
         TrainerEntity trainerEntity = modelMapper.map(trainerDto, TrainerEntity.class);
 
