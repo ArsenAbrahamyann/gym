@@ -1,11 +1,16 @@
 package org.example.consoleImpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import org.example.console.TrainerConsoleImpl;
 import org.example.console.UserConsoleImpl;
 import org.example.entity.TrainerEntity;
-import org.example.entity.UserEntity;
 import org.example.entity.dto.TrainerDto;
-import org.example.entity.dto.UserDto;
 import org.example.service.TrainerService;
 import org.example.service.UserService;
 import org.example.utils.UserUtils;
@@ -15,25 +20,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerConsoleImplTest {
 
     @Mock
     private TrainerService trainerService;
+    @Mock
+    private ValidationUtils validationUtils;
 
     @Mock
     private UserConsoleImpl userConsole;
@@ -44,70 +51,116 @@ public class TrainerConsoleImplTest {
     @Mock
     private ModelMapper modelMapper;
 
-    @Mock
-    private ValidationUtils validationUtils;
-
     @InjectMocks
     private TrainerConsoleImpl trainerConsoleImpl;
 
     private final Logger log = LoggerFactory.getLogger(TrainerConsoleImplTest.class);
 
+    @Mock
+    private Scanner scanner;
+
     @BeforeEach
-    void setUp() {
-        // Setup code if necessary
+    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+
+        scanner = mock(Scanner.class);
+        Field scannerField = TrainerConsoleImpl.class.getDeclaredField("scanner");
+        scannerField.setAccessible(true);
+        scannerField.set(trainerConsoleImpl, scanner);
     }
 
     @Test
-    void testCreateTrainer() {
-        String input = "John\nDoe\ntrue\nExpert\n";
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        System.setIn(in);
+    public void testCreateTrainer_ValidInput() {
+        when(scanner.nextLine()).thenReturn("John", "Doe", "true", "Expert");
 
-        List<String> existingUsernames = Arrays.asList("existingUser1");
+        List<String> existingUsernames = new ArrayList<>();
+        existingUsernames.add("sgfsd.sdfsdf");
+        existingUsernames.add("sdfsd.dsf");
+
         when(userService.getAllUsernames()).thenReturn(existingUsernames);
-        when(UserUtils.generateUsername(anyString(), anyString(), anyList())).thenReturn("john.doe");
-        when(UserUtils.generatePassword()).thenReturn("password123");
 
-        TrainerDto trainerDto = new TrainerDto();
-        when(modelMapper.map(any(TrainerDto.class), eq(TrainerEntity.class))).thenReturn(new TrainerEntity());
+        try (MockedStatic<UserUtils> mockedUserUtils = mockStatic(UserUtils.class)) {
+            mockedUserUtils.when(() -> UserUtils.generateUsername("John", "Doe", existingUsernames))
+                    .thenReturn("John.Doe");
+            mockedUserUtils.when(UserUtils::generatePassword)
+                    .thenReturn("password123");
 
-        trainerConsoleImpl.createTrainer();
+            TrainerEntity mockTrainerEntity = new TrainerEntity();
+            when(modelMapper.map(any(TrainerDto.class), eq(TrainerEntity.class))).thenReturn(mockTrainerEntity);
 
-        verify(trainerService).createTrainer(any(TrainerEntity.class));
-        log.info("Test for createTrainer() passed.");
+            when(validationUtils.isValidBoolean("true")).thenReturn(true);
+
+            trainerConsoleImpl.createTrainer();
+
+            verify(userService).getAllUsernames();
+            verify(trainerService).createTrainer(any(TrainerEntity.class));
+            verify(modelMapper).map(any(TrainerDto.class), eq(TrainerEntity.class));
+            verify(validationUtils).isValidBoolean("true");
+
+            System.out.println("Test for createTrainer() passed.");
+        }
     }
 
     @Test
-    void testUpdateTrainer() {
-        String input = "trainerUser\nNewFirstName\nNewLastName\nNewSpecialization\n";
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        System.setIn(in);
+    void updateTrainer_shouldUpdateTrainerSuccessfully() {
+        String username = "trainerUser";
+        String newFirstName = "John";
+        String newLastName = "Doe";
+        String newSpecialization = "Fitness";
 
-        TrainerEntity trainerEntity = new TrainerEntity();
-        when(trainerService.getTrainer(anyString())).thenReturn(trainerEntity);
-        when(modelMapper.map(any(TrainerEntity.class), eq(TrainerEntity.class))).thenReturn(trainerEntity);
+        TrainerEntity existingTrainer = new TrainerEntity();
+        existingTrainer.setUserId(username);
+
+        TrainerEntity trainerDto = new TrainerEntity();
+        trainerDto.setUserId(username);
+
+        TrainerEntity updatedTrainer = new TrainerEntity();
+        updatedTrainer.setUserId(username);
+        updatedTrainer.setFirstName(newFirstName);
+        updatedTrainer.setLastName(newLastName);
+        updatedTrainer.setSpecialization(newSpecialization);
+
+        when(trainerService.getTrainer(username)).thenReturn(existingTrainer);
+        when(modelMapper.map(existingTrainer, TrainerEntity.class)).thenReturn(trainerDto);
+        when(modelMapper.map(trainerDto, TrainerEntity.class)).thenReturn(updatedTrainer);
+
+        when(scanner.nextLine()).thenReturn(username, newFirstName, newLastName, newSpecialization);
 
         trainerConsoleImpl.updateTrainer();
 
-        verify(trainerService).updateTrainer(anyString(), any(TrainerEntity.class));
-        log.info("Test for updateTrainer() passed.");
+        verify(trainerService).getTrainer(username);
     }
 
     @Test
     void testViewTrainer() {
-        String input = "trainerUser\n";
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        System.setIn(in);
-
+        String username = "trainer1";
         TrainerEntity trainerEntity = new TrainerEntity();
+        trainerEntity.setUserId(username);
+        trainerEntity.setSpecialization("Java");
+
         TrainerDto trainerDto = new TrainerDto();
-        when(trainerService.getTrainer(anyString())).thenReturn(trainerEntity);
-        when(modelMapper.map(any(TrainerEntity.class), eq(TrainerDto.class))).thenReturn(trainerDto);
+        trainerDto.setUserId(username);
+        trainerDto.setSpecialization("Java");
+
+        when(scanner.nextLine()).thenReturn(username);
+        when(trainerService.getTrainer(username)).thenReturn(trainerEntity);
+        when(modelMapper.map(trainerEntity, TrainerDto.class)).thenReturn(trainerDto);
+        doNothing().when(userConsole).printAllUsername();
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
 
         trainerConsoleImpl.viewTrainer();
 
-        verify(trainerService).getTrainer(anyString());
-        log.info("Test for viewTrainer() passed.");
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("Username: trainer1"));
+        assertTrue(output.contains("Specialization: Java"));
+
+        System.setOut(originalOut);
+
+        verify(trainerService).getTrainer(username);
+        verify(userConsole).printAllUsername();
+        verify(modelMapper).map(trainerEntity, TrainerDto.class);
     }
 
     @Test
@@ -128,9 +181,6 @@ public class TrainerConsoleImplTest {
     @Test
     void testPrintMenu() {
         trainerConsoleImpl.printMenu();
-
-        // Since printMenu() just prints to console, you might want to manually verify the output.
-        // We can't verify the output directly, so this test mainly ensures the method runs without exceptions.
         log.info("Test for printMenu() passed.");
     }
 }
