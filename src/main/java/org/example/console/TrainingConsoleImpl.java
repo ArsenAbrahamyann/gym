@@ -50,39 +50,40 @@ public class TrainingConsoleImpl {
     public void createTraining() {
         log.info("Starting to create a new training.");
 
-        TrainingDto trainingDto = new TrainingDto();
 
+        TrainingDto trainingDto = new TrainingDto();
         traineeConsole.viewAllTrainee();
         System.out.print("Enter trainee username: ");
         String traineeUsername = scanner.nextLine();
         validationUtils.validateTraineeExists(traineeUsername);
+        trainingDto.setTraineeId(traineeUsername);
 
         trainerConsole.viewAllTrainer();
         System.out.print("Enter trainer username: ");
         String trainerUsername = scanner.nextLine();
         validationUtils.validateTrainerExists(trainerUsername);
+        trainingDto.setTrainerId(trainerUsername);
 
         System.out.print("Enter training name: ");
         String trainingName = scanner.nextLine();
+        trainingDto.setTrainingName(trainingName);
 
         System.out.print("Enter training type: ");
         String trainingTypeName = scanner.nextLine();
         TrainingTypeDto trainingTypeDto = new TrainingTypeDto(trainingTypeName);
+        trainingDto.setTrainingTypeDto(trainingTypeDto);
 
         System.out.print("Enter training date (YYYY-MM-DD): ");
         String trainingDateInput = scanner.nextLine();
         validationUtils.validateBirthDate(trainingDateInput);
+        trainingDto.setTrainingDate(trainingDateInput);
 
         System.out.print("Enter training duration (HH:MM): ");
         String trainingDurationInput = scanner.nextLine();
         validationUtils.validateTrainingDuration(trainingDurationInput);
-
-        trainingDto.setTraineeId(traineeUsername);
-        trainingDto.setTrainerId(trainerUsername);
-        trainingDto.setTrainingName(trainingName);
-        trainingDto.setTrainingTypeDto(trainingTypeDto);
-        trainingDto.setTrainingDate(trainingDateInput);
         trainingDto.setTrainingDuration(trainingDurationInput);
+
+
 
         TrainingEntity trainingEntity = modelMapper.map(trainingDto, TrainingEntity.class);
         trainingService.createTraining(trainingEntity);

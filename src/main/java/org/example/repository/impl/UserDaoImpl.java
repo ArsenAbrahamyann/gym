@@ -6,13 +6,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
-import org.example.repository.UserDAO;
+import org.example.repository.UserDao;
 import org.example.storage.InMemoryStorage;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class UserDAOImpl implements UserDAO {
+public class UserDaoImpl implements UserDao {
     private final InMemoryStorage inMemoryStorage;
 
     @Override

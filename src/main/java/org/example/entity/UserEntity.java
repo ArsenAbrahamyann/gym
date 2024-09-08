@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class UserEntity {
     private String firstName;
     private String lastName;
-    private String UserName;
+    private String username;
     private String password;
     private String isActive;
 }
