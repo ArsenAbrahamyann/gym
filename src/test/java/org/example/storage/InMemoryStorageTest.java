@@ -2,21 +2,20 @@ package org.example.storage;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.entity.TraineeEntity;
-import org.example.entity.TrainerEntity;
-import org.example.entity.TrainingEntity;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
+import org.example.entity.TrainingEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import static org.assertj.core.api.Assertions.assertThat;
+
 public class InMemoryStorageTest {
     private InMemoryStorage inMemoryStorage;
 
@@ -36,35 +35,47 @@ public class InMemoryStorageTest {
 
                     getObjectMapper().writeValue(writer, dataToSave);
 
-                    System.out.println("Data saved successfully to " + tempDir.resolve("storage.json"));
+                    System.out.println("Data saved successfully to "
+                            + tempDir.resolve("storage.json"));
                 } catch (IOException e) {
-                    System.out.println("Error saving data to file: " + e.getMessage());
+                    System.out.println("Error saving data to file: "
+                            + e.getMessage());
                 }
             }
 
             @Override
             public void loadFromFile() {
                 File file = tempDir.resolve("storage.json").toFile();
-                if (!file.exists()) {
+                if (! file.exists()) {
                     System.out.println("File does not exist. Starting fresh.");
                     return;
                 }
 
                 try {
-                    Map<String, Object> loadedData = getObjectMapper().readValue(file, new TypeReference<Map<String, Object>>() {});
-                    setTraineeStorage(getObjectMapper().convertValue(loadedData.get("traineeStorage"), new TypeReference<Map<String, TraineeEntity>>() {}));
-                    setTrainerStorage(getObjectMapper().convertValue(loadedData.get("trainerStorage"), new TypeReference<Map<String, TrainerEntity>>() {}));
-                    setTrainingStorage(getObjectMapper().convertValue(loadedData.get("trainingStorage"), new TypeReference<Map<String, TrainingEntity>>() {}));
-                    System.out.println("Data loaded successfully from " + tempDir.resolve("storage.json"));
+                    Map<String, Object> loadedData = getObjectMapper().readValue(file,
+                            new TypeReference<Map<String, Object>>() {
+                            });
+                    setTraineeStorage(getObjectMapper().convertValue(loadedData.get("traineeStorage"),
+                            new TypeReference<Map<String, TraineeEntity>>() {
+                            }));
+                    setTrainerStorage(getObjectMapper().convertValue(loadedData.get("trainerStorage"),
+                            new TypeReference<Map<String, TrainerEntity>>() {
+                            }));
+                    setTrainingStorage(getObjectMapper().convertValue(loadedData.get("trainingStorage"),
+                            new TypeReference<Map<String, TrainingEntity>>() {
+                            }));
+                    System.out.println("Data loaded successfully from "
+                            + tempDir.resolve("storage.json"));
                 } catch (IOException e) {
-                    System.out.println("Error loading file: " + e.getMessage());
+                    System.out.println("Error loading file: "
+                            + e.getMessage());
                 }
             }
         };
     }
 
     @Test
-    void testSaveToFile() throws IOException {
+    void testSaveToFile() {
         TraineeEntity trainee = new TraineeEntity("2024-09-03T10:00:00", "123 Main St", "1");
         inMemoryStorage.getTraineeStorage().put("1", trainee);
 

@@ -45,7 +45,6 @@ public class TrainerService {
      */
     public void updateTrainer(String userId, TrainerEntity trainerEntity) {
         trainerDAO.updateTrainer(userId, trainerEntity);
-
     }
 
     /**
