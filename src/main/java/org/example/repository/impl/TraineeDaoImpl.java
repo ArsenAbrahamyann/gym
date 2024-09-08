@@ -3,15 +3,15 @@ package org.example.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.entity.TraineeEntity;
-import org.example.repository.TraineeDAO;
+import org.example.repository.TraineeDao;
 import org.example.storage.InMemoryStorage;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class TraineeDAOImpl implements TraineeDAO {
+public class TraineeDaoImpl implements TraineeDao {
     private final InMemoryStorage storage;
 
-    public TraineeDAOImpl(InMemoryStorage storage) {
+    public TraineeDaoImpl(InMemoryStorage storage) {
         this.storage = storage;
     }
 

@@ -3,7 +3,7 @@ package org.example.repository;
 import java.util.List;
 import org.example.entity.TraineeEntity;
 
-public interface TraineeDAO {
+public interface TraineeDao {
     void createTrainee(TraineeEntity traineeEntity);
 
     void updateTrainee(String userId, TraineeEntity traineeEntity);

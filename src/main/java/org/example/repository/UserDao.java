@@ -2,6 +2,6 @@ package org.example.repository;
 
 import java.util.List;
 
-public interface UserDAO {
+public interface UserDao {
     List<String> findAllUsernames();
 }
