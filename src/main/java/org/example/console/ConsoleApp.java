@@ -3,6 +3,7 @@ package org.example.console;
 import java.util.Scanner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * The {@code ConsoleApp} class represents the main application console for managing
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class ConsoleApp {
     private final TraineeConsoleImpl traineeConsole;
     private final TrainerConsoleImpl trainerConsole;
