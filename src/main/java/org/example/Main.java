@@ -41,7 +41,7 @@ public class Main {
 
         ConsoleApp consoleApp = context.getBean(ConsoleApp.class);
 
-        ("Beans initialized and ready to use");
+        log.info("Beans initialized and ready to use");
 
         consoleApp.run();
 
