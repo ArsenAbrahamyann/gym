@@ -3,9 +3,6 @@ package org.example;
 import lombok.extern.slf4j.Slf4j;
 import org.example.config.AppConfig;
 import org.example.console.ConsoleApp;
-import org.example.console.TraineeConsoleImpl;
-import org.example.console.TrainerConsoleImpl;
-import org.example.console.TrainingConsoleImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
