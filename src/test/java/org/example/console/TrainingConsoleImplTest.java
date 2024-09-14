@@ -1,12 +1,19 @@
-package org.example.consoleImpl;
+package org.example.console;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import org.example.console.TraineeConsoleImpl;
-import org.example.console.TrainerConsoleImpl;
-import org.example.console.TrainingConsoleImpl;
 import org.example.entity.TrainingEntity;
 import org.example.entity.dto.TrainingDto;
 import org.example.service.TrainingService;
@@ -18,15 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingConsoleImplTest {
@@ -48,6 +46,19 @@ public class TrainingConsoleImplTest {
     @Mock
     private Scanner scanner;
 
+    /**
+     * Sets up the test environment before each test case for {@link TrainingConsoleImpl}.
+     * This method performs the following actions:
+     * <ul>
+     *   <li>Mocks a {@code Scanner} instance to simulate user input during tests.</li>
+     *   <li>Uses reflection to retrieve the private {@code scanner} field from the {@link TrainingConsoleImpl} class.</li>
+     *   <li>Sets the mocked {@code Scanner} instance into the {@code trainingConsole} object, enabling tests
+     *       to interact with a mock scanner for controlled input.</li>
+     * </ul>
+     *
+     * @throws NoSuchFieldException if the {@code scanner} field cannot be found in {@link TrainingConsoleImpl}.
+     * @throws IllegalAccessException if the {@code scanner} field is inaccessible or cannot be modified.
+     */
     @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
 
