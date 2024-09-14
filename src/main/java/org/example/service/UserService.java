@@ -1,33 +1,47 @@
 package org.example.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.repository.UserDao;
+import lombok.extern.slf4j.Slf4j;
+import org.example.entity.UserEntity;
+import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
-/**
- * Service class for managing user entities.
- * <p>
- * This service provides methods for creating, updating, deleting, and retrieving user entities.
- * It interacts with the {@link UserDao} to handle persistence and retrieval of user data.
- * </p>
- */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserDao userDao;
+    private final UserRepository userRepository;
 
-    /**
-     * Retrieves a list of all usernames from the data store.
-     * <p>
-     * This method fetches all usernames currently stored in the data store. The usernames are
-     * retrieved using the {@link UserDao} and returned as a list of strings.
-     * </p>
-     *
-     * @return a list of all usernames
-     */
-    public List<String> getAllUsernames() {
-        return userDao.findAllUsernames();
+    public boolean authenticateUser(String username, String password) {
+        log.info("Authenticating user: {}", username);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (user.getPassword().equals(password)) {
+            log.info("User {} authenticated successfully", username);
+            return true;
+        } else {
+            log.warn("Authentication failed for user {}", username);
+            return false;
+        }
+    }
+
+    public void updateUserPassword(String username, String newPassword) {
+        log.info("Updating password for user: {}", username);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setPassword(newPassword);
+        userRepository.update(user);
+        log.info("Password updated successfully for user: {}", username);
+    }
+
+    public void toggleUserStatus(String username) {
+        log.info("Toggling status for user: {}", username);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setIsActive(! user.getIsActive());
+        userRepository.update(user);
+        log.info("User status toggled successfully for {}", username);
     }
 }

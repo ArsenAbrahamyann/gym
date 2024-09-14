@@ -1,16 +1,15 @@
-package org.example.entity.dto;
+package org.example.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
+    private Long id;
     private String firstName;
     private String lastName;
-    private String username;
-    private String password;
-    private String isActive;
+    private Boolean isActive;
 }

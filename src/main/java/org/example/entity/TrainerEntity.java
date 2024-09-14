@@ -6,10 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrainerEntity extends UserEntity {
+public class TrainerEntity {
     private String userId;
     private String specialization;
 }

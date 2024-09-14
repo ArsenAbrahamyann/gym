@@ -1,12 +1,13 @@
-package org.example.entity.dto;
+package org.example.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class TrainingTypeDto {
+    private Long id;
     private String trainingTypeName;
 }
