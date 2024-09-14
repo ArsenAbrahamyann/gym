@@ -19,8 +19,14 @@ repositories {
 
 dependencies {
     // Spring dependencies
-    implementation("org.springframework:spring-context:5.3.28")
+    implementation("org.springframework:spring-core:5.3.28") // Update to your Spring version if necessary
     implementation("org.springframework:spring-beans:5.3.28")
+    implementation("org.springframework:spring-context:5.3.28")
+    implementation("org.springframework:spring-jdbc:5.3.28")
+    implementation("org.springframework:spring-tx:5.3.28")
+
+    // Spring ORM for Hibernate integration
+    implementation ("org.springframework:spring-orm:5.3.28")
 
     // Hibernate dependencies
     implementation("org.hibernate:hibernate-core:5.6.15.Final")
