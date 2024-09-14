@@ -2,76 +2,74 @@ package org.example.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.dto.TrainerDto;
 import org.example.entity.TrainerEntity;
-import org.example.repository.TrainerDao;
+import org.example.entity.UserEntity;
+import org.example.exeption.ResourceNotFoundException;
+import org.example.repository.TrainerRepository;
+import org.example.repository.UserRepository;
+import org.example.utils.UserUtils;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
-/**
- * Service class responsible for managing trainer entities.
- * <p>
- * This service provides methods for creating, updating, deleting, and retrieving trainer entities.
- * It interacts with the {@link TrainerDao} to handle persistence and retrieval of trainer data.
- * </p>
- */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TrainerService {
+    private final TrainerRepository trainerRepository;
+    private final UserRepository userRepository;
+    private final UserUtils userUtils;
 
-    private final TrainerDao trainerDao;
+    public TrainerDto createTrainerProfile(TrainerDto trainerDto) {
+        log.info("Creating trainer profile ");
 
-    /**
-     * Creates a new trainer entity in the data store.
-     * <p>
-     * This method persists the provided trainer entity. The entity must include all necessary details
-     * required for creation. It is stored in the data store for future retrieval and management.
-     * </p>
-     *
-     * @param trainerEntity the trainer entity to be created
-     */
-    public void createTrainer(TrainerEntity trainerEntity) {
-        trainerDao.createTrainer(trainerEntity);
+        List<String> allUsername = userRepository.findAllUsername()
+                .orElseThrow(() -> new ResourceNotFoundException("username not found"));
+        String generatedUsername = userUtils.generateUsername(trainerDto.getUser().getFirstName(),
+                trainerDto.getUser().getLastName(), allUsername);
+        String generatedPassword = userUtils.generatePassword();
+
+        // Create User entity
+        UserEntity user = new UserEntity();
+        user.setUsername(generatedUsername);
+        user.setPassword(generatedPassword);
+        user.setFirstName(trainerDto.getUser().getFirstName());
+        user.setLastName(trainerDto.getUser().getLastName());
+        user.setIsActive(trainerDto.getUser().getIsActive());
+        userRepository.save(user);
+
+        // Create Trainee entity and associate with User
+        TrainerEntity trainer = new TrainerEntity();
+        trainer.setSpecialization(trainerDto.getSpecialization());
+        trainer.setTrainees(trainerDto.getTrainees());
+        trainer.setUser(user);
+        trainerRepository.save(trainer);
+
+        log.info("Trainee profile created successfully for {}", user.getUsername());
+
+        return trainerDto;
     }
 
-    /**
-     * Updates an existing trainer entity in the data store.
-     * <p>
-     * This method updates the details of an existing trainer entity. The trainer entity must include a valid
-     * user ID and the new details to be updated. The update is performed using the provided user ID to locate
-     * the existing record.
-     * </p>
-     *
-     * @param userId        the ID of the trainer to be updated
-     * @param trainerEntity the trainer entity with updated details
-     */
-    public void updateTrainer(String userId, TrainerEntity trainerEntity) {
-        trainerDao.updateTrainer(userId, trainerEntity);
+    public void changeTrainerPassword(String username, String newPassword) {
+        log.info("Changing password for trainer {}", username);
+        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
+        UserEntity user = trainer.getUser();
+        user.setPassword(newPassword);
+        userRepository.update(user);
+        log.info("Password updated successfully for trainer {}", username);
     }
 
-    /**
-     * Retrieves a trainer entity by its ID.
-     * <p>
-     * This method fetches the trainer entity from the data store using the provided user ID. If no trainer is
-     * found with the given ID, the method returns null.
-     * </p>
-     *
-     * @param userId the ID of the trainer to retrieve
-     * @return the trainer entity if found, or null if not found
-     */
-    public TrainerEntity getTrainer(String userId) {
-        return trainerDao.getTrainer(userId);
-    }
+    public void toggleTrainerStatus(String username) {
+        log.info("Toggling trainer status for {}", username);
+        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
-    /**
-     * Retrieves all trainer entities from the data store.
-     * <p>
-     * This method fetches a list of all trainer entities currently stored in the data store.
-     * </p>
-     *
-     * @return a list of all trainer entities
-     */
-    public List<TrainerEntity> getAllTrainers() {
-        return trainerDao.getAllTrainers();
+        UserEntity user = trainer.getUser();
+        user.setIsActive(! user.getIsActive());
+        userRepository.update(user);
+        log.info("Trainer status toggled successfully for {}", username);
     }
-
 
 }
