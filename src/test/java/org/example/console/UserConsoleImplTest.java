@@ -1,10 +1,14 @@
-package org.example.consoleImpl;
+package org.example.console;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.List;
-import org.example.console.UserConsoleImpl;
 import org.example.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,10 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class UserConsoleImplTest {
@@ -30,19 +30,15 @@ public class UserConsoleImplTest {
         List<String> usernames = List.of("user1", "user2", "user3");
         Mockito.when(userService.getAllUsernames()).thenReturn(usernames);
 
-        PrintStream originalOut = System.out;
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
-
         userConsoleImpl.printAllUsername();
-
+        PrintStream originalOut = System.out;
         String output = outContent.toString().trim();
         assert (output.contains("user1"));
         assert (output.contains("user2"));
         assert (output.contains("user3"));
-
         verify(userService, times(1)).getAllUsernames();
-
         System.setOut(originalOut);
     }
 

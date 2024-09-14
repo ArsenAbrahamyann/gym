@@ -1,5 +1,13 @@
 package org.example.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -11,18 +19,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
     @Mock
-    private TrainingDao trainingDAO;
+    private TrainingDao trainingDao;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -41,35 +42,35 @@ public class TrainingServiceTest {
     void testCreateTraining() throws NoSuchFieldException, IllegalAccessException {
         trainingService.createTraining(mockTraining);
 
-        verify(trainingDAO, times(1)).createTraining(mockTraining);
+        verify(trainingDao, times(1)).createTraining(mockTraining);
 
         Field daoField = TrainingService.class.getDeclaredField("trainingDao");
         daoField.setAccessible(true);
-        TrainingDao injectedDAO = (TrainingDao) daoField.get(trainingService);
+        TrainingDao trainingDao1 = (TrainingDao) daoField.get(trainingService);
 
-        assertNotNull(injectedDAO);
-        assertEquals(trainingDAO, injectedDAO);
+        assertNotNull(trainingDao1);
+        assertEquals(trainingDao, trainingDao1);
     }
 
     @Test
     void testGetTraining_TrainingExists() {
-        when(trainingDAO.getTraining("Java Basics")).thenReturn(mockTraining);
+        when(trainingDao.getTraining("Java Basics")).thenReturn(mockTraining);
 
         TrainingEntity result = trainingService.getTraining("Java Basics");
 
         assertNotNull(result);
         assertEquals("Java Basics", result.getTrainingName());
-        verify(trainingDAO, times(1)).getTraining("Java Basics");
+        verify(trainingDao, times(1)).getTraining("Java Basics");
     }
 
     @Test
     void testGetTraining_TrainingDoesNotExist() {
-        when(trainingDAO.getTraining("Non-Existent Training")).thenReturn(null);
+        when(trainingDao.getTraining("Non-Existent Training")).thenReturn(null);
 
         TrainingEntity result = trainingService.getTraining("Non-Existent Training");
 
         assertNull(result);
-        verify(trainingDAO, times(1)).getTraining("Non-Existent Training");
+        verify(trainingDao, times(1)).getTraining("Non-Existent Training");
     }
 
     @Test
@@ -81,7 +82,7 @@ public class TrainingServiceTest {
                 }}
         );
 
-        when(trainingDAO.getAllTrainings()).thenReturn(mockTrainings);
+        when(trainingDao.getAllTrainings()).thenReturn(mockTrainings);
 
         List<TrainingEntity> result = trainingService.getAllTrainings();
 
@@ -89,17 +90,17 @@ public class TrainingServiceTest {
         assertEquals(2, result.size());
         assertEquals("Java Basics", result.get(0).getTrainingName());
         assertEquals("Advanced Java", result.get(1).getTrainingName());
-        verify(trainingDAO, times(1)).getAllTrainings();
+        verify(trainingDao, times(1)).getAllTrainings();
     }
 
     @Test
     void testGetAllTrainings_EmptyList() {
-        when(trainingDAO.getAllTrainings()).thenReturn(Arrays.asList());
+        when(trainingDao.getAllTrainings()).thenReturn(Arrays.asList());
 
         List<TrainingEntity> result = trainingService.getAllTrainings();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(trainingDAO, times(1)).getAllTrainings();
+        verify(trainingDao, times(1)).getAllTrainings();
     }
 }

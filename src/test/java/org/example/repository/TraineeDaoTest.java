@@ -1,13 +1,5 @@
 package org.example.repository;
 
-import java.util.Arrays;
-import java.util.List;
-import org.example.entity.TraineeEntity;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -16,10 +8,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
+import org.example.entity.TraineeEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+
 @ExtendWith(MockitoExtension.class)
 public class TraineeDaoTest {
     @Mock
-    private TraineeDao traineeDAO;
+    private TraineeDao traineeDao;
 
     private TraineeEntity trainee1;
     private TraineeEntity trainee2;
@@ -32,43 +34,43 @@ public class TraineeDaoTest {
 
     @Test
     void testCreateTrainee() {
-        doNothing().when(traineeDAO).createTrainee(any(TraineeEntity.class));
+        doNothing().when(traineeDao).createTrainee(any(TraineeEntity.class));
 
-        traineeDAO.createTrainee(trainee1);
-        verify(traineeDAO, times(1)).createTrainee(trainee1);
+        traineeDao.createTrainee(trainee1);
+        verify(traineeDao, times(1)).createTrainee(trainee1);
     }
 
     @Test
     void testUpdateTrainee() {
-        doNothing().when(traineeDAO).updateTrainee(anyString(), any(TraineeEntity.class));
+        doNothing().when(traineeDao).updateTrainee(anyString(), any(TraineeEntity.class));
 
-        traineeDAO.updateTrainee("userId1", trainee1);
-        verify(traineeDAO, times(1)).updateTrainee("userId1", trainee1);
+        traineeDao.updateTrainee("userId1", trainee1);
+        verify(traineeDao, times(1)).updateTrainee("userId1", trainee1);
     }
 
     @Test
     void testDeleteTrainee() {
-        doNothing().when(traineeDAO).deleteTrainee(anyString());
+        doNothing().when(traineeDao).deleteTrainee(anyString());
 
-        traineeDAO.deleteTrainee("userId1");
-        verify(traineeDAO, times(1)).deleteTrainee("userId1");
+        traineeDao.deleteTrainee("userId1");
+        verify(traineeDao, times(1)).deleteTrainee("userId1");
     }
 
     @Test
     void testGetTrainee() {
-        when(traineeDAO.getTrainee(anyString())).thenReturn(trainee1);
+        when(traineeDao.getTrainee(anyString())).thenReturn(trainee1);
 
-        TraineeEntity result = traineeDAO.getTrainee("userId1");
+        TraineeEntity result = traineeDao.getTrainee("userId1");
         assertThat(result).isEqualTo(trainee1);
-        verify(traineeDAO, times(1)).getTrainee("userId1");
+        verify(traineeDao, times(1)).getTrainee("userId1");
     }
 
     @Test
     void testGetAllTrainees() {
-        when(traineeDAO.getAllTrainees()).thenReturn(Arrays.asList(trainee1, trainee2));
+        when(traineeDao.getAllTrainees()).thenReturn(Arrays.asList(trainee1, trainee2));
 
-        List<TraineeEntity> result = traineeDAO.getAllTrainees();
+        List<TraineeEntity> result = traineeDao.getAllTrainees();
         assertThat(result).hasSize(2).containsExactly(trainee1, trainee2);
-        verify(traineeDAO, times(1)).getAllTrainees();
+        verify(traineeDao, times(1)).getAllTrainees();
     }
 }

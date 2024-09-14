@@ -1,5 +1,13 @@
 package org.example.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -10,18 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingDaoTest {
     @Mock
-    private TrainingDao trainingDAO;
+    private TrainingDao trainingDao;
 
     private TrainingEntity training1;
     private TrainingEntity training2;
@@ -40,27 +41,27 @@ public class TrainingDaoTest {
 
     @Test
     void testCreateTraining() {
-        doNothing().when(trainingDAO).createTraining(any(TrainingEntity.class));
+        doNothing().when(trainingDao).createTraining(any(TrainingEntity.class));
 
-        trainingDAO.createTraining(training1);
-        verify(trainingDAO, times(1)).createTraining(training1);
+        trainingDao.createTraining(training1);
+        verify(trainingDao, times(1)).createTraining(training1);
     }
 
     @Test
     void testGetTraining() {
-        when(trainingDAO.getTraining(anyString())).thenReturn(training1);
+        when(trainingDao.getTraining(anyString())).thenReturn(training1);
 
-        TrainingEntity result = trainingDAO.getTraining("Morning Cardio");
+        TrainingEntity result = trainingDao.getTraining("Morning Cardio");
         assertThat(result).isEqualTo(training1);
-        verify(trainingDAO, times(1)).getTraining("Morning Cardio");
+        verify(trainingDao, times(1)).getTraining("Morning Cardio");
     }
 
     @Test
     void testGetAllTrainings() {
-        when(trainingDAO.getAllTrainings()).thenReturn(Arrays.asList(training1, training2));
+        when(trainingDao.getAllTrainings()).thenReturn(Arrays.asList(training1, training2));
 
-        List<TrainingEntity> result = trainingDAO.getAllTrainings();
+        List<TrainingEntity> result = trainingDao.getAllTrainings();
         assertThat(result).hasSize(2).containsExactly(training1, training2);
-        verify(trainingDAO, times(1)).getAllTrainings();
+        verify(trainingDao, times(1)).getAllTrainings();
     }
 }

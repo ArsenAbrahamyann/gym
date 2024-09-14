@@ -1,5 +1,7 @@
 package org.example.storage;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -14,13 +16,11 @@ import org.example.entity.TrainingEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class InMemoryStorageTest {
-    private InMemoryStorage inMemoryStorage;
-
     @TempDir
     Path tempDir;
+    private InMemoryStorage inMemoryStorage;
 
     @BeforeEach
     void setUp() {

@@ -1,4 +1,13 @@
-package org.example.consoleImpl;
+package org.example.console;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -7,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import org.example.console.TrainerConsoleImpl;
-import org.example.console.UserConsoleImpl;
 import org.example.entity.TrainerEntity;
 import org.example.entity.dto.TrainerDto;
 import org.example.service.TrainerService;
@@ -25,40 +32,39 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerConsoleImplTest {
 
+    private final Logger log = LoggerFactory.getLogger(TrainerConsoleImplTest.class);
     @Mock
     private TrainerService trainerService;
     @Mock
     private ValidationUtils validationUtils;
-
     @Mock
     private UserConsoleImpl userConsole;
-
     @Mock
     private UserService userService;
-
     @Mock
     private ModelMapper modelMapper;
-
     @InjectMocks
     private TrainerConsoleImpl trainerConsoleImpl;
-
-    private final Logger log = LoggerFactory.getLogger(TrainerConsoleImplTest.class);
-
     @Mock
     private Scanner scanner;
 
+    /**
+     * Sets up the test environment before each test case for {@link TrainerConsoleImpl}.
+     * This method does the following:
+     * <ul>
+     *   <li>Mocks the {@code Scanner} object to simulate user input during tests.</li>
+     *   <li>Uses reflection to retrieve the private {@code scanner} field from {@link TrainerConsoleImpl}.</li>
+     *   <li>Sets the mocked {@code Scanner} instance into the {@code trainerConsoleImpl} object, allowing tests
+     *       to interact with a mock {@code Scanner} for controlled input.</li>
+     * </ul>
+     *
+     * @throws NoSuchFieldException if the {@code scanner} field is not found in {@link TrainerConsoleImpl}.
+     * @throws IllegalAccessException if the {@code scanner} field is inaccessible or cannot be modified.
+     */
     @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
 
@@ -105,18 +111,17 @@ public class TrainerConsoleImplTest {
         String username = "trainerUser";
         String newFirstName = "John";
         String newLastName = "Doe";
-        String newSpecialization = "Fitness";
 
         TrainerEntity existingTrainer = new TrainerEntity();
         existingTrainer.setUserId(username);
 
         TrainerEntity trainerDto = new TrainerEntity();
         trainerDto.setUserId(username);
-
         TrainerEntity updatedTrainer = new TrainerEntity();
         updatedTrainer.setUserId(username);
         updatedTrainer.setFirstName(newFirstName);
         updatedTrainer.setLastName(newLastName);
+        String newSpecialization = "Fitness";
         updatedTrainer.setSpecialization(newSpecialization);
 
         when(trainerService.getTrainer(username)).thenReturn(existingTrainer);
