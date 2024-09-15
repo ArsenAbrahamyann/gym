@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.example.dto.TraineeDto;
+import org.example.dto.TrainerDto;
 import org.example.dto.UserDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
@@ -76,7 +78,9 @@ public class TraineeServiceTest {
         traineeDto.setUser(new UserDto("TestFirstName", "TestLastName", true));
         traineeDto.setDateOfBirth(new Date());
         traineeDto.setAddress("123 Test Street");
-        traineeDto.setTrainers(new HashSet<>(List.of(trainerEntity)));
+        Set<TrainerDto> trainerDtos = new HashSet<>();
+        trainerDtos.add(new TrainerDto());
+        traineeDto.setTrainers(trainerDtos);
     }
 
     @Test
