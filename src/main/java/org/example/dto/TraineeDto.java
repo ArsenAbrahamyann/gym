@@ -11,7 +11,6 @@ import org.example.entity.TrainerEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TraineeDto {
-    private Long id;
     private Date dateOfBirth;
     private String address;
     private UserDto user;

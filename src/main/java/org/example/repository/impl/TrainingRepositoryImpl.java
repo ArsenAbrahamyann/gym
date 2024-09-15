@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
@@ -11,13 +18,6 @@ import org.example.entity.TrainingEntity;
 import org.example.repository.TrainingRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 
 @Repository
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
     }
 
     @Override
-    public List<TrainingEntity> findTrainingsForTrainee(Long traineeId, Date fromDate, Date toDate, String trainerName,
+    public Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, Date fromDate, Date toDate, String trainerName,
                                                         String trainingType) {
         // Get the CriteriaBuilder
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -89,11 +89,11 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         cq.where(predicates.toArray(new Predicate[0]));
 
         // Execute the query
-        return entityManager.createQuery(cq).getResultList();
+        return Optional.ofNullable(entityManager.createQuery(cq).getResultList());
     }
 
     @Override
-    public List<TrainingEntity> findTrainingsForTrainer(Long trainerId, Date fromDate, Date toDate,
+    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, Date fromDate, Date toDate,
                                                         String traineeName) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
@@ -127,6 +127,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
 
         cq.where(predicates.toArray(new Predicate[0]));
 
-        return entityManager.createQuery(cq).getResultList();
+        return Optional.ofNullable(entityManager.createQuery(cq).getResultList());
+
     }
 }

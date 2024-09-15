@@ -1,6 +1,5 @@
 package org.example.entity;
 
-import java.time.Duration;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;

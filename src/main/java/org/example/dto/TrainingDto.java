@@ -12,7 +12,6 @@ import org.example.entity.TrainingTypeEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingDto {
-    private Long id;
     private TraineeEntity trainee;
     private TrainerEntity trainer;
     private String trainingName;

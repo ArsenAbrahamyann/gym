@@ -16,4 +16,8 @@ public interface TrainerRepository {
     Optional<List<TrainerEntity>> findAssignedTrainers(Long id);
 
     Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds);
+
+    void update(TrainerEntity trainer);
+
+
 }

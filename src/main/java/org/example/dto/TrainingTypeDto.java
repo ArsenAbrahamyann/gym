@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingTypeDto {
-    private Long id;
     private String trainingTypeName;
 }

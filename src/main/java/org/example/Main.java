@@ -1,46 +1,68 @@
 package org.example;
 
+import java.sql.Date;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-import org.example.console.ConsoleApp;
+import org.example.config.AppConfig;
+import org.example.dto.TraineeDto;
+import org.example.dto.TrainerDto;
+import org.example.dto.TrainingTypeDto;
+import org.example.dto.UserDto;
+import org.example.entity.TraineeEntity;
+import org.example.service.TraineeService;
+import org.example.service.TrainerService;
+import org.example.service.TrainingService;
+import org.example.service.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-/**
- * The main entry point of the application.
- * <p>
- * This class initializes the Spring application context using {@link AnnotationConfigApplicationContext},
- * retrieves and sets up the necessary console components from the context, and then starts the console application.
- * </p>
- */
+
 @Slf4j
 public class Main {
 
-    /**
-     * The main method which serves as the entry point for the application.
-     * <p>
-     * It performs the following steps:
-     * <ol>
-     *     <li>Initializes the Spring application context using {@link AnnotationConfigApplicationContext} with the
-     *     configuration provided by {@link AppConfig}.</li>
-     *     <li>Retrieves instances of {@link ConsoleApp} from the application context.</li>
-     *     <li>Prints a message indicating that the beans are initialized and ready to use.</li>
-     *     <li>Creates an instance of {@link ConsoleApp} using the retrieved console components and starts it by calling
-     *     the {@link ConsoleApp#run()} method.</li>
-     *     <li>Closes the application context to release resources.</li>
-     * </ol>
-     * </p>
-     *
-     * @param args command-line arguments passed to the application. This implementation does not use them.
-     */
+
     public static void main(String[] args) {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 
-        ConsoleApp consoleApp = context.getBean(ConsoleApp.class);
+        UserService userService = context.getBean(UserService.class);
+        TraineeService traineeService = context.getBean(TraineeService.class);
+        TrainingService trainingService = context.getBean(TrainingService.class);
+        TrainerService trainerService = context.getBean(TrainerService.class);
 
-        log.info("Beans initialized and ready to use");
+        //creat testUser
+        UserDto userDto = new UserDto();
+        userDto.setFirstName("Arsen");
+        userDto.setLastName("Abrahamyan");
+        userDto.setIsActive(true);
 
-        consoleApp.run();
+        //creat testTrainee
 
+        TraineeDto traineeDto = new TraineeDto();
+        traineeDto.setUser(userDto);
+        traineeDto.setAddress("lvovyan");
+        traineeDto.setDateOfBirth(Date.valueOf("1998-07-06"));
+
+        //creat testTrainer
+
+        TrainerDto trainerDto = new TrainerDto();
+        trainerDto.setUser(userDto);
+        trainerDto.setTrainees((Set<TraineeEntity>) traineeDto);
+
+
+        //creat testTrainingTypeName
+        TrainingTypeDto trainingTypeDto = new TrainingTypeDto();
+        trainingTypeDto.setTrainingTypeName("Java");
+
+        trainerDto.setSpecialization(trainingTypeDto);
+        trainerService.createTrainerProfile(trainerDto);
+        traineeService.createTraineeProfile(traineeDto);
+        // Use the context to get beans and run your application logic
+        // For example, to get a UserService bean:
+        // UserService userService = context.getBean(UserService.class);
+
+        log.info("Spring application started.");
+
+        // Close the context when done
         ((AnnotationConfigApplicationContext) context).close();
     }
 }

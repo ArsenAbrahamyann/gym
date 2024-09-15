@@ -56,4 +56,11 @@ public class TrainerRepositoryImpl implements TrainerRepository {
                 .createQuery("FROM TrainerEntity t WHERE t.id IN :ids", TrainerEntity.class)
                 .getResultList());
     }
+
+    @Override
+    public void update(TrainerEntity trainer) {
+        sessionFactory.getCurrentSession()
+                .detach(trainer);
+    }
+
 }
