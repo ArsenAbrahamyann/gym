@@ -2,17 +2,18 @@ package org.example.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.UserEntity;
 import org.example.exeption.ValidationException;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ValidationUtils {
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private  final String DATE_FORMAT = "yyyy-MM-dd";
 
     public void validateTrainee(TraineeEntity trainee) {
         if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()) {
@@ -68,7 +69,7 @@ public class ValidationUtils {
         validateTrainee(trainee);
     }
 
-    public void validateUpdateTrainer(TrainerEntity trainer) {
+    public  void validateUpdateTrainer(TrainerEntity trainer) {
         if (trainer.getId() == null) {
             throw new ValidationException("Trainer ID is required for updates.");
         }
@@ -123,16 +124,16 @@ public class ValidationUtils {
     }
 
 
-    public void validateTraineeTrainingsCriteria(String traineeUsername, String fromDate, String toDate, String trainerName, String trainingType) {
+    public void validateTraineeTrainingsCriteria(String traineeUsername, Date fromDate, Date toDate, String trainerName, String trainingType) {
         if (traineeUsername == null || traineeUsername.isEmpty()) {
             throw new ValidationException("Trainee username is required for fetching training list.");
         }
 
-        if (fromDate != null && !fromDate.isEmpty()) {
+        if (fromDate != null && fromDate != null) {
             validateDateFormat(fromDate, "From date");
         }
 
-        if (toDate != null && !toDate.isEmpty()) {
+        if (toDate != null && toDate != null) {
             validateDateFormat(toDate, "To date");
         }
 
@@ -149,16 +150,16 @@ public class ValidationUtils {
         }
     }
 
-    public void validateTrainerTrainingsCriteria(String trainerUsername, String fromDate, String toDate, String traineeName) {
+    public void validateTrainerTrainingsCriteria(String trainerUsername, Date fromDate, Date toDate, String traineeName) {
         if (trainerUsername == null || trainerUsername.isEmpty()) {
             throw new ValidationException("Trainer username is required for fetching training list.");
         }
 
-        if (fromDate != null && !fromDate.isEmpty()) {
+        if (fromDate != null && fromDate != null) {
             validateDateFormat(fromDate, "From date");
         }
 
-        if (toDate != null && !toDate.isEmpty()) {
+        if (toDate != null && toDate != null) {
             validateDateFormat(toDate, "To date");
         }
 
@@ -171,20 +172,10 @@ public class ValidationUtils {
         }
     }
 
-    private void validateDateFormat(String date, String fieldName) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-        sdf.setLenient(false);
-        try {
-            sdf.parse(date);
-        } catch (ParseException e) {
-            throw new ValidationException(fieldName + " must be in the format " + DATE_FORMAT);
-        }
-    }
-
-    private void validateDateRange(String fromDate, String toDate) {
+    void validateDateRange(Date fromDate, Date toDate) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
         try {
-            if (sdf.parse(fromDate).after(sdf.parse(toDate))) {
+            if (sdf.parse(String.valueOf(fromDate)).after(sdf.parse(String.valueOf(toDate)))) {
                 throw new ValidationException("'From date' must be before 'To date'.");
             }
         } catch (ParseException e) {
@@ -192,13 +183,23 @@ public class ValidationUtils {
         }
     }
 
-    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, TrainerEntity trainer) {
+    private void validateDateFormat(Date date, String fieldName) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        sdf.setLenient(false);
+        try {
+            sdf.parse(String.valueOf(date));
+        } catch (ParseException e) {
+            throw new ValidationException(fieldName + " must be in the format " + DATE_FORMAT);
+        }
+    }
+
+    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, List<TrainerEntity> trainers) {
         if (trainee == null || trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required.");
         }
 
-        if (trainer == null || trainer.getId() == null) {
-            throw new ValidationException("Trainer ID is required.");
+        if (trainers == null ) {
+            throw new ValidationException("Trainers ID is required.");
         }
     }
 }

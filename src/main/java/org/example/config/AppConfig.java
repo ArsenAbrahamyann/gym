@@ -1,12 +1,11 @@
 package org.example.config;
 
-import java.util.Objects;
 import java.util.Properties;
 import javax.sql.DataSource;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +15,14 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+@Data
 @Configuration
 @ComponentScan(basePackages = "org.example")
 @PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 @RequiredArgsConstructor
-public class HibernateConfig {
+@Slf4j
+public class AppConfig {
 
     private final Environment env;
 
@@ -31,13 +32,21 @@ public class HibernateConfig {
         sessionFactory.setDataSource(dataSource());
         sessionFactory.setPackagesToScan("org.example.entity");
         sessionFactory.setHibernateProperties(hibernateProperties());
+
+        // Debug log to check properties
+        log.debug("Hibernate properties: {}", hibernateProperties());
+
         return sessionFactory;
     }
 
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
+        log.debug("Driver class name: {}", env.getProperty("spring.datasource.driver-class-name"));
+        log.debug("DataSource URL: {}", env.getProperty("spring.datasource.url"));
+        log.debug("DataSource username: {}", env.getProperty("spring.datasource.username"));
+
+        dataSource.setDriverClassName(env.getProperty("spring.datasource.driver-class-name"));
         dataSource.setUrl(env.getProperty("spring.datasource.url"));
         dataSource.setUsername(env.getProperty("spring.datasource.username"));
         dataSource.setPassword(env.getProperty("spring.datasource.password"));
@@ -51,11 +60,21 @@ public class HibernateConfig {
         return txManager;
     }
 
-    private Properties hibernateProperties() {
+    Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.put("hibernate.dialect", env.getProperty("spring.jpa.properties.hibernate.dialect"));
-        properties.put("hibernate.show_sql", env.getProperty("spring.jpa.show-sql"));
-        properties.put("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto"));
+        String dialect = env.getProperty("spring.jpa.properties.hibernate.dialect");
+        String showSql = env.getProperty("spring.jpa.show-sql");
+        String formatSql = env.getProperty("spring.jpa.properties.hibernate.format_sql");
+
+        if (dialect != null) {
+            properties.put("hibernate.dialect", dialect);
+        }
+        if (showSql != null) {
+            properties.put("hibernate.show_sql", showSql);
+        }
+        if (formatSql != null) {
+            properties.put("hibernate.format_sql", formatSql);
+        }
         return properties;
     }
 }

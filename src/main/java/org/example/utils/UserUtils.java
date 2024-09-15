@@ -2,6 +2,7 @@ package org.example.utils;
 
 import java.security.SecureRandom;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * Utility class for user-related operations.
@@ -10,10 +11,11 @@ import java.util.List;
  * are unique among existing ones and generates secure random passwords.
  * </p>
  */
+@Component
 public class UserUtils {
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final int PASSWORD_LENGTH = 10;
-    private static final SecureRandom RANDOM = new SecureRandom();
+    private  final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private  final int PASSWORD_LENGTH = 10;
+    private  final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * Generates a unique username based on the provided first name and last name.
@@ -27,7 +29,7 @@ public class UserUtils {
      * @param existingUsernames a list of usernames that already exist to check against
      * @return a unique username
      */
-    public static String generateUsername(String firstName, String lastName, List<String> existingUsernames) {
+    public  String generateUsername(String firstName, String lastName, List<String> existingUsernames) {
         String baseUsername = firstName
                 + "."
                 + lastName;
@@ -52,7 +54,7 @@ public class UserUtils {
      *
      * @return a randomly generated password
      */
-    public static String generatePassword() {
+    public  String generatePassword() {
         StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
         for (int i = 0; i < PASSWORD_LENGTH; i++) {
             password.append(CHARACTERS.charAt(RANDOM.nextInt(CHARACTERS.length())));

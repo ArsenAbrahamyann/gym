@@ -1,11 +1,11 @@
 package org.example.service;
 
+import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.UserEntity;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 @Slf4j

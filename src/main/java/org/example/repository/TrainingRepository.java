@@ -10,8 +10,8 @@ public interface TrainingRepository {
 
     void save(TrainingEntity training);
 
-    List<TrainingEntity> findTrainingsForTrainee(Long traineeId, Date fromDate, Date toDate, String trainerName,
+    Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, Date fromDate, Date toDate, String trainerName,
                                                  String trainingType);
 
-    List<TrainingEntity> findTrainingsForTrainer(Long trainerId, Date fromDate, Date toDate, String traineeName);
+    Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, Date fromDate, Date toDate, String traineeName);
 }

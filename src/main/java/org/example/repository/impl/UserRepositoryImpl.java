@@ -27,7 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
         List<String> usernames = sessionFactory.getCurrentSession()
                 .createQuery("select u.username from UserEntity u", String.class)
                 .getResultList();
-        return Optional.ofNullable(usernames);
+        return Optional.of(usernames);
     }
 
     @Override
