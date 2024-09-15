@@ -1,10 +1,11 @@
 package org.example.utils;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
@@ -57,7 +58,8 @@ public class ValidationUtilsTest {
         when(traineeEntity.getUser()).thenReturn(userEntity);
         when(userEntity.getUsername()).thenReturn(null);
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validateTrainee(traineeEntity));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTrainee(traineeEntity));
         assertEquals("Trainee username is required.", thrown.getMessage());
     }
 
@@ -79,7 +81,8 @@ public class ValidationUtilsTest {
         when(userEntity.getPassword()).thenReturn("password");
         when(trainerEntity.getSpecialization()).thenReturn(null);
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validateTrainer(trainerEntity));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTrainer(trainerEntity));
         assertEquals("Trainer specialization is required.", thrown.getMessage());
     }
 
@@ -94,7 +97,8 @@ public class ValidationUtilsTest {
     void testValidatePasswordMatch_Invalid() {
         when(userEntity.getPassword()).thenReturn("password");
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validatePasswordMatch(userEntity, "wrongPassword"));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validatePasswordMatch(userEntity, "wrongPassword"));
         assertEquals("Invalid password. Please try again.", thrown.getMessage());
     }
 
@@ -114,13 +118,15 @@ public class ValidationUtilsTest {
     void testValidateUpdateTrainee_NoId() {
         when(traineeEntity.getId()).thenReturn(null);
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validateUpdateTrainee(traineeEntity));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateUpdateTrainee(traineeEntity));
         assertEquals("Trainee ID is required for updates.", thrown.getMessage());
     }
 
     @Test
     void testValidateTraineeTrainingsCriteria_MissingUsername() {
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validateTraineeTrainingsCriteria(null, null, null, null, null));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTraineeTrainingsCriteria(null, null, null, null, null));
         assertEquals("Trainee username is required for fetching training list.", thrown.getMessage());
     }
 
@@ -136,7 +142,8 @@ public class ValidationUtilsTest {
     void testValidateUpdateTraineeTrainerList_NoTrainee() {
         when(traineeEntity.getId()).thenReturn(null);
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> validationUtils.validateUpdateTraineeTrainerList(traineeEntity, List.of()));
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateUpdateTraineeTrainerList(traineeEntity, List.of()));
         assertEquals("Trainee ID is required.", thrown.getMessage());
     }
 }

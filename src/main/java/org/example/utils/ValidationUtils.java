@@ -11,16 +11,28 @@ import org.example.entity.UserEntity;
 import org.example.exeption.ValidationException;
 import org.springframework.stereotype.Component;
 
+/**
+ * Utility class for performing various validation operations related to entities.
+ * Includes methods for validating trainees, trainers, training entities, and user passwords,
+ * as well as validating date ranges and criteria for fetching trainings.
+ */
 @Component
 public class ValidationUtils {
-    private  final String DATE_FORMAT = "yyyy-MM-dd";
+    private final String dataFormat = "yyyy-MM-dd";
 
+    /**
+     * Validates the fields of a TraineeEntity.
+     *
+     * @param trainee The TraineeEntity to validate.
+     * @throws ValidationException if any required fields are missing or invalid.
+     */
     public void validateTrainee(TraineeEntity trainee) {
         if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()) {
             throw new ValidationException("Trainee username is required.");
         }
 
-        if (trainee.getUser() == null || trainee.getUser().getPassword() == null || trainee.getUser().getPassword().isEmpty()) {
+        if (trainee.getUser() == null || trainee.getUser().getPassword() == null
+                || trainee.getUser().getPassword().isEmpty()) {
             throw new ValidationException("Trainee password is required.");
         }
 
@@ -33,12 +45,19 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates the fields of a TrainerEntity.
+     *
+     * @param trainer The TrainerEntity to validate.
+     * @throws ValidationException if any required fields are missing or invalid.
+     */
     public void validateTrainer(TrainerEntity trainer) {
         if (trainer.getUser().getUsername() == null || trainer.getUser().getUsername().isEmpty()) {
             throw new ValidationException("Trainer username is required.");
         }
 
-        if (trainer.getUser() == null || trainer.getUser().getPassword() == null || trainer.getUser().getPassword().isEmpty()) {
+        if (trainer.getUser() == null || trainer.getUser().getPassword() == null
+                || trainer.getUser().getPassword().isEmpty()) {
             throw new ValidationException("Trainer password is required.");
         }
 
@@ -51,16 +70,29 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates that the password provided matches the password stored for the user.
+     *
+     * @param user The UserEntity containing the stored password.
+     * @param enteredPassword The password entered for authentication.
+     * @throws ValidationException if the user does not exist or the passwords do not match.
+     */
     public void validatePasswordMatch(UserEntity user, String enteredPassword) {
         if (user == null) {
             throw new ValidationException("User does not exist.");
         }
 
-        if (!user.getPassword().equals(enteredPassword)) {
+        if (! user.getPassword().equals(enteredPassword)) {
             throw new ValidationException("Invalid password. Please try again.");
         }
     }
 
+    /**
+     * Validates the fields of a TraineeEntity for update operations.
+     *
+     * @param trainee The TraineeEntity to validate.
+     * @throws ValidationException if the TraineeEntity ID is missing or the entity is invalid.
+     */
     public void validateUpdateTrainee(TraineeEntity trainee) {
         if (trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required for updates.");
@@ -69,7 +101,13 @@ public class ValidationUtils {
         validateTrainee(trainee);
     }
 
-    public  void validateUpdateTrainer(TrainerEntity trainer) {
+    /**
+     * Validates the fields of a TrainerEntity for update operations.
+     *
+     * @param trainer The TrainerEntity to validate.
+     * @throws ValidationException if the TrainerEntity ID is missing or the entity is invalid.
+     */
+    public void validateUpdateTrainer(TrainerEntity trainer) {
         if (trainer.getId() == null) {
             throw new ValidationException("Trainer ID is required for updates.");
         }
@@ -77,6 +115,10 @@ public class ValidationUtils {
         validateTrainer(trainer);
     }
 
+    /**
+     * Validates the fields of a TraineeEntity for activation or deactivation.
+     * @ throws ValidationException if the TraineeEntity ID or active state is missing.
+     */
     public void validateActivateDeactivateTrainee(TraineeEntity trainee) {
         if (trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required for activation/deactivation.");
@@ -87,6 +129,10 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates the fields of a TrainerEntity for activation or deactivation.
+     * @ throws ValidationException if the TrainerEntity ID or active state is missing.
+     */
     public void validateActivateDeactivateTrainer(TrainerEntity trainer) {
         if (trainer.getId() == null) {
             throw new ValidationException("Trainer ID is required for activation/deactivation.");
@@ -97,6 +143,10 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates the fields of a TrainerEntity for activation or deactivation.
+     * @ throws ValidationException if the TrainerEntity ID or active state is missing.
+     */
     public void validateTraining(TrainingEntity training) {
         if (training.getTrainee() == null || training.getTrainee().getId() == null) {
             throw new ValidationException("Trainee must be selected for the training.");
@@ -123,8 +173,18 @@ public class ValidationUtils {
         }
     }
 
-
-    public void validateTraineeTrainingsCriteria(String traineeUsername, Date fromDate, Date toDate, String trainerName, String trainingType) {
+    /**
+     * Validates the criteria for fetching trainings for a trainee.
+     *
+     * @param traineeUsername The username of the trainee.
+     * @param fromDate The start date for fetching trainings.
+     * @param toDate The end date for fetching trainings.
+     * @param trainerName Optional trainer name for filtering.
+     * @param trainingType Optional training type for filtering.
+     * @throws ValidationException if any criteria are invalid.
+     */
+    public void validateTraineeTrainingsCriteria(String traineeUsername, Date fromDate, Date toDate, String trainerName,
+                                                 String trainingType) {
         if (traineeUsername == null || traineeUsername.isEmpty()) {
             throw new ValidationException("Trainee username is required for fetching training list.");
         }
@@ -150,7 +210,17 @@ public class ValidationUtils {
         }
     }
 
-    public void validateTrainerTrainingsCriteria(String trainerUsername, Date fromDate, Date toDate, String traineeName) {
+    /**
+     * Validates the criteria for fetching trainings for a trainer.
+     *
+     * @param trainerUsername The username of the trainer.
+     * @param fromDate The start date for fetching trainings.
+     * @param toDate The end date for fetching trainings.
+     * @param traineeName Optional trainee name for filtering.
+     * @throws ValidationException if any criteria are invalid.
+     */
+    public void validateTrainerTrainingsCriteria(String trainerUsername, Date fromDate, Date toDate,
+                                                 String traineeName) {
         if (trainerUsername == null || trainerUsername.isEmpty()) {
             throw new ValidationException("Trainer username is required for fetching training list.");
         }
@@ -172,8 +242,15 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates that the 'from' date is before the 'to' date.
+     *
+     * @param fromDate The start date.
+     * @param toDate The end date.
+     * @throws ValidationException if the 'from' date is after the 'to' date or the dates are invalid.
+     */
     void validateDateRange(Date fromDate, Date toDate) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         try {
             if (sdf.parse(String.valueOf(fromDate)).after(sdf.parse(String.valueOf(toDate)))) {
                 throw new ValidationException("'From date' must be before 'To date'.");
@@ -183,22 +260,37 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates that the date is in the correct format.
+     *
+     * @param date The date to validate.
+     * @param fieldName The name of the field being validated.
+     * @throws ValidationException if the date is not in the correct format.
+     */
     private void validateDateFormat(Date date, String fieldName) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         sdf.setLenient(false);
         try {
             sdf.parse(String.valueOf(date));
         } catch (ParseException e) {
-            throw new ValidationException(fieldName + " must be in the format " + DATE_FORMAT);
+            throw new ValidationException(fieldName
+                    + " must be in the format "
+                    + dataFormat);
         }
     }
 
+    /**
+     * Validates that a trainee and a list of trainers are provided for updating the trainee's trainer list.
+     *
+     * @param trainee The TraineeEntity to validate.
+     * @param trainers The list of TrainerEntity to validate.
+     * @throws ValidationException if the trainee ID or trainers list is missing.
+     */
     public void validateUpdateTraineeTrainerList(TraineeEntity trainee, List<TrainerEntity> trainers) {
         if (trainee == null || trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required.");
         }
-
-        if (trainers == null ) {
+        if (trainers == null) {
             throw new ValidationException("Trainers ID is required.");
         }
     }

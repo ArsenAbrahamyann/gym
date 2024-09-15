@@ -1,5 +1,6 @@
 package org.example.config;
 
+import java.util.Objects;
 import java.util.Properties;
 import javax.sql.DataSource;
 import lombok.Data;
@@ -15,6 +16,11 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+/**
+ * Configuration class for setting up Hibernate and Spring integration.
+ * It handles database configuration, session factory creation, and transaction management.
+ */
 @Data
 @Configuration
 @ComponentScan(basePackages = "org.example")
@@ -25,6 +31,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class AppConfig {
 
     private final Environment env;
+
+    /**
+     * Configures the Hibernate session factory bean.
+     * The session factory is responsible for managing Hibernate sessions,
+     * and it integrates Hibernate with Spring's transaction management.
+     *
+     * @return a configured {@link LocalSessionFactoryBean} object
+     */
 
     @Bean
     public LocalSessionFactoryBean sessionFactory() {
@@ -39,6 +53,12 @@ public class AppConfig {
         return sessionFactory;
     }
 
+    /**
+     * Configures the data source to be used by the application.
+     * The data source includes the database connection details such as URL, username, and password.
+     *
+     * @return a configured {@link DataSource} object
+     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -46,13 +66,20 @@ public class AppConfig {
         log.debug("DataSource URL: {}", env.getProperty("spring.datasource.url"));
         log.debug("DataSource username: {}", env.getProperty("spring.datasource.username"));
 
-        dataSource.setDriverClassName(env.getProperty("spring.datasource.driver-class-name"));
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
         dataSource.setUrl(env.getProperty("spring.datasource.url"));
         dataSource.setUsername(env.getProperty("spring.datasource.username"));
         dataSource.setPassword(env.getProperty("spring.datasource.password"));
         return dataSource;
     }
 
+    /**
+     * Configures the Hibernate transaction manager to handle transactions for Hibernate sessions.
+     * The transaction manager integrates Hibernate transactions with Spring's transaction management.
+     *
+     * @param sessionFactory the Hibernate {@link SessionFactory} used by the transaction manager
+     * @return a configured {@link HibernateTransactionManager} object
+     */
     @Bean
     public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
         HibernateTransactionManager txManager = new HibernateTransactionManager();
@@ -60,11 +87,19 @@ public class AppConfig {
         return txManager;
     }
 
+    /**
+     * Creates and configures Hibernate properties, such as the SQL dialect,
+     * SQL formatting, and other database-related settings.
+     * These properties are loaded from the application.properties file.
+     *
+     * @return a {@link Properties} object containing Hibernate configuration settings
+     */
     Properties hibernateProperties() {
         Properties properties = new Properties();
         String dialect = env.getProperty("spring.jpa.properties.hibernate.dialect");
         String showSql = env.getProperty("spring.jpa.show-sql");
         String formatSql = env.getProperty("spring.jpa.properties.hibernate.format_sql");
+        String ddl = env.getProperty("spring.jpa.hibernate.ddl-auto");
 
         if (dialect != null) {
             properties.put("hibernate.dialect", dialect);
@@ -74,6 +109,9 @@ public class AppConfig {
         }
         if (formatSql != null) {
             properties.put("hibernate.format_sql", formatSql);
+        }
+        if (ddl != null) {
+            properties.put("spring.jpa.hibernate.ddl-auto", ddl);
         }
         return properties;
     }

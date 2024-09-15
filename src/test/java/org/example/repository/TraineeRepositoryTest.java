@@ -3,13 +3,16 @@ package org.example.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
@@ -29,6 +32,10 @@ public class TraineeRepositoryTest {
     @Mock
     private UserEntity user;
 
+    /**
+     * Sets up the test environment by initializing entities with sample data.
+     * This method is executed before each test in the test class.
+     */
     @BeforeEach
     public void setUp() {
         user = new UserEntity();

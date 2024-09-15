@@ -7,11 +7,22 @@ import org.example.repository.TraineeRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Implementation of the {@link TraineeRepository} interface, providing
+ * CRUD operations and custom query methods for {@link TraineeEntity} using Hibernate.
+ */
 @Repository
 @RequiredArgsConstructor
 public class TraineeRepositoryImpl implements TraineeRepository {
+
     private final SessionFactory sessionFactory;
 
+    /**
+     * Finds a {@link TraineeEntity} by the username of the user associated with the trainee.
+     *
+     * @param username the username of the trainee
+     * @return an {@link Optional} containing the found {@link TraineeEntity}, or empty if not found
+     */
     @Override
     public Optional<TraineeEntity> findByTraineeFromUsername(String username) {
         return Optional.ofNullable(sessionFactory.getCurrentSession()
@@ -20,6 +31,12 @@ public class TraineeRepositoryImpl implements TraineeRepository {
                 .uniqueResult());
     }
 
+    /**
+     * Finds a {@link TraineeEntity} by its ID.
+     *
+     * @param traineeId the ID of the trainee
+     * @return an {@link Optional} containing the found {@link TraineeEntity}, or empty if not found
+     */
     @Override
     public Optional<TraineeEntity> findById(Long traineeId) {
         return Optional.ofNullable(sessionFactory.getCurrentSession()
@@ -28,11 +45,22 @@ public class TraineeRepositoryImpl implements TraineeRepository {
                 .uniqueResult());
     }
 
+    /**
+     * Saves a new {@link TraineeEntity} to the database.
+     *
+     * @param trainee the {@link TraineeEntity} to be saved
+     */
     @Override
     public void save(TraineeEntity trainee) {
         sessionFactory.getCurrentSession().persist(trainee);
     }
 
+    /**
+     * Updates the given {@link TraineeEntity}.
+     * This method uses `detach` to remove the entity from the session to prevent any automatic updates.
+     *
+     * @param trainee the {@link TraineeEntity} to be updated
+     */
     @Override
     public void update(TraineeEntity trainee) {
         sessionFactory.getCurrentSession()

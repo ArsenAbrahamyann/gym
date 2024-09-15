@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UserUtils {
-    private  final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private  final int PASSWORD_LENGTH = 10;
-    private  final SecureRandom RANDOM = new SecureRandom();
+    private final String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private final int passwordLength = 10;
+    private final SecureRandom random = new SecureRandom();
 
     /**
      * Generates a unique username based on the provided first name and last name.
@@ -49,15 +49,15 @@ public class UserUtils {
      * Generates a random password of a fixed length.
      * <p>
      * This method creates a password by selecting random characters from a predefined set of characters.
-     * The password length is specified by the {@link #PASSWORD_LENGTH} constant.
+     * The password length is specified by the {@link #passwordLength} constant.
      * </p>
      *
      * @return a randomly generated password
      */
     public  String generatePassword() {
-        StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
-        for (int i = 0; i < PASSWORD_LENGTH; i++) {
-            password.append(CHARACTERS.charAt(RANDOM.nextInt(CHARACTERS.length())));
+        StringBuilder password = new StringBuilder(passwordLength);
+        for (int i = 0; i < passwordLength; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
         }
         return password.toString();
     }

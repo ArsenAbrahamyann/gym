@@ -5,7 +5,6 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.entity.TrainerEntity;
 
 @Data
 @NoArgsConstructor
@@ -14,5 +13,5 @@ public class TraineeDto {
     private Date dateOfBirth;
     private String address;
     private UserDto user;
-    private Set<TrainerEntity> trainers;
+    private Set<TrainerDto> trainers;
 }
