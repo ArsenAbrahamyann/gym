@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.example.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,11 @@ public class UserRepositoryTest {
     @Mock
     private UserEntity user;
 
+    /**
+     * Sets up the test environment by initializing a {@link UserEntity} instance with predefined sample data.
+     * This method ensures that a {@code UserEntity} object with specific attributes is available for use in test methods,
+     * providing a consistent starting state for each test.
+     */
     @BeforeEach
     public void setUp() {
         user = new UserEntity();

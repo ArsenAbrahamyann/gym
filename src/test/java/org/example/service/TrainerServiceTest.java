@@ -3,24 +3,24 @@ package org.example.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-
 import javax.persistence.EntityNotFoundException;
-
 import org.example.dto.TrainerDto;
 import org.example.dto.TrainingTypeDto;
 import org.example.dto.UserDto;
-import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
-import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerServiceTest {

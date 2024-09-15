@@ -1,23 +1,22 @@
 package org.example.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.HashSet;
-
 import org.example.dto.TraineeDto;
-import org.example.dto.TrainerDto;
 import org.example.dto.UserDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
-import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.UserRepository;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeServiceTest {
@@ -57,6 +55,10 @@ public class TraineeServiceTest {
     private TraineeDto traineeDto;
     private TrainerEntity trainerEntity;
 
+    /**
+     * Initializes test data and entities before each test method is executed.
+     * This method is executed before each test to ensure a consistent test environment.
+     */
     @BeforeEach
     public void setUp() {
         userEntity = new UserEntity();
@@ -84,15 +86,13 @@ public class TraineeServiceTest {
         when(userUtils.generatePassword()).thenReturn("newPass");
 
         TraineeDto result = traineeService.createTraineeProfile(traineeDto);
-
         verify(userRepository).findAllUsername();
         verify(userUtils).generateUsername(anyString(), anyString(), any());
         verify(userUtils).generatePassword();
         verify(userRepository).save(any(UserEntity.class));
+        assertEquals(result.getUser().getFirstName(), "TestFirstName");
         verify(traineeRepository).save(any(TraineeEntity.class));
         verify(validationUtils).validateTrainee(any(TraineeEntity.class));
-
-        assertEquals(result.getUser().getFirstName(), "TestFirstName");
         assertEquals(result.getUser().getLastName(), "TestLastName");
     }
 

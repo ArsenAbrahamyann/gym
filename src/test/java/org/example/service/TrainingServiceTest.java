@@ -1,14 +1,18 @@
 package org.example.service;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import javax.persistence.EntityNotFoundException;
 import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
@@ -109,15 +113,18 @@ public class TrainingServiceTest {
     void testGetTrainingsForTraineeSuccess() {
         // Given
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
-        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString()))
+        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class),
+                any(Date.class), anyString(), anyString()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
         // When
-        List<TrainingEntity> result = trainingService.getTrainingsForTrainee("traineeName", new Date(), new Date(), "trainerName", "trainingType");
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainee("traineeName", new Date(),
+                new Date(), "trainerName", "trainingType");
 
         // Then
         assertEquals(1, result.size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString());
+        verify(trainingRepository, times(1)).findTrainingsForTrainee(anyLong(),
+                any(Date.class), any(Date.class), anyString(), anyString());
     }
 
     @Test
@@ -127,7 +134,8 @@ public class TrainingServiceTest {
 
         // When & Then
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainee("traineeName", new Date(), new Date(), "trainerName", "trainingType");
+            trainingService.getTrainingsForTrainee("traineeName", new Date(),
+                    new Date(), "trainerName", "trainingType");
         });
         assertEquals("Trainee not found", exception.getMessage());
     }
@@ -136,12 +144,14 @@ public class TrainingServiceTest {
     void testGetTrainingsForTraineeNoTrainingsFound() {
         // Given
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
-        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString()))
+        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class),
+                any(Date.class), anyString(), anyString()))
                 .thenReturn(Optional.empty());
 
         // When & Then
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainee("traineeName", new Date(), new Date(), "trainerName", "trainingType");
+            trainingService.getTrainingsForTrainee("traineeName", new Date(),
+                    new Date(), "trainerName", "trainingType");
         });
         assertEquals("Trainings not found", exception.getMessage());
     }
@@ -154,11 +164,13 @@ public class TrainingServiceTest {
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
         // When
-        List<TrainingEntity> result = trainingService.getTrainingsForTrainer("trainerUsername", new Date(), new Date(), "traineeName");
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainer("trainerUsername",
+                new Date(), new Date(), "traineeName");
 
         // Then
         assertEquals(1, result.size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainer(anyLong(), any(Date.class), any(Date.class), anyString());
+        verify(trainingRepository, times(1)).findTrainingsForTrainer(anyLong(),
+                any(Date.class), any(Date.class), anyString());
     }
 
     @Test
@@ -168,7 +180,8 @@ public class TrainingServiceTest {
 
         // When & Then
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainer("trainerUsername", new Date(), new Date(), "traineeName");
+            trainingService.getTrainingsForTrainer("trainerUsername",
+                    new Date(), new Date(), "traineeName");
         });
         assertEquals("Trainer not found", exception.getMessage());
     }
@@ -177,12 +190,14 @@ public class TrainingServiceTest {
     void testGetTrainingsForTrainerNoTrainingsFound() {
         // Given
         when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(trainerEntity));
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(Date.class), any(Date.class), anyString()))
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(Date.class),
+                any(Date.class), anyString()))
                 .thenReturn(Optional.empty());
 
         // When & Then
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainer("trainerUsername", new Date(), new Date(), "traineeName");
+            trainingService.getTrainingsForTrainer("trainerUsername",
+                    new Date(), new Date(), "traineeName");
         });
         assertEquals("Trainings not found", exception.getMessage());
     }

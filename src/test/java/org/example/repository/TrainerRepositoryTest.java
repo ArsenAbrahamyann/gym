@@ -3,29 +3,26 @@ package org.example.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import org.example.dto.TrainerDto;
-import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
-import org.example.service.TrainerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerRepositoryTest {
@@ -41,6 +38,11 @@ public class TrainerRepositoryTest {
     @Mock
     private TrainingTypeEntity specialization;
 
+
+    /**
+     * Initializes test data and entities before each test method is executed.
+     * This method sets up the environment with a sample user, a specialization, and a trainer entity.
+     */
     @BeforeEach
     public void setUp() {
         user = new UserEntity();

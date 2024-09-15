@@ -5,17 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import org.example.entity.TrainingEntity;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
+import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingRepositoryTest {
-
     @Mock
     private TrainingRepository trainingRepository;
 
@@ -41,6 +41,11 @@ public class TrainingRepositoryTest {
     @Mock
     private TrainingTypeEntity trainingType;
 
+
+    /**
+     * Sets up the test environment by initializing entities related to training, trainee, trainer, and training type.
+     * This method prepares sample data for use in test methods to ensure a consistent starting state.
+     */
     @BeforeEach
     public void setUp() {
         training = new TrainingEntity();
@@ -94,7 +99,8 @@ public class TrainingRepositoryTest {
         // Arrange
         List<TrainingEntity> trainings = new ArrayList<>();
         trainings.add(training);
-        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString()))
+        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class),
+                any(Date.class), anyString(), anyString()))
                 .thenReturn(Optional.of(trainings));
 
         // Act
@@ -104,7 +110,8 @@ public class TrainingRepositoryTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(trainings.size(), result.get().size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString());
+        verify(trainingRepository, times(1))
+                .findTrainingsForTrainee(anyLong(), any(Date.class), any(Date.class), anyString(), anyString());
     }
 
     @Test
@@ -122,6 +129,7 @@ public class TrainingRepositoryTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(trainings.size(), result.get().size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainer(anyLong(), any(Date.class), any(Date.class), anyString());
+        verify(trainingRepository, times(1))
+                .findTrainingsForTrainer(anyLong(), any(Date.class), any(Date.class), anyString());
     }
 }

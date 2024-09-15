@@ -1,21 +1,16 @@
 package org.example.utils;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 public class UserUtilsTest {
-
     private final UserUtils userUtils = new UserUtils();
 
     @Test
@@ -29,7 +24,8 @@ public class UserUtilsTest {
     public void testGenerateUsernameBaseCase() {
         List<String> existingUsernames = Arrays.asList("john.doe");
         String username = userUtils.generateUsername("john", "doe", existingUsernames);
-        assertEquals("john.doe1", username, "Username should be generated with a serial number if the base username exists.");
+        assertEquals("john.doe1", username, "Username should be generated "
+                + "with a serial number if the base username exists.");
     }
 
 

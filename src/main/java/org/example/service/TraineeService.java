@@ -18,28 +18,36 @@ import org.example.utils.ValidationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service class for managing Trainee profiles and related operations.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TraineeService {
+
     private final UserUtils userUtils;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
     private final ValidationUtils validationUtils;
 
-    // 1. Create Trainee Profile
+    /**
+     * Creates a new trainee profile.
+     *
+     * @param traineeDto The data transfer object containing trainee information.
+     * @return The created TraineeDto object.
+     */
     @Transactional
     public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
         log.info("Creating trainee profile ");
 
-                List<String> allUsername = userRepository.findAllUsername()
-                        .orElseThrow(() -> new ResourceNotFoundException("username not found"));
+        List<String> allUsername = userRepository.findAllUsername()
+                .orElseThrow(() -> new ResourceNotFoundException("username not found"));
         String generatedUsername = userUtils.generateUsername(traineeDto.getUser().getFirstName(),
                 traineeDto.getUser().getLastName(), allUsername);
         String generatedPassword = userUtils.generatePassword();
 
-        // Create User entity
         UserEntity user = new UserEntity();
         user.setUsername(generatedUsername);
         user.setPassword(generatedPassword);
@@ -48,21 +56,23 @@ public class TraineeService {
         user.setIsActive(traineeDto.getUser().getIsActive());
         userRepository.save(user);
 
-        // Create Trainee entity and associate with User
         TraineeEntity trainee = new TraineeEntity();
         trainee.setDateOfBirth(traineeDto.getDateOfBirth());
         trainee.setAddress(traineeDto.getAddress());
         trainee.setUser(user);
         traineeRepository.save(trainee);
-
         validationUtils.validateTrainee(trainee);
 
         log.info("Trainee profile created successfully for {}", generatedUsername);
-
         return traineeDto;
     }
 
-    // 7. Change Trainee Password
+    /**
+     * Changes the password of a trainee.
+     *
+     * @param username    The username of the trainee.
+     * @param newPassword The new password to set.
+     */
     public void changeTraineePassword(String username, String newPassword) {
         log.info("Changing password for trainee {}", username);
         UserEntity user = userRepository.findByUsername(username)
@@ -76,7 +86,11 @@ public class TraineeService {
         log.info("Password updated successfully for trainee {}", username);
     }
 
-    // 11. Activate/Deactivate Trainee
+    /**
+     * Toggles the active status of a trainee.
+     *
+     * @param username The username of the trainee.
+     */
     @Transactional
     public void toggleTraineeStatus(String username) {
         log.info("Toggling trainee status for {}", username);
@@ -92,6 +106,12 @@ public class TraineeService {
         log.info("Trainee status toggled successfully for {}", username);
     }
 
+    /**
+     * Retrieves unassigned trainers for a trainee.
+     *
+     * @param traineeUsername The username of the trainee.
+     * @return The list of unassigned trainers.
+     */
     public List<TrainerEntity> getUnassignedTrainers(String traineeUsername) {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
         TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
@@ -104,11 +124,17 @@ public class TraineeService {
 
         allTrainers.removeAll(assignedTrainers);
 
-
         log.info("Found {} unassigned trainers for trainee: {}", allTrainers.size(), traineeUsername);
         return allTrainers;
     }
 
+    /**
+     * Updates the list of trainers assigned to a specific trainee.
+     *
+     * @param traineeUsername The username of the trainee.
+     * @param trainerIds      The list of trainer IDs to be assigned to the trainee.
+     * @throws EntityNotFoundException If the trainee or any trainers are not found.
+     */
     @Transactional
     public void updateTraineeTrainers(String traineeUsername, List<Long> trainerIds) {
         log.info("Updating trainers for trainee: {}", traineeUsername);
@@ -118,7 +144,7 @@ public class TraineeService {
         List<TrainerEntity> newTrainers = trainerRepository.findAllById(trainerIds)
                 .orElseThrow(() -> new EntityNotFoundException("Trainers not found"));
 
-        validationUtils.validateUpdateTraineeTrainerList(trainee,newTrainers);
+        validationUtils.validateUpdateTraineeTrainerList(trainee, newTrainers);
 
         trainee.setTrainers(new HashSet<>(newTrainers));
 
@@ -128,7 +154,13 @@ public class TraineeService {
         log.info("Updated trainer list for trainee: {}", traineeUsername);
     }
 
-    // 10. Update Trainee Profile
+    /**
+     * Updates the profile information of a trainee.
+     *
+     * @param username   The username of the trainee.
+     * @param traineeDto The updated trainee information.
+     * @throws EntityNotFoundException If the trainee is not found.
+     */
     @Transactional
     public void updateTraineeProfile(String username, TraineeDto traineeDto) {
         log.info("Updating trainee profile for {}", username);
@@ -145,5 +177,4 @@ public class TraineeService {
 
         log.info("Trainee profile updated successfully for {}", username);
     }
-
 }

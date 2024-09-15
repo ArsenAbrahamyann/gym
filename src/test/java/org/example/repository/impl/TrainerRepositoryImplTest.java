@@ -1,13 +1,14 @@
 package org.example.repository.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
 import org.hibernate.Session;
@@ -149,7 +150,8 @@ public class TrainerRepositoryImplTest {
         // Arrange
         Long traineeId = 1L;
         Query<TrainerEntity> query = mock(Query.class);
-        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId", TrainerEntity.class)).thenReturn(query);
+        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id ="
+                + " :traineeId", TrainerEntity.class)).thenReturn(query);
         when(query.setParameter("traineeId", traineeId)).thenReturn(query);
         when(query.list()).thenReturn(Arrays.asList(trainerEntity));
 
@@ -167,7 +169,8 @@ public class TrainerRepositoryImplTest {
         List<Long> trainerIds = Arrays.asList(1L, 2L);
         Query<TrainerEntity> query = mock(Query.class);
         // Use lenient to suppress the warning for unused stubbing
-        lenient().when(session.createQuery("FROM TrainerEntity t WHERE t.id IN :ids", TrainerEntity.class)).thenReturn(query);
+        lenient().when(session.createQuery("FROM TrainerEntity t WHERE t.id IN :ids",
+                TrainerEntity.class)).thenReturn(query);
         lenient().when(query.setParameter("ids", trainerIds)).thenReturn(query);
         lenient().when(query.getResultList()).thenReturn(Arrays.asList(trainerEntity));
 

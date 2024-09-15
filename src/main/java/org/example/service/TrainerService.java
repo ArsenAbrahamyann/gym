@@ -19,27 +19,34 @@ import org.example.utils.ValidationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service class for managing Trainer profiles and related operations.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TrainerService {
+
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
     private final UserUtils userUtils;
     private final TrainingRepository trainingRepository;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Creates a new trainer profile.
+     *
+     * @param trainerDto The data transfer object containing trainer information.
+     * @return The created TrainerDto object.
+     */
     public TrainerDto createTrainerProfile(TrainerDto trainerDto) {
         log.info("Creating trainer profile ");
-
-
         List<String> allUsername = userRepository.findAllUsername()
                 .orElseThrow(() -> new ResourceNotFoundException("username not found"));
         String generatedUsername = userUtils.generateUsername(trainerDto.getUser().getFirstName(),
                 trainerDto.getUser().getLastName(), allUsername);
         String generatedPassword = userUtils.generatePassword();
 
-        // Create User entity
         UserEntity user = new UserEntity();
         user.setUsername(generatedUsername);
         user.setPassword(generatedPassword);
@@ -51,7 +58,6 @@ public class TrainerService {
         TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity();
         trainingTypeEntity.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
 
-        // Create Trainee entity and associate with User
         TrainerEntity trainer = new TrainerEntity();
         trainer.setSpecialization(trainingTypeEntity);
         trainer.setTrainees(trainerDto.getTrainees());
@@ -61,11 +67,16 @@ public class TrainerService {
 
         trainerRepository.save(trainer);
 
-        log.info("Trainee profile created successfully for {}", user.getUsername());
-
+        log.debug("Trainer profile created: {}", trainer);
         return trainerDto;
     }
 
+    /**
+     * Changes the password of the trainer.
+     *
+     * @param username    The username of the trainer.
+     * @param newPassword The new password to set.
+     */
     public void changeTrainerPassword(String username, String newPassword) {
         log.info("Changing password for trainer {}", username);
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
@@ -78,6 +89,11 @@ public class TrainerService {
         log.info("Password updated successfully for trainer {}", username);
     }
 
+    /**
+     * Toggles the active status of a trainer.
+     *
+     * @param username The username of the trainer.
+     */
     public void toggleTrainerStatus(String username) {
         log.info("Toggling trainer status for {}", username);
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
@@ -89,7 +105,13 @@ public class TrainerService {
         userRepository.update(user);
         log.info("Trainer status toggled successfully for {}", username);
     }
-    // 9. Update Trainer Profile
+
+    /**
+     * Updates the profile of the trainer.
+     *
+     * @param username   The username of the trainer.
+     * @param trainerDto The updated trainer information.
+     */
     @Transactional
     public void updateTrainerProfile(String username, TrainerDto trainerDto) {
         log.info("Updating trainer profile for {}", username);
@@ -106,15 +128,23 @@ public class TrainerService {
         log.info("Trainer profile updated successfully for {}", username);
     }
 
-    // 14. Get Trainer Trainings List by Trainer Username and Criteria
-    public List<TrainingEntity> getTrainerTrainings(String trainerUsername, Date fromDate, Date toDate, String traineeName) {
+    /**
+     * Retrieves the list of trainings for a trainer within a given date range.
+     *
+     * @param trainerUsername The username of the trainer.
+     * @param fromDate        The start date of the date range.
+     * @param toDate          The end date of the date range.
+     * @param traineeName     The name of the trainee (optional).
+     * @return The list of trainings for the trainer.
+     */
+    public List<TrainingEntity> getTrainerTrainings(String trainerUsername, Date fromDate,
+                                                    Date toDate, String traineeName) {
         log.info("Fetching trainings for trainer: {}", trainerUsername);
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
                         + trainerUsername));
         validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
 
-        // Assuming TrainingRepository has a method for filtering by date range and trainee name
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(
                         trainer.getId(), fromDate, toDate, traineeName)
                 .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
@@ -122,5 +152,4 @@ public class TrainerService {
         log.info("Found {} trainings for trainer: {}", trainings.size(), trainerUsername);
         return trainings;
     }
-
 }
