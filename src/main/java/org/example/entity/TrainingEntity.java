@@ -1,6 +1,7 @@
 package org.example.entity;
 
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class TrainingEntity {
     @Column(name = "training_name", nullable = false)
     private String trainingName;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "training_type_id", referencedColumnName = "id")
     private TrainingTypeEntity trainingType;
 

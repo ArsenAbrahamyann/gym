@@ -11,4 +11,6 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private Boolean isActive;
+    private String username;
+    private String password;
 }

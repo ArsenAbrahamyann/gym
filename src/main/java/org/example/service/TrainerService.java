@@ -14,8 +14,8 @@ import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.repository.UserRepository;
-import org.example.utils.UserUtils;
 import org.example.utils.ValidationUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +29,9 @@ public class TrainerService {
 
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
-    private final UserUtils userUtils;
     private final TrainingRepository trainingRepository;
     private final ValidationUtils validationUtils;
+    private final ModelMapper modelMapper;
 
     /**
      * Creates a new trainer profile.
@@ -39,34 +39,12 @@ public class TrainerService {
      * @param trainerDto The data transfer object containing trainer information.
      * @return The created TrainerDto object.
      */
+    @Transactional
     public TrainerDto createTrainerProfile(TrainerDto trainerDto) {
         log.info("Creating trainer profile ");
-        List<String> allUsername = userRepository.findAllUsername()
-                .orElseThrow(() -> new ResourceNotFoundException("username not found"));
-        String generatedUsername = userUtils.generateUsername(trainerDto.getUser().getFirstName(),
-                trainerDto.getUser().getLastName(), allUsername);
-        String generatedPassword = userUtils.generatePassword();
-
-        UserEntity user = new UserEntity();
-        user.setUsername(generatedUsername);
-        user.setPassword(generatedPassword);
-        user.setFirstName(trainerDto.getUser().getFirstName());
-        user.setLastName(trainerDto.getUser().getLastName());
-        user.setIsActive(trainerDto.getUser().getIsActive());
-        userRepository.save(user);
-
-        TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity();
-        trainingTypeEntity.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
-
-        TrainerEntity trainer = new TrainerEntity();
-        trainer.setSpecialization(trainingTypeEntity);
-        trainer.setTrainees(trainerDto.getTrainees());
-        trainer.setUser(user);
-
+        TrainerEntity trainer = modelMapper.map(trainerDto, TrainerEntity.class);
         validationUtils.validateTrainer(trainer);
-
         trainerRepository.save(trainer);
-
         log.debug("Trainer profile created: {}", trainer);
         return trainerDto;
     }

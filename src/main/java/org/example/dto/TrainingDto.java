@@ -4,18 +4,15 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.entity.TraineeEntity;
-import org.example.entity.TrainerEntity;
-import org.example.entity.TrainingTypeEntity;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingDto {
-    private TraineeEntity trainee;
-    private TrainerEntity trainer;
+    private TraineeDto trainee;
+    private TrainerDto trainer;
     private String trainingName;
-    private TrainingTypeEntity trainingType;
+    private TrainingTypeDto trainingType;
     private Date trainingDate;
     private Integer trainingDuration;
 }
