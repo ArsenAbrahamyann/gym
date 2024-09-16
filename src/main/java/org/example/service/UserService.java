@@ -1,11 +1,14 @@
 package org.example.service;
 
+import java.util.List;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.UserEntity;
+import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for managing user-related operations.
@@ -17,6 +20,25 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    /**
+     * Retrieves a list of all usernames from the system.
+     *
+     * <p>This method is marked as {@code @Transactional}, meaning that it is executed
+     * within a transactional context. If called within a transaction, it will
+     * participate in that transaction; otherwise, a new transaction will be started.
+     *
+     * <p>The method interacts with the underlying {@link UserRepository} to fetch
+     * all the usernames from the database. The repository should handle querying
+     * for the usernames and return a list of results.
+     *
+     * @return a {@link List} of {@link String} containing all usernames in the system.
+     */
+    @Transactional
+    public List<String> findAllUsernames() {
+        return userRepository.findAllUsername()
+                .orElseThrow(() -> new ResourceNotFoundException("Usernames not found"));
+    }
 
     /**
      * Authenticates a user by checking their username and password.

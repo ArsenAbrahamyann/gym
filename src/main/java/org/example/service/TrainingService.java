@@ -14,6 +14,7 @@ import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.utils.ValidationUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +30,7 @@ public class TrainingService {
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final ValidationUtils validationUtils;
+    private final ModelMapper modelMapper;
 
     /**
      * Adds a new training record.
@@ -37,24 +39,15 @@ public class TrainingService {
      * @throws EntityNotFoundException If the specified trainee or trainer is not found.
      */
     public void addTraining(TrainingDto trainingDto) {
-        log.info("Adding new training for trainee: {}", trainingDto.getTrainee().getId());
-        TraineeEntity trainee = traineeRepository.findById(trainingDto.getTrainee().getId())
+        TrainingEntity training = modelMapper.map(trainingDto, TrainingEntity.class);
+        log.info("Adding new training for trainee: {}", training.getTrainee().getId());
+        TraineeEntity trainee = traineeRepository.findById(training.getTrainee().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
-        TrainerEntity trainer = trainerRepository.findById(trainingDto.getTrainer().getId())
+        TrainerEntity trainer = trainerRepository.findById(training.getTrainer().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
-
-        TrainingEntity training = new TrainingEntity();
-        training.setTrainee(trainee);
-        training.setTrainer(trainer);
-        training.setTrainingName(trainingDto.getTrainingName());
-        training.setTrainingType(trainingDto.getTrainingType());
-        training.setTrainingDate(trainingDto.getTrainingDate());
-        training.setTrainingDuration(trainingDto.getTrainingDuration());
-
         validationUtils.validateTraining(training);
-
         trainingRepository.save(training);
-        log.info("Training added successfully for trainee: {}", trainingDto.getTrainee().getId());
+        log.info("Training added successfully for trainee: {}", training.getTrainee().getId());
     }
 
     /**

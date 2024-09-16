@@ -9,12 +9,11 @@ import org.example.dto.TraineeDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
-import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.UserRepository;
-import org.example.utils.UserUtils;
 import org.example.utils.ValidationUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class TraineeService {
 
-    private final UserUtils userUtils;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
     private final ValidationUtils validationUtils;
+    private final ModelMapper modelMapper;
 
     /**
      * Creates a new trainee profile.
@@ -41,29 +40,11 @@ public class TraineeService {
     @Transactional
     public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
         log.info("Creating trainee profile ");
-
-        List<String> allUsername = userRepository.findAllUsername()
-                .orElseThrow(() -> new ResourceNotFoundException("username not found"));
-        String generatedUsername = userUtils.generateUsername(traineeDto.getUser().getFirstName(),
-                traineeDto.getUser().getLastName(), allUsername);
-        String generatedPassword = userUtils.generatePassword();
-
-        UserEntity user = new UserEntity();
-        user.setUsername(generatedUsername);
-        user.setPassword(generatedPassword);
-        user.setFirstName(traineeDto.getUser().getFirstName());
-        user.setLastName(traineeDto.getUser().getLastName());
-        user.setIsActive(traineeDto.getUser().getIsActive());
-        userRepository.save(user);
-
-        TraineeEntity trainee = new TraineeEntity();
-        trainee.setDateOfBirth(traineeDto.getDateOfBirth());
-        trainee.setAddress(traineeDto.getAddress());
-        trainee.setUser(user);
-        traineeRepository.save(trainee);
+        TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
         validationUtils.validateTrainee(trainee);
-
-        log.info("Trainee profile created successfully for {}", generatedUsername);
+        userRepository.save(trainee.getUser());
+        traineeRepository.save(trainee);
+        log.info("Trainee profile created successfully for {}", traineeDto.getUser().getUsername());
         return traineeDto;
     }
 

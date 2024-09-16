@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -114,5 +115,15 @@ public class AppConfig {
             properties.put("spring.jpa.hibernate.ddl-auto", ddl);
         }
         return properties;
+    }
+
+    /**
+     * Defines an {@link ModelMapper} bean that will be managed by the Spring container.
+     *
+     * @return a new instance of {@link ModelMapper}.
+     */
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }
