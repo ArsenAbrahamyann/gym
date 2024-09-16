@@ -75,7 +75,7 @@ public class TraineeServiceTest {
         traineeEntity.setUser(userEntity);
 
         traineeDto = new TraineeDto();
-        traineeDto.setUser(new UserDto("TestFirstName", "TestLastName", true));
+        traineeDto.setUser(new UserDto("TestFirstName", "TestLastName", true,"fg","sfd"));
         traineeDto.setDateOfBirth(new Date());
         traineeDto.setAddress("123 Test Street");
         Set<TrainerDto> trainerDtos = new HashSet<>();

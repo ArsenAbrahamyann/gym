@@ -14,11 +14,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
+import org.example.dto.TraineeDto;
+import org.example.dto.TrainerDto;
 import org.example.dto.TrainingDto;
+import org.example.dto.TrainingTypeDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
-import org.example.entity.TrainingTypeEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
@@ -48,24 +50,22 @@ public class TrainingServiceTest {
     @InjectMocks
     private TrainingService trainingService;
 
-    private TraineeEntity traineeEntity;
-    private TrainerEntity trainerEntity;
+    private TraineeDto traineeDto;
+    private TrainerDto trainerDto;
     private TrainingEntity trainingEntity;
     private TrainingDto trainingDto;
 
     @BeforeEach
     void setUp() {
-        traineeEntity = new TraineeEntity();
-        traineeEntity.setId(1L);
-        trainerEntity = new TrainerEntity();
-        trainerEntity.setId(1L);
+        traineeDto = new TraineeDto();
+        trainerDto = new TrainerDto();
         trainingEntity = new TrainingEntity();
         trainingEntity.setId(1L);
         trainingDto = new TrainingDto();
-        trainingDto.setTrainee(traineeEntity);
-        trainingDto.setTrainer(trainerEntity);
+        trainingDto.setTrainee(traineeDto);
+        trainingDto.setTrainer(trainerDto);
         trainingDto.setTrainingName("Yoga");
-        trainingDto.setTrainingType(new TrainingTypeEntity());
+        trainingDto.setTrainingType(new TrainingTypeDto());
         trainingDto.setTrainingDate(new Date());
         trainingDto.setTrainingDuration(60);
     }
@@ -73,8 +73,8 @@ public class TrainingServiceTest {
     @Test
     void testAddTrainingSuccess() {
         // Given
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(traineeEntity));
-        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainerEntity));
+        when(traineeRepository.findById(1L)).thenReturn(Optional.of(new TraineeEntity()));
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(new TrainerEntity()));
         doNothing().when(validationUtils).validateTraining(any(TrainingEntity.class));
 
         // When
@@ -99,7 +99,7 @@ public class TrainingServiceTest {
     @Test
     void testAddTrainingTrainerNotFound() {
         // Given
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(traineeEntity));
+        when(traineeRepository.findById(1L)).thenReturn(Optional.of(new TraineeEntity()));
         when(trainerRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
@@ -112,7 +112,7 @@ public class TrainingServiceTest {
     @Test
     void testGetTrainingsForTraineeSuccess() {
         // Given
-        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(new TraineeEntity()));
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class),
                 any(Date.class), anyString(), anyString()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
@@ -143,7 +143,7 @@ public class TrainingServiceTest {
     @Test
     void testGetTrainingsForTraineeNoTrainingsFound() {
         // Given
-        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(new TraineeEntity()));
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(Date.class),
                 any(Date.class), anyString(), anyString()))
                 .thenReturn(Optional.empty());
@@ -159,7 +159,7 @@ public class TrainingServiceTest {
     @Test
     void testGetTrainingsForTrainerSuccess() {
         // Given
-        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(trainerEntity));
+        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(new TrainerEntity()));
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(Date.class), any(Date.class), anyString()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
@@ -189,7 +189,7 @@ public class TrainingServiceTest {
     @Test
     void testGetTrainingsForTrainerNoTrainingsFound() {
         // Given
-        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(trainerEntity));
+        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(new TrainerEntity()));
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(Date.class),
                 any(Date.class), anyString()))
                 .thenReturn(Optional.empty());
