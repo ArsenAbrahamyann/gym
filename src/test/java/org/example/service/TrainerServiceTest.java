@@ -64,9 +64,13 @@ public class TrainerServiceTest {
     @BeforeEach
     void setup() {
         // Mock data initialization
-        userEntity = new UserEntity(1L, "John", "Doe", "johndoe", "password", true);
-        trainerEntity = new TrainerEntity(1L, new TrainingTypeEntity(1L, "Yoga"), userEntity, new HashSet<>());
-        trainerDto = new TrainerDto(new TrainingTypeDto("Yoga"), new UserDto("John", "Doe", true), new HashSet<>());
+        userEntity = new UserEntity(1L, "John", "Doe", "johndoe",
+                "password", true);
+        trainerEntity = new TrainerEntity(1L, new TrainingTypeEntity(1L, "Yoga"),
+                userEntity, new HashSet<>());
+        trainerDto = new TrainerDto(new TrainingTypeDto("Yoga"),
+                new UserDto("John", "Doe", true, "fsg", "sdf"),
+                new HashSet<>());
     }
 
     @Test
