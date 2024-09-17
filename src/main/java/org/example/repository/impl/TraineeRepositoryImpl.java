@@ -3,6 +3,7 @@ package org.example.repository.impl;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TraineeEntity;
+import org.example.entity.UserEntity;
 import org.example.repository.TraineeRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class TraineeRepositoryImpl implements TraineeRepository {
     @Override
     public Optional<TraineeEntity> findByTraineeFromUsername(String username) {
         return Optional.ofNullable(sessionFactory.getCurrentSession()
-                .createQuery("from UserEntity where username = :username", TraineeEntity.class)
+                .createQuery("from TraineeEntity te where te.user.username = :username", TraineeEntity.class)
                 .setParameter("username", username)
                 .uniqueResult());
     }
@@ -52,7 +53,7 @@ public class TraineeRepositoryImpl implements TraineeRepository {
      */
     @Override
     public void save(TraineeEntity trainee) {
-        sessionFactory.getCurrentSession().persist(trainee);
+        sessionFactory.getCurrentSession().merge(trainee);
     }
 
     /**
@@ -64,6 +65,6 @@ public class TraineeRepositoryImpl implements TraineeRepository {
     @Override
     public void update(TraineeEntity trainee) {
         sessionFactory.getCurrentSession()
-                .detach(trainee);
+                .saveOrUpdate(trainee);
     }
 }

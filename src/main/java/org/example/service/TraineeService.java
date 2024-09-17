@@ -2,6 +2,7 @@ package org.example.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +40,29 @@ public class TraineeService {
      */
     @Transactional
     public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
-        log.info("Creating trainee profile ");
+        log.info("Creating trainee profile");
+
+        // Map TraineeDto to TraineeEntity
         TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
-        validationUtils.validateTrainee(trainee);
-        userRepository.save(trainee.getUser());
+
+        // Check if UserEntity already exists
+        UserEntity user = trainee.getUser();
+        Optional<UserEntity> existingUserOpt = userRepository.findByUsername(user.getUsername());
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+        } else {
+            // Save UserEntity first
+            user = userRepository.save(user);
+        }
+
+        // Set the saved UserEntity to the TraineeEntity
+        trainee.setUser(user);
+
+        // Save the TraineeEntity
         traineeRepository.save(trainee);
-        log.info("Trainee profile created successfully for {}", traineeDto.getUser().getUsername());
+
+        log.info("Trainee profile created successfully for {}", user.getUsername());
+
         return traineeDto;
     }
 
@@ -54,6 +72,7 @@ public class TraineeService {
      * @param username    The username of the trainee.
      * @param newPassword The new password to set.
      */
+    @Transactional
     public void changeTraineePassword(String username, String newPassword) {
         log.info("Changing password for trainee {}", username);
         UserEntity user = userRepository.findByUsername(username)
@@ -75,14 +94,11 @@ public class TraineeService {
     @Transactional
     public void toggleTraineeStatus(String username) {
         log.info("Toggling trainee status for {}", username);
-        TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(username)
+        UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
                         + username));
 
-        validationUtils.validateActivateDeactivateTrainee(trainee);
-
-        UserEntity user = trainee.getUser();
-        user.setIsActive(! user.getIsActive());
+        user.setIsActive(!user.getIsActive());
         userRepository.update(user);
         log.info("Trainee status toggled successfully for {}", username);
     }
@@ -93,6 +109,7 @@ public class TraineeService {
      * @param traineeUsername The username of the trainee.
      * @return The list of unassigned trainers.
      */
+    @Transactional
     public List<TrainerEntity> getUnassignedTrainers(String traineeUsername) {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
         TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
@@ -145,10 +162,13 @@ public class TraineeService {
     @Transactional
     public void updateTraineeProfile(String username, TraineeDto traineeDto) {
         log.info("Updating trainee profile for {}", username);
+
         TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
                         + username));
-
+        UserEntity existingUser = userRepository.findByUsername(trainee.getUser().getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        trainee.setUser(existingUser);
         trainee.setDateOfBirth(traineeDto.getDateOfBirth());
         trainee.setAddress(traineeDto.getAddress());
 

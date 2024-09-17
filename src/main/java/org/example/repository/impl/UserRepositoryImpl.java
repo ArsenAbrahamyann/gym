@@ -2,11 +2,14 @@ package org.example.repository.impl;
 
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.UserEntity;
 import org.example.repository.UserRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the {@link UserRepository} interface, providing
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements UserRepository {
 
     private final SessionFactory sessionFactory;
+
 
     /**
      * Finds a {@link UserEntity} by its username.
@@ -51,8 +55,13 @@ public class UserRepositoryImpl implements UserRepository {
      * @param user the {@link UserEntity} to be saved
      */
     @Override
-    public void save(UserEntity user) {
-        sessionFactory.getCurrentSession().persist(user);
+    public UserEntity save(UserEntity user) {
+        if (user.getId() == null) {
+            sessionFactory.getCurrentSession().persist(user);
+            return user;
+        } else {
+            return (UserEntity) sessionFactory.getCurrentSession().merge(user);
+        }
     }
 
     /**
@@ -63,7 +72,7 @@ public class UserRepositoryImpl implements UserRepository {
      */
     @Override
     public void update(UserEntity user) {
-        sessionFactory.getCurrentSession().detach(user);
+        sessionFactory.getCurrentSession().update(user);
     }
 
     /**
@@ -76,7 +85,7 @@ public class UserRepositoryImpl implements UserRepository {
         Optional<UserEntity> user = findByUsername(username);
         if (user.isPresent()) {
             UserEntity userEntity = user.get();
-            sessionFactory.getCurrentSession().remove(userEntity);
+            sessionFactory.getCurrentSession().delete(userEntity);
         }
     }
 }

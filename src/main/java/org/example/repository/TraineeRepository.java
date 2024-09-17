@@ -2,6 +2,7 @@ package org.example.repository;
 
 import java.util.Optional;
 import org.example.entity.TraineeEntity;
+import org.example.entity.UserEntity;
 
 /**
  * Repository interface for managing {@link TraineeEntity} operations.
