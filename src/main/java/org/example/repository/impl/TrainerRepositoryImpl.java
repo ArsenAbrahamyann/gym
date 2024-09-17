@@ -25,7 +25,7 @@ public class TrainerRepositoryImpl implements TrainerRepository {
      */
     @Override
     public void save(TrainerEntity trainer) {
-        sessionFactory.getCurrentSession().persist(trainer);
+        sessionFactory.getCurrentSession().saveOrUpdate(trainer);
     }
 
     /**
@@ -51,7 +51,7 @@ public class TrainerRepositoryImpl implements TrainerRepository {
     @Override
     public Optional<TrainerEntity> findByTrainerFromUsername(String username) {
         return Optional.ofNullable(sessionFactory.getCurrentSession()
-                .createQuery("from UserEntity where username = :username", TrainerEntity.class)
+                .createQuery("from TrainerEntity te where te.user.username = :username", TrainerEntity.class)
                 .setParameter("username", username)
                 .uniqueResult());
     }
@@ -105,6 +105,6 @@ public class TrainerRepositoryImpl implements TrainerRepository {
     @Override
     public void update(TrainerEntity trainer) {
         sessionFactory.getCurrentSession()
-                .detach(trainer);
+                .saveOrUpdate(trainer);
     }
 }

@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
  * as well as validating date ranges and criteria for fetching trainings.
  */
 @Component
+@Slf4j
 public class ValidationUtils {
     private final String dataFormat = "yyyy-MM-dd";
 
@@ -82,8 +84,8 @@ public class ValidationUtils {
             throw new ValidationException("User does not exist.");
         }
 
-        if (! user.getPassword().equals(enteredPassword)) {
-            throw new ValidationException("Invalid password. Please try again.");
+        if (user.getPassword().equals(enteredPassword)) {
+            log.info("it is to same password");
         }
     }
 

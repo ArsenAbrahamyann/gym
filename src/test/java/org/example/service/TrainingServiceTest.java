@@ -21,6 +21,7 @@ import org.example.dto.TrainingTypeDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
+import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;

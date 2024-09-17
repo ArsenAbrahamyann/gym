@@ -1,5 +1,7 @@
 package org.example.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +15,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "training")
@@ -39,8 +42,10 @@ public class TrainingEntity {
     @JoinColumn(name = "training_type_id", referencedColumnName = "id")
     private TrainingTypeEntity trainingType;
 
-    @Column(name = "training_date", nullable = false)
-    private Date trainingDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "training_date", updatable = false)
+    @CreationTimestamp
+    private LocalDateTime trainingDate;
 
     @Column(name = "training_duration", nullable = false)
     private Integer trainingDuration;

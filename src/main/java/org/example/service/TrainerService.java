@@ -2,6 +2,7 @@ package org.example.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
+import org.example.repository.TrainingTypeRepository;
 import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
@@ -30,6 +32,7 @@ public class TrainerService {
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
     private final TrainingRepository trainingRepository;
+    private final TrainingTypeRepository trainingTypeRepository;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
 
@@ -44,6 +47,19 @@ public class TrainerService {
         log.info("Creating trainer profile ");
         TrainerEntity trainer = modelMapper.map(trainerDto, TrainerEntity.class);
         validationUtils.validateTrainer(trainer);
+        TrainingTypeEntity trainingType = trainer.getSpecialization();
+
+        if (trainingType.getId() == null) {
+            trainingTypeRepository.save(trainingType);
+        }
+
+        Optional<UserEntity> existingUser = userRepository.findByUsername(trainerDto.getUser().getUsername());
+        if (existingUser.isPresent()) {
+            trainer.getUser().setId(existingUser.get().getId());
+        }else {
+            userRepository.save(trainer.getUser());
+        }
+
         trainerRepository.save(trainer);
         log.debug("Trainer profile created: {}", trainer);
         return trainerDto;
@@ -55,12 +71,13 @@ public class TrainerService {
      * @param username    The username of the trainer.
      * @param newPassword The new password to set.
      */
+    @Transactional
     public void changeTrainerPassword(String username, String newPassword) {
         log.info("Changing password for trainer {}", username);
-        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
+                        + username));
 
-        UserEntity user = trainer.getUser();
         validationUtils.validatePasswordMatch(user, newPassword);
         user.setPassword(newPassword);
         userRepository.update(user);
@@ -72,13 +89,14 @@ public class TrainerService {
      *
      * @param username The username of the trainer.
      */
+    @Transactional
     public void toggleTrainerStatus(String username) {
         log.info("Toggling trainer status for {}", username);
-        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
+                        + username));
 
-        validationUtils.validateActivateDeactivateTrainer(trainer);
-        UserEntity user = trainer.getUser();
+//        validationUtils.validateActivateDeactivateTrainer(trainer);
         user.setIsActive(! user.getIsActive());
         userRepository.update(user);
         log.info("Trainer status toggled successfully for {}", username);
@@ -96,11 +114,16 @@ public class TrainerService {
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
                         + username));
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         validationUtils.validateUpdateTrainer(trainer);
-        TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity();
-        trainingTypeEntity.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
-        trainer.setSpecialization(trainingTypeEntity);
+        TrainingTypeEntity trainingType = modelMapper.map(trainerDto.getSpecialization().getTrainingTypeName(),
+                TrainingTypeEntity.class);
+        trainingType.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
+        trainingTypeRepository.save(trainingType);
+        trainer.setSpecialization(trainingType);
+        trainer.setUser(user);
         trainerRepository.update(trainer);
 
         log.info("Trainer profile updated successfully for {}", username);

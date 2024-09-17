@@ -29,7 +29,7 @@ public interface UserRepository {
      *
      * @param user the {@link UserEntity} to be saved
      */
-    void save(UserEntity user);
+    UserEntity save(UserEntity user);
 
     /**
      * Updates an existing {@link UserEntity}.

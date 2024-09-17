@@ -2,6 +2,7 @@ package org.example.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +10,16 @@ import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
+import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
+import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for managing training records.
@@ -28,6 +32,7 @@ public class TrainingService {
 
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
+    private final UserRepository userRepository;
     private final TrainerRepository trainerRepository;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
@@ -38,13 +43,44 @@ public class TrainingService {
      * @param trainingDto The details of the training to be added.
      * @throws EntityNotFoundException If the specified trainee or trainer is not found.
      */
+    @Transactional
     public void addTraining(TrainingDto trainingDto) {
         TrainingEntity training = modelMapper.map(trainingDto, TrainingEntity.class);
         log.info("Adding new training for trainee: {}", training.getTrainee().getId());
-        TraineeEntity trainee = traineeRepository.findById(training.getTrainee().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
-        TrainerEntity trainer = trainerRepository.findById(training.getTrainer().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
+
+        Optional<List<String>> allUsername = userRepository.findAllUsername();
+        TraineeEntity trainee = training.getTrainee();
+        TrainerEntity trainer = training.getTrainer();
+
+        UserEntity user = trainee.getUser();
+        UserEntity user1 = trainer.getUser();
+
+        boolean foundTraineeUser = false;
+        boolean foundTrainerUser = false;
+
+        for (String username : allUsername.get()) {
+            if (user.getUsername().contains(username)) {
+                foundTraineeUser = true;
+            }
+            if (user1.getUsername().contains(username)) {
+                foundTrainerUser = true;
+            }
+        }
+
+        if (foundTraineeUser && trainee.getId() != null) {
+            userRepository.update(user); // Make sure user has an ID
+            traineeRepository.save(trainee);
+        } else {
+            log.error("Trainee user not found or ID is null.");
+        }
+
+        if (foundTrainerUser && trainer.getId() != null) {
+            userRepository.update(user1); // Make sure user1 has an ID
+            trainerRepository.save(trainer);
+        } else {
+            log.error("Trainer user not found or ID is null.");
+        }
+
         validationUtils.validateTraining(training);
         trainingRepository.save(training);
         log.info("Training added successfully for trainee: {}", training.getTrainee().getId());
