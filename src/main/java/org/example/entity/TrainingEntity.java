@@ -14,7 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
@@ -29,10 +31,14 @@ public class TrainingEntity {
 
     @ManyToOne
     @JoinColumn(name = "trainee_id", referencedColumnName = "id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private TraineeEntity trainee;
 
     @ManyToOne
     @JoinColumn(name = "trainer_id", referencedColumnName = "id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private TrainerEntity trainer;
 
     @Column(name = "training_name", nullable = false)

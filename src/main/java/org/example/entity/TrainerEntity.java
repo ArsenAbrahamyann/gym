@@ -13,11 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "trainer")
@@ -40,18 +43,13 @@ public class TrainerEntity {
 
     @ManyToMany(mappedBy = "trainers", fetch = FetchType.LAZY)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<TraineeEntity> trainees = new HashSet<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TrainerEntity that = (TrainerEntity) o;
-        return Objects.equals(id, that.id);
-    }
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonIgnore
+    private Set<TrainingEntity> training = new HashSet<>();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

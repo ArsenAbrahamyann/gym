@@ -1,5 +1,6 @@
 package org.example;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,9 +75,11 @@ public class Main {
         trainerDto.setTrainees(traineeDtos);
         trainerService.updateTrainerProfile("Arsen.Abrahamyan1",trainerDto);
 
-        TrainingDto trainingDto = new TrainingDto(traineeDto,trainerDto,"techer",trainingTypeDto,12);
+        TrainingDto trainingDto = new TrainingDto(56L,24L,"techer",32L,12);
         TrainingService trainingService = context.getBean(TrainingService.class);
         trainingService.addTraining(trainingDto);
+        trainingService.getTrainingsForTrainee("Arsen.Abrahamyan", LocalDateTime.parse("2022-12-12T10:15:30"),LocalDateTime.now(),"Arsen.Abrahamyan1","Java");
+        trainingService.getTrainingsForTrainer("Arsen.Abrahamyan1",LocalDateTime.parse("2022-12-12T10:15:30"),LocalDateTime.now(),"Arsen.Abrahamyan");
         ((AnnotationConfigApplicationContext) context).close();
     }
 }

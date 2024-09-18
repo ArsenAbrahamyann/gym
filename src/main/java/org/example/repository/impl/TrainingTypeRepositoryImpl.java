@@ -1,5 +1,6 @@
 package org.example.repository.impl;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
@@ -20,5 +21,13 @@ public class TrainingTypeRepositoryImpl implements TrainingTypeRepository {
     @Override
     public void save(TrainingTypeEntity trainingTypeEntity) {
        sessionFactory.getCurrentSession().persist(trainingTypeEntity);
+    }
+
+    @Override
+    public Optional<TrainingTypeEntity> findById(Long trainingTypeId) {
+        return Optional.ofNullable(sessionFactory.getCurrentSession()
+                .createQuery("from TrainingTypeEntity where id = :trainingTypeId", TrainingTypeEntity.class)
+                .setParameter("trainingTypeId", trainingTypeId)
+                .uniqueResult());
     }
 }
