@@ -1,7 +1,6 @@
 package org.example.repository;
 
 import java.util.Optional;
-import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 
 /**
@@ -16,5 +15,9 @@ public interface TrainingTypeRepository {
      */
     void save(TrainingTypeEntity trainingTypeEntity);
 
+    /**
+     * find by id {@param trainingTypeId}
+     * @return TrainingTypeEntity
+     */
     Optional<TrainingTypeEntity> findById(Long trainingTypeId);
 }

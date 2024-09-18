@@ -12,6 +12,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class TrainingRepositoryImpl implements TrainingRepository {
 
     private final SessionFactory sessionFactory;
@@ -40,6 +42,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
      */
     @Override
     public Optional<TrainingEntity> findByTrainingName(String trainingName) {
+        log.debug("Finding TrainingEntity by training name: {}", trainingName);
         return Optional.ofNullable(sessionFactory.getCurrentSession()
                 .createQuery("from TrainingEntity where trainingName = :trainingName", TrainingEntity.class)
                 .setParameter("trainingName", trainingName)
@@ -53,8 +56,11 @@ public class TrainingRepositoryImpl implements TrainingRepository {
      */
     @Override
     public void save(TrainingEntity training) {
+        log.debug("Saving TrainingEntity with ID: {}", training.getId());
         sessionFactory.getCurrentSession()
                 .persist(training);
+        log.info("TrainingEntity with ID: {} saved successfully", training.getId());
+
     }
 
     /**
@@ -70,6 +76,8 @@ public class TrainingRepositoryImpl implements TrainingRepository {
     @Override
     public Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
                                                                   LocalDateTime toDate, String trainerName, String trainingType) {
+        log.debug("Finding trainings for trainee ID: {} with criteria [fromDate: {}, toDate: {}, trainerName: {}, trainingType: {}]",
+                traineeId, fromDate, toDate, trainerName, trainingType);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
         Root<TrainingEntity> training = cq.from(TrainingEntity.class);
@@ -97,8 +105,13 @@ public class TrainingRepositoryImpl implements TrainingRepository {
 
         cq.where(predicates.toArray(new Predicate[0]));
 
-        return Optional.ofNullable(entityManager.createQuery(cq).getResultList());
-    }
+        List<TrainingEntity> resultList = entityManager.createQuery(cq).getResultList();
+        if (resultList.isEmpty()) {
+            log.info("No trainings found for trainee ID: {}", traineeId);
+        } else {
+            log.info("Found {} trainings for trainee ID: {}", resultList.size(), traineeId);
+        }
+        return Optional.of(resultList);    }
 
     /**
      * Finds a list of {@link TrainingEntity} for a given trainer based on criteria.
@@ -112,6 +125,8 @@ public class TrainingRepositoryImpl implements TrainingRepository {
     @Override
     public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate, LocalDateTime toDate,
                                                         String traineeName) {
+        log.debug("Finding trainings for trainer ID: {} with criteria [fromDate: {}, toDate: {}, traineeName: {}]",
+                trainerId, fromDate, toDate, traineeName);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
         Root<TrainingEntity> training = cq.from(TrainingEntity.class);
@@ -141,6 +156,11 @@ public class TrainingRepositoryImpl implements TrainingRepository {
 
         cq.where(predicates.toArray(new Predicate[0]));
 
-        return Optional.ofNullable(entityManager.createQuery(cq).getResultList());
-    }
+        List<TrainingEntity> resultList = entityManager.createQuery(cq).getResultList();
+        if (resultList.isEmpty()) {
+            log.info("No trainings found for trainer ID: {}", trainerId);
+        } else {
+            log.info("Found {} trainings for trainer ID: {}", resultList.size(), trainerId);
+        }
+        return Optional.of(resultList);    }
 }

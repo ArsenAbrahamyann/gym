@@ -1,7 +1,6 @@
 package org.example.repository;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.example.entity.TrainingEntity;

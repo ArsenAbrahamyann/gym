@@ -2,10 +2,9 @@ package org.example.repository.impl;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
-import org.example.entity.UserEntity;
 import org.example.repository.TraineeRepository;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class TraineeRepositoryImpl implements TraineeRepository {
 
     private final SessionFactory sessionFactory;
@@ -27,10 +27,19 @@ public class TraineeRepositoryImpl implements TraineeRepository {
      */
     @Override
     public Optional<TraineeEntity> findByTraineeFromUsername(String username) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession()
+        log.debug("Finding TraineeEntity by username: {}", username);
+        TraineeEntity trainee = sessionFactory.getCurrentSession()
                 .createQuery("from TraineeEntity te where te.user.username = :username", TraineeEntity.class)
                 .setParameter("username", username)
-                .uniqueResult());
+                .uniqueResult();
+
+        if (trainee == null) {
+            log.info("TraineeEntity with username: {} not found", username);
+        } else {
+            log.info("TraineeEntity with username: {} found", username);
+        }
+
+        return Optional.ofNullable(trainee);
     }
 
     /**
@@ -41,10 +50,19 @@ public class TraineeRepositoryImpl implements TraineeRepository {
      */
     @Override
     public Optional<TraineeEntity> findById(Long traineeId) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession()
+        log.debug("Finding TraineeEntity by ID: {}", traineeId);
+        TraineeEntity trainee = sessionFactory.getCurrentSession()
                 .createQuery("from TraineeEntity where id = :traineeId", TraineeEntity.class)
                 .setParameter("traineeId", traineeId)
-                .uniqueResult());
+                .uniqueResult();
+
+        if (trainee == null) {
+            log.info("TraineeEntity with ID: {} not found", traineeId);
+        } else {
+            log.info("TraineeEntity with ID: {} found", traineeId);
+        }
+
+        return Optional.ofNullable(trainee);
     }
 
     /**
@@ -54,7 +72,10 @@ public class TraineeRepositoryImpl implements TraineeRepository {
      */
     @Override
     public void save(TraineeEntity trainee) {
+        log.debug("Saving TraineeEntity: {}", trainee);
         sessionFactory.getCurrentSession().merge(trainee);
+        log.info("Successfully saved TraineeEntity: {}", trainee);
+
     }
 
     /**
@@ -65,18 +86,17 @@ public class TraineeRepositoryImpl implements TraineeRepository {
      */
     @Override
     public void update(TraineeEntity trainee) {
-        sessionFactory.getCurrentSession()
-                .saveOrUpdate(trainee);
+        log.debug("Updating TraineeEntity: {}", trainee);
+        sessionFactory.getCurrentSession().saveOrUpdate(trainee);
+        log.info("Successfully updated TraineeEntity: {}", trainee);
+
     }
 
     @Override
     public void delete(TraineeEntity trainee) {
-        if (trainee != null) {
-            Session session = sessionFactory.getCurrentSession();
-            if (!session.contains(trainee)) {
-                trainee = (TraineeEntity) session.merge(trainee);
-            }
-            session.delete(trainee);
-        }
+        log.debug("Deleting TraineeEntity: {}", trainee);
+        sessionFactory.getCurrentSession().delete(trainee);
+        log.info("Successfully deleted TraineeEntity: {}", trainee);
+
     }
 }
