@@ -32,6 +32,7 @@ public class TrainerService {
 
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final TrainingRepository trainingRepository;
     private final TrainingTypeRepository trainingTypeRepository;
     private final ValidationUtils validationUtils;
@@ -60,7 +61,7 @@ public class TrainerService {
         }else {
             userRepository.save(trainer.getUser());
         }
-
+        userService.authenticateUser(trainer.getUser().getUsername(),trainer.getUser().getPassword());
         trainerRepository.save(trainer);
         log.debug("Trainer profile created: {}", trainer);
         return trainerDto;

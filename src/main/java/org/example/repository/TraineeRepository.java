@@ -38,4 +38,6 @@ public interface TraineeRepository {
      * @param trainee the {@link TraineeEntity} to be updated
      */
     void update(TraineeEntity trainee);
+
+    void delete(TraineeEntity trainee);
 }

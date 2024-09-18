@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.entity.TraineeEntity;
 import org.example.entity.UserEntity;
 import org.example.repository.TraineeRepository;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
@@ -66,5 +67,16 @@ public class TraineeRepositoryImpl implements TraineeRepository {
     public void update(TraineeEntity trainee) {
         sessionFactory.getCurrentSession()
                 .saveOrUpdate(trainee);
+    }
+
+    @Override
+    public void delete(TraineeEntity trainee) {
+        if (trainee != null) {
+            Session session = sessionFactory.getCurrentSession();
+            if (!session.contains(trainee)) {
+                trainee = (TraineeEntity) session.merge(trainee);
+            }
+            session.delete(trainee);
+        }
     }
 }
