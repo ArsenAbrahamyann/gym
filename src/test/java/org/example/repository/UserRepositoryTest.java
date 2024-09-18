@@ -76,9 +76,6 @@ public class UserRepositoryTest {
 
     @Test
     public void testSave() {
-        // Arrange
-        doNothing().when(userRepository).save(any(UserEntity.class));
-
         // Act
         userRepository.save(user);
 
