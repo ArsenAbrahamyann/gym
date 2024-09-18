@@ -2,7 +2,6 @@ package org.example.repository;
 
 import java.util.Optional;
 import org.example.entity.TraineeEntity;
-import org.example.entity.UserEntity;
 
 /**
  * Repository interface for managing {@link TraineeEntity} operations.
@@ -39,5 +38,10 @@ public interface TraineeRepository {
      */
     void update(TraineeEntity trainee);
 
+    /**
+     * Delete an existing {@Link TraineeEntity}.
+     *
+     * @param trainee
+     */
     void delete(TraineeEntity trainee);
 }

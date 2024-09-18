@@ -48,6 +48,7 @@ public class UserService {
      * @return {@code true} if the username and password match, {@code false} otherwise.
      * @throws EntityNotFoundException If the user with the specified username is not found.
      */
+    @Transactional
     public boolean authenticateUser(String username, String password) {
         log.info("Authenticating user: {}", username);
         UserEntity user = userRepository.findByUsername(username)
@@ -68,6 +69,7 @@ public class UserService {
      * @param newPassword The new password to set for the user.
      * @throws EntityNotFoundException If the user with the specified username is not found.
      */
+    @Transactional
     public void updateUserPassword(String username, String newPassword) {
         log.info("Updating password for user: {}", username);
         UserEntity user = userRepository.findByUsername(username)
@@ -83,6 +85,7 @@ public class UserService {
      * @param username The username of the user whose status is to be toggled.
      * @throws EntityNotFoundException If the user with the specified username is not found.
      */
+    @Transactional
     public void toggleUserStatus(String username) {
         log.info("Toggling status for user: {}", username);
         UserEntity user = userRepository.findByUsername(username)

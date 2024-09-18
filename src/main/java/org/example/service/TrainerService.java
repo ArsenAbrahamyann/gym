@@ -1,7 +1,6 @@
 package org.example.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -98,7 +97,6 @@ public class TrainerService {
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
                         + username));
 
-//        validationUtils.validateActivateDeactivateTrainer(trainer);
         user.setIsActive(! user.getIsActive());
         userRepository.update(user);
         log.info("Trainer status toggled successfully for {}", username);

@@ -177,7 +177,15 @@ public class TraineeService {
         log.info("Trainee profile updated successfully for {}", username);
     }
 
+    /**
+     * Deletes a trainee by their username.
+     *
+     * @param username The username of the trainee to delete.
+     * @throws ResourceNotFoundException If the user or trainee is not found.
+     */
+    @Transactional
     public void deleteTraineeByUsername(String username) {
+        log.info("Deleting trainee with username: {}", username);
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -193,5 +201,6 @@ public class TraineeService {
         } else {
             throw new IllegalArgumentException("User not found for username: " + username);
         }
+        log.info("Trainee deleted successfully with username: {}", username);
     }
 }

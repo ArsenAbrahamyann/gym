@@ -1,9 +1,7 @@
 package org.example.service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +9,6 @@ import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
-import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.exeption.ValidationException;
 import org.example.repository.TraineeRepository;
