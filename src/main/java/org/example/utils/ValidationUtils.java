@@ -2,6 +2,7 @@ package org.example.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -185,7 +186,7 @@ public class ValidationUtils {
      * @param trainingType Optional training type for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
-    public void validateTraineeTrainingsCriteria(String traineeUsername, Date fromDate, Date toDate, String trainerName,
+    public void validateTraineeTrainingsCriteria(String traineeUsername, LocalDateTime fromDate, LocalDateTime toDate, String trainerName,
                                                  String trainingType) {
         if (traineeUsername == null || traineeUsername.isEmpty()) {
             throw new ValidationException("Trainee username is required for fetching training list.");
@@ -221,7 +222,7 @@ public class ValidationUtils {
      * @param traineeName Optional trainee name for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
-    public void validateTrainerTrainingsCriteria(String trainerUsername, Date fromDate, Date toDate,
+    public void validateTrainerTrainingsCriteria(String trainerUsername, LocalDateTime fromDate, LocalDateTime toDate,
                                                  String traineeName) {
         if (trainerUsername == null || trainerUsername.isEmpty()) {
             throw new ValidationException("Trainer username is required for fetching training list.");
@@ -251,7 +252,7 @@ public class ValidationUtils {
      * @param toDate The end date.
      * @throws ValidationException if the 'from' date is after the 'to' date or the dates are invalid.
      */
-    void validateDateRange(Date fromDate, Date toDate) {
+    void validateDateRange(LocalDateTime fromDate, LocalDateTime toDate) {
         SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         try {
             if (sdf.parse(String.valueOf(fromDate)).after(sdf.parse(String.valueOf(toDate)))) {
@@ -269,7 +270,7 @@ public class ValidationUtils {
      * @param fieldName The name of the field being validated.
      * @throws ValidationException if the date is not in the correct format.
      */
-    private void validateDateFormat(Date date, String fieldName) {
+    private void validateDateFormat(LocalDateTime date, String fieldName) {
         SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         sdf.setLenient(false);
         try {

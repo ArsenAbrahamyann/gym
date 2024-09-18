@@ -1,5 +1,6 @@
 package org.example.service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -138,8 +139,8 @@ public class TrainerService {
      * @param traineeName     The name of the trainee (optional).
      * @return The list of trainings for the trainer.
      */
-    public List<TrainingEntity> getTrainerTrainings(String trainerUsername, Date fromDate,
-                                                    Date toDate, String traineeName) {
+    public List<TrainingEntity> getTrainerTrainings(String trainerUsername, LocalDateTime fromDate,
+                                                    LocalDateTime toDate, String traineeName) {
         log.info("Fetching trainings for trainer: {}", trainerUsername);
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "

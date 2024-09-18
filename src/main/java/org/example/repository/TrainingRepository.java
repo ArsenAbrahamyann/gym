@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +37,8 @@ public interface TrainingRepository {
      * @param trainingType the type of training (optional)
      * @return an {@link Optional} containing a list of matching {@link TrainingEntity}, or empty if none found
      */
-    Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, Date fromDate,
-                                                           Date toDate, String trainerName, String trainingType);
+    Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
+                                                           LocalDateTime toDate, String trainerName, String trainingType);
 
     /**
      * Finds trainings for a specific trainer based on optional criteria such as date range and trainee name.
@@ -48,6 +49,6 @@ public interface TrainingRepository {
      * @param traineeName the name of the trainee (optional)
      * @return an {@link Optional} containing a list of matching {@link TrainingEntity}, or empty if none found
      */
-    Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, Date fromDate,
-                                                           Date toDate, String traineeName);
+    Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate,
+                                                           LocalDateTime toDate, String traineeName);
 }

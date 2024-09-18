@@ -1,7 +1,7 @@
 package org.example.repository.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
+import org.example.entity.UserEntity;
 import org.example.repository.TrainingRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
@@ -67,8 +68,8 @@ public class TrainingRepositoryImpl implements TrainingRepository {
      * @return an {@link Optional} containing a list of {@link TrainingEntity}, or empty if no trainings match the criteria
      */
     @Override
-    public Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, Date fromDate,
-                                                          Date toDate, String trainerName, String trainingType) {
+    public Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
+                                                                  LocalDateTime toDate, String trainerName, String trainingType) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
         Root<TrainingEntity> training = cq.from(TrainingEntity.class);
@@ -76,7 +77,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         List<Predicate> predicates = new ArrayList<>();
 
         if (traineeId != null) {
-            predicates.add(cb.equal(training.get("traineeId"), traineeId));
+            predicates.add(cb.equal(training.get("trainee").get("id"), traineeId));
         }
 
         if (fromDate != null) {
@@ -87,8 +88,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         }
 
         if (trainerName != null && !trainerName.isEmpty()) {
-            Join<TrainingEntity, TrainerEntity> trainer = training.join("trainer");
-            predicates.add(cb.like(cb.lower(trainer.get("name")), "%" + trainerName.toLowerCase() + "%"));
+            Join<TrainingEntity, TrainerEntity> trainerJoin = training.join("trainer");
         }
 
         if (trainingType != null && !trainingType.isEmpty()) {
@@ -110,7 +110,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
      * @return an {@link Optional} containing a list of {@link TrainingEntity}, or empty if no trainings match the criteria
      */
     @Override
-    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, Date fromDate, Date toDate,
+    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate, LocalDateTime toDate,
                                                         String traineeName) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
@@ -119,7 +119,7 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         List<Predicate> predicates = new ArrayList<>();
 
         if (trainerId != null) {
-            predicates.add(cb.equal(training.get("trainerId"), trainerId));
+            predicates.add(cb.equal(training.get("trainer").get("id"), trainerId));
         }
 
         if (fromDate != null) {
@@ -130,11 +130,13 @@ public class TrainingRepositoryImpl implements TrainingRepository {
             predicates.add(cb.lessThanOrEqualTo(training.get("trainingDate"), toDate));
         }
 
-        if (traineeName != null && ! traineeName.isEmpty()) {
+        if (traineeName != null && !traineeName.isEmpty()) {
             Join<TrainingEntity, TraineeEntity> trainee = training.join("trainee");
-            predicates.add(cb.like(cb.lower(trainee.get("name")), "%"
-                    + traineeName.toLowerCase()
-                    + "%"));
+            Join<TraineeEntity, UserEntity> user = trainee.join("user");
+
+            Predicate usernamePredicate = cb.like(cb.lower(user.get("username")), "%" + traineeName.toLowerCase() + "%");
+
+            predicates.add(usernamePredicate);
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
