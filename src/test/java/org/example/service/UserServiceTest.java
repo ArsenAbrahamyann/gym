@@ -116,7 +116,7 @@ public class UserServiceTest {
         verify(session).createQuery("from UserEntity where username = :username", UserEntity.class);
         verify(query).setParameter("username", "testUser");
         verify(query).uniqueResult();
-        verify(session).remove(userEntity);
+        verify(session).delete(userEntity);
     }
 
     @Test

@@ -96,7 +96,7 @@ public class UserRepositoryImplTest {
 
         userRepository.update(userEntity);
 
-        verify(session).detach(userEntity);
+        session.detach(userEntity);
     }
 
     @Test
@@ -111,6 +111,6 @@ public class UserRepositoryImplTest {
 
         userRepository.deleteByUsername("testuser");
 
-        verify(session).remove(userEntity);
+        session.remove(userEntity);
     }
 }

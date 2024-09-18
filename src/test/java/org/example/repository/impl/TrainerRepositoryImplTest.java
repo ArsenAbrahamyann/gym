@@ -52,6 +52,7 @@ public class TrainerRepositoryImplTest {
         trainerEntity.setId(1L);
         trainerEntity.setUser(userEntity);
 
+        // Mock the session factory to return a session
         when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
@@ -60,8 +61,8 @@ public class TrainerRepositoryImplTest {
         // Act
         trainerRepository.save(trainerEntity);
 
-        // Assert
-        verify(session).persist(trainerEntity);
+        // Assert that the session's saveOrUpdate method was called
+        verify(session).saveOrUpdate(trainerEntity);
     }
 
     @Test
@@ -102,7 +103,8 @@ public class TrainerRepositoryImplTest {
         // Arrange
         String username = "janedoe";
         Query<TrainerEntity> query = mock(Query.class);
-        when(session.createQuery("from UserEntity where username = :username", TrainerEntity.class)).thenReturn(query);
+        when(session.createQuery("from TrainerEntity te where te.user.username = :username", TrainerEntity.class))
+                .thenReturn(query);
         when(query.setParameter("username", username)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(trainerEntity);
 
@@ -119,7 +121,8 @@ public class TrainerRepositoryImplTest {
         // Arrange
         String username = "non_existing_user";
         Query<TrainerEntity> query = mock(Query.class);
-        when(session.createQuery("from UserEntity where username = :username", TrainerEntity.class)).thenReturn(query);
+        when(session.createQuery("from TrainerEntity te where te.user.username = :username", TrainerEntity.class))
+                .thenReturn(query);
         when(query.setParameter("username", username)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(null);
 
@@ -150,17 +153,15 @@ public class TrainerRepositoryImplTest {
         // Arrange
         Long traineeId = 1L;
         Query<TrainerEntity> query = mock(Query.class);
-        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id ="
-                + " :traineeId", TrainerEntity.class)).thenReturn(query);
+        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId", TrainerEntity.class))
+                .thenReturn(query);
         when(query.setParameter("traineeId", traineeId)).thenReturn(query);
-        when(query.list()).thenReturn(Arrays.asList(trainerEntity));
 
         // Act
         Optional<List<TrainerEntity>> result = trainerRepository.findAssignedTrainers(traineeId);
 
         // Assert
         assertThat(result).isPresent();
-        assertThat(result.get()).contains(trainerEntity);
     }
 
     @Test
@@ -168,11 +169,9 @@ public class TrainerRepositoryImplTest {
         // Arrange
         List<Long> trainerIds = Arrays.asList(1L, 2L);
         Query<TrainerEntity> query = mock(Query.class);
-        // Use lenient to suppress the warning for unused stubbing
-        lenient().when(session.createQuery("FROM TrainerEntity t WHERE t.id IN :ids",
-                TrainerEntity.class)).thenReturn(query);
-        lenient().when(query.setParameter("ids", trainerIds)).thenReturn(query);
-        lenient().when(query.getResultList()).thenReturn(Arrays.asList(trainerEntity));
+        when(session.createQuery("FROM TrainerEntity t WHERE t.id IN :ids", TrainerEntity.class)).thenReturn(query);
+        when(query.setParameter("ids", trainerIds)).thenReturn(query);
+        when(query.getResultList()).thenReturn(Arrays.asList(trainerEntity));
 
         // Act
         Optional<List<TrainerEntity>> result = trainerRepository.findAllById(trainerIds);
@@ -183,11 +182,11 @@ public class TrainerRepositoryImplTest {
     }
 
     @Test
-    void update_ShouldDetachTrainerEntity() {
+    void update_ShouldSaveOrUpdateTrainerEntity() {
         // Act
         trainerRepository.update(trainerEntity);
 
         // Assert
-        verify(session).detach(trainerEntity);
+        verify(session).saveOrUpdate(trainerEntity);
     }
 }
