@@ -10,6 +10,7 @@ import org.example.dto.TraineeDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
+import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.UserRepository;
@@ -29,6 +30,7 @@ public class TraineeService {
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
 
@@ -42,23 +44,19 @@ public class TraineeService {
     public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
         log.info("Creating trainee profile");
 
-        // Map TraineeDto to TraineeEntity
         TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
 
-        // Check if UserEntity already exists
         UserEntity user = trainee.getUser();
         Optional<UserEntity> existingUserOpt = userRepository.findByUsername(user.getUsername());
         if (existingUserOpt.isPresent()) {
             user = existingUserOpt.get();
         } else {
-            // Save UserEntity first
             user = userRepository.save(user);
         }
 
-        // Set the saved UserEntity to the TraineeEntity
         trainee.setUser(user);
 
-        // Save the TraineeEntity
+        userService.authenticateUser(user.getUsername(),user.getPassword());
         traineeRepository.save(trainee);
 
         log.info("Trainee profile created successfully for {}", user.getUsername());
@@ -177,5 +175,23 @@ public class TraineeService {
         traineeRepository.update(trainee);
 
         log.info("Trainee profile updated successfully for {}", username);
+    }
+
+    public void deleteTraineeByUsername(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user != null) {
+            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(user.getUsername())
+                    .orElseThrow(() -> new ResourceNotFoundException("TraineeEntity not found"));
+
+            if (trainee != null) {
+                traineeRepository.delete(trainee);
+            } else {
+                throw new IllegalArgumentException("Trainee not found for username: " + username);
+            }
+        } else {
+            throw new IllegalArgumentException("User not found for username: " + username);
+        }
     }
 }
