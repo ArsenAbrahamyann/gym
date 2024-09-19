@@ -1,13 +1,18 @@
 package org.example.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.time.Duration;
+import java.util.List;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
-import org.example.service.TraineeService;
-import org.example.service.TrainerService;
+import org.example.entity.TrainingEntity;
+import org.example.entity.TrainingTypeEntity;
+import org.example.entity.UserEntity;
+import org.example.exeption.ValidationException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,101 +21,120 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class ValidationUtilsTest {
-    @Mock
-    private TrainerService trainerService;
-
-    @Mock
-    private TraineeService traineeService;
 
     @InjectMocks
     private ValidationUtils validationUtils;
 
-    @Test
-    public void testValidateBirthDate_ValidDate() {
-        boolean result = validationUtils.validateBirthDate("2000-01-01");
-        assertThat(result).isTrue();
+    @Mock
+    private TraineeEntity traineeEntity;
+
+    @Mock
+    private TrainerEntity trainerEntity;
+
+    @Mock
+    private TrainingEntity trainingEntity;
+
+    @Mock
+    private UserEntity userEntity;
+
+    @BeforeEach
+    void setUp() {
+        // Set up default mock behaviors if needed
     }
 
     @Test
-    public void testValidateBirthDate_FutureDate() {
-        boolean result = validationUtils.validateBirthDate("2100-01-01");
-        assertThat(result).isFalse();
+    void testValidateTrainee_Valid() {
+        when(traineeEntity.getUser()).thenReturn(userEntity);
+        when(userEntity.getUsername()).thenReturn("traineeUser");
+        when(userEntity.getPassword()).thenReturn("password");
+        when(traineeEntity.getAddress()).thenReturn("address");
+        when(userEntity.getIsActive()).thenReturn(true);
+
+        assertDoesNotThrow(() -> validationUtils.validateTrainee(traineeEntity));
     }
 
     @Test
-    public void testValidateBirthDate_InvalidFormat() {
-        boolean result = validationUtils.validateBirthDate("01-01-2000");
-        assertThat(result).isFalse();
+    void testValidateTrainee_UsernameMissing() {
+        when(traineeEntity.getUser()).thenReturn(userEntity);
+        when(userEntity.getUsername()).thenReturn(null);
+
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTrainee(traineeEntity));
+        assertEquals("Trainee username is required.", thrown.getMessage());
     }
 
     @Test
-    public void testValidateTrainingDuration_ValidFormat() {
-        Duration result = validationUtils.validateTrainingDuration("01:30");
-        assertThat(result).isEqualTo(Duration.ofHours(1).plusMinutes(30));
+    void testValidateTrainer_Valid() {
+        when(trainerEntity.getUser()).thenReturn(userEntity);
+        when(userEntity.getUsername()).thenReturn("trainerUser");
+        when(userEntity.getPassword()).thenReturn("password");
+        when(trainerEntity.getSpecialization()).thenReturn(new TrainingTypeEntity());
+        when(userEntity.getIsActive()).thenReturn(true);
+
+        assertDoesNotThrow(() -> validationUtils.validateTrainer(trainerEntity));
     }
 
     @Test
-    public void testValidateTrainingDuration_InvalidValues() {
-        IllegalArgumentException thrown = org.assertj.core.api.Assertions.catchThrowableOfType(() ->
-                validationUtils.validateTrainingDuration("01:60"), IllegalArgumentException.class);
-        assertThat(thrown).isNotNull().hasMessageContaining("Invalid duration values.");
+    void testValidateTrainer_SpecializationMissing() {
+        when(trainerEntity.getUser()).thenReturn(userEntity);
+        when(userEntity.getUsername()).thenReturn("trainerUser");
+        when(userEntity.getPassword()).thenReturn("password");
+        when(trainerEntity.getSpecialization()).thenReturn(null);
+
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTrainer(trainerEntity));
+        assertEquals("Trainer specialization is required.", thrown.getMessage());
     }
 
     @Test
-    public void testValidateTraineeExists_TraineeFound() {
-        TraineeEntity trainee = new TraineeEntity(); // Create a dummy trainee entity
-        when(traineeService.getTrainee("validUser")).thenReturn(trainee);
+    void testValidatePasswordMatch_Valid() {
+        when(userEntity.getPassword()).thenReturn("password");
 
-        TraineeEntity result = validationUtils.validateTraineeExists("validUser");
-        assertThat(result).isNotNull();
+        assertDoesNotThrow(() -> validationUtils.validatePasswordMatch(userEntity, "password"));
     }
 
     @Test
-    public void testValidateTraineeExists_TraineeNotFound() {
-        when(traineeService.getTrainee("invalidUser")).thenReturn(null);
+    void testValidateUpdateTrainee_Valid() {
+        when(traineeEntity.getId()).thenReturn(1L);
+        when(traineeEntity.getUser()).thenReturn(userEntity);
+        when(userEntity.getUsername()).thenReturn("traineeUser");
+        when(userEntity.getPassword()).thenReturn("password");
+        when(traineeEntity.getAddress()).thenReturn("address");
+        when(userEntity.getIsActive()).thenReturn(true);
 
-        TraineeEntity result = validationUtils.validateTraineeExists("invalidUser");
-        assertThat(result).isNull();
+        assertDoesNotThrow(() -> validationUtils.validateUpdateTrainee(traineeEntity));
     }
 
     @Test
-    public void testValidateTrainerExists_TrainerFound() {
-        TrainerEntity trainer = new TrainerEntity(); // Create a dummy trainer entity
-        when(trainerService.getTrainer("validUser")).thenReturn(trainer);
+    void testValidateUpdateTrainee_NoId() {
+        when(traineeEntity.getId()).thenReturn(null);
 
-        TrainerEntity result = validationUtils.validateTrainerExists("validUser");
-        assertThat(result).isNotNull();
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateUpdateTrainee(traineeEntity));
+        assertEquals("Trainee ID is required for updates.", thrown.getMessage());
     }
 
     @Test
-    public void testValidateTrainerExists_TrainerNotFound() {
-        when(trainerService.getTrainer("invalidUser")).thenReturn(null);
-
-        TrainerEntity result = validationUtils.validateTrainerExists("invalidUser");
-        assertThat(result).isNull();
+    void testValidateTraineeTrainingsCriteria_MissingUsername() {
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateTraineeTrainingsCriteria(null, null, null, null, null));
+        assertEquals("Trainee username is required for fetching training list.", thrown.getMessage());
     }
 
     @Test
-    public void testIsValidBoolean_ValidTrue() {
-        boolean result = validationUtils.isValidBoolean("true");
-        assertThat(result).isTrue();
+    void testValidateUpdateTraineeTrainerList_Valid() {
+        when(traineeEntity.getId()).thenReturn(1L);
+        List<TrainerEntity> trainers = List.of(new TrainerEntity());
+
+        assertDoesNotThrow(() -> validationUtils.validateUpdateTraineeTrainerList(traineeEntity, trainers));
     }
 
     @Test
-    public void testIsValidBoolean_ValidFalse() {
-        boolean result = validationUtils.isValidBoolean("false");
-        assertThat(result).isTrue();
-    }
+    void testValidateUpdateTraineeTrainerList_NoTrainee() {
+        when(traineeEntity.getId()).thenReturn(null);
 
-    @Test
-    public void testIsValidBoolean_InvalidValue() {
-        boolean result = validationUtils.isValidBoolean("notABoolean");
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void testIsValidBoolean_NullValue() {
-        boolean result = validationUtils.isValidBoolean(null);
-        assertThat(result).isFalse();
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> validationUtils.validateUpdateTraineeTrainerList(traineeEntity, List.of()));
+        assertEquals("Trainee ID is required.", thrown.getMessage());
     }
 }

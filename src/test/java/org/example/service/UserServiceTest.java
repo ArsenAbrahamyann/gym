@@ -1,12 +1,17 @@
 package org.example.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import org.example.repository.UserDao;
+import java.util.Optional;
+import javax.persistence.EntityNotFoundException;
+import org.example.entity.UserEntity;
+import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,45 +22,70 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     @Mock
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @InjectMocks
     private UserService userService;
 
+    private UserEntity userEntity;
+
     @BeforeEach
-    void setUp() throws Exception {
-        Field userDaoField = UserService.class.getDeclaredField("userDao");
-        userDaoField.setAccessible(true);
-        userDaoField.set(userService, userDao);
+    void setUp() {
+        userEntity = new UserEntity();
+        userEntity.setUsername("testUser");
+        userEntity.setPassword("testPassword");
     }
 
     @Test
-    public void testGetAllUsernames_ReturnsUsernames() {
-        List<String> mockUsernames = Arrays.asList("user1", "user2", "user3");
-        when(userDao.findAllUsernames()).thenReturn(mockUsernames);
+    void testAuthenticateUserSuccess() {
+        // Given
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
 
-        List<String> usernames = userService.getAllUsernames();
+        // When
+        boolean result = userService.authenticateUser("testUser", "testPassword");
 
-        assertEquals(mockUsernames, usernames);
+        // Then
+        assertTrue(result, "User authentication should succeed with correct password.");
+        verify(userRepository).findByUsername("testUser");
     }
 
     @Test
-    public void testGetAllUsernames_EmptyList() {
-        when(userDao.findAllUsernames()).thenReturn(Arrays.asList());
+    void testAuthenticateUserFailureDueToIncorrectPassword() {
+        // Given
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
 
-        List<String> usernames = userService.getAllUsernames();
+        // When
+        boolean result = userService.authenticateUser("testUser", "wrongPassword");
 
-        assertEquals(0, usernames.size());
+        // Then
+        assertFalse(result, "User authentication should fail with incorrect password.");
+        verify(userRepository).findByUsername("testUser");
     }
 
     @Test
-    public void testGetAllUsernames_SingleUser() {
-        List<String> mockUsernames = Arrays.asList("user1");
-        when(userDao.findAllUsernames()).thenReturn(mockUsernames);
+    void testAuthenticateUserThrowsEntityNotFoundException() {
+        // Given
+        when(userRepository.findByUsername("nonExistingUser")).thenReturn(Optional.empty());
 
-        List<String> usernames = userService.getAllUsernames();
+        // When
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            userService.authenticateUser("nonExistingUser", "somePassword");
+        });
 
-        assertEquals(1, usernames.size());
-        assertEquals("user1", usernames.get(0));
+        // Then
+        assertEquals("User not found", exception.getMessage(), "Exception message should match expected output.");
+        verify(userRepository).findByUsername("nonExistingUser");
+    }
+
+    @Test
+    void testAuthenticateUserRepositoryInteraction() {
+        // Given
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
+
+        // When
+        userService.authenticateUser("testUser", "testPassword");
+
+        // Then
+        verify(userRepository, times(1)).findByUsername("testUser");
     }
 }
