@@ -1,97 +1,187 @@
 package org.example.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import javax.persistence.EntityNotFoundException;
+import org.example.dto.TraineeDto;
+import org.example.dto.UserDto;
 import org.example.entity.TraineeEntity;
-import org.example.repository.TraineeDao;
+import org.example.entity.TrainerEntity;
+import org.example.entity.UserEntity;
+import org.example.exeption.ResourceNotFoundException;
+import org.example.repository.TraineeRepository;
+import org.example.repository.TrainerRepository;
+import org.example.repository.UserRepository;
+import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeServiceTest {
+
     @Mock
-    private TraineeDao traineeDao;
+    private TraineeRepository traineeRepository;
+
+    @Mock
+    private TrainerRepository trainerRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
+    @Mock
+    private ModelMapper modelMapper;
 
     @InjectMocks
     private TraineeService traineeService;
 
+    private UserEntity userEntity;
     private TraineeEntity traineeEntity;
+    private TraineeDto traineeDto;
+    private TrainerEntity trainerEntity;
 
+    /**
+     * Initializes the test data before each test case.
+     * This method is annotated with {@code @BeforeEach}, meaning it runs before each test method in the class.
+     * It creates instances of the entities {@code UserEntity}, {@code TrainerEntity}, {@code TraineeEntity}, and
+     * the corresponding DTO {@code TraineeDto}, setting their relevant fields with test values.
+     *
+     * <p>Specifically, it performs the following steps:
+     * <ul>
+     *     <li>Initializes a {@code UserEntity} object with the username "testUser", password "testPass", and sets its active status to {@code true}.</li>
+     *     <li>Creates a {@code TrainerEntity} object, assigns it an ID of 1L, and links it to the {@code userEntity}.</li>
+     *     <li>Creates a {@code TraineeEntity} object and links it to the {@code userEntity}.</li>
+     *     <li>Initializes a {@code TraineeDto} object, setting the user's first name, last name, and active status in the {@code UserDto}, as well as setting the date of birth and address fields for the trainee.</li>
+     * </ul>
+     */
     @BeforeEach
-    void setUp() {
+    public void setUp() {
+        userEntity = new UserEntity();
+        userEntity.setUsername("testUser");
+        userEntity.setPassword("testPass");
+        userEntity.setIsActive(true);
+
+        trainerEntity = new TrainerEntity();
+        trainerEntity.setId(1L);
+        trainerEntity.setUser(userEntity);
+
         traineeEntity = new TraineeEntity();
-        traineeEntity.setUserId("trainee123");
-        traineeEntity.setFirstName("John");
-        traineeEntity.setLastName("Doe");
+        traineeEntity.setUser(userEntity);
+
+        traineeDto = new TraineeDto();
+        traineeDto.setUser(new UserDto("TestFirstName", "TestLastName", true, "fg", "sfd"));
+        traineeDto.setDateOfBirth(LocalDateTime.now());
+        traineeDto.setAddress("123 Test Street");
+
     }
 
     @Test
-    void testCreateTrainee() {
-        traineeService.createTrainee(traineeEntity);
+    public void testUpdateTraineeTrainers_Success() {
+        TrainerEntity newTrainerEntity = new TrainerEntity();
+        newTrainerEntity.setId(2L);
+        newTrainerEntity.setUser(userEntity);
 
-        verify(traineeDao, times(1)).createTrainee(traineeEntity);
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
+        when(trainerRepository.findAllById(any())).thenReturn(Optional.of(List.of(newTrainerEntity)));
+        doNothing().when(validationUtils).validateUpdateTraineeTrainerList(any(TraineeEntity.class), any());
+
+        traineeService.updateTraineeTrainers("testUser", List.of(2L));
+
+        verify(traineeRepository).findByTraineeFromUsername("testUser");
+        verify(trainerRepository).findAllById(List.of(2L));
+        verify(validationUtils).validateUpdateTraineeTrainerList(traineeEntity, List.of(newTrainerEntity));
+        verify(traineeRepository).update(traineeEntity);
     }
 
     @Test
-    void testUpdateTrainee() {
-        traineeService.updateTrainee(traineeEntity);
+    public void testUpdateTraineeProfile_Success() {
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        doNothing().when(validationUtils).validateUpdateTrainee(any(TraineeEntity.class));
 
-        verify(traineeDao, times(1)).updateTrainee(traineeEntity.getUserId(), traineeEntity);
+        traineeService.updateTraineeProfile("testUser", traineeDto);
+
+        verify(traineeRepository).findByTraineeFromUsername("testUser");
+        verify(traineeRepository).update(traineeEntity);
+        verify(validationUtils).validateUpdateTrainee(traineeEntity);
     }
 
     @Test
-    void testDeleteTrainee() {
-        String username = "trainee123";
+    public void testCreateTraineeProfile_UserAlreadyExists() {
+        TraineeEntity trainee = new TraineeEntity();
+        trainee.setId(1L);
 
-        traineeService.deleteTrainee(username);
+        traineeRepository.save(trainee);
 
-        verify(traineeDao, times(1)).deleteTrainee(username);
+        verify(traineeRepository, times(1)).save(trainee);
     }
 
     @Test
-    void testGetTrainee() {
-        String userId = "trainee123";
-        when(traineeDao.getTrainee(userId)).thenReturn(traineeEntity);
+    public void testChangeTraineePassword_UserNotFound() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        TraineeEntity result = traineeService.getTrainee(userId);
+        assertThrows(EntityNotFoundException.class, () ->
+                traineeService.changeTraineePassword("nonExistentUser", "newPass"));
 
-        assertNotNull(result);
-        assertEquals(traineeEntity, result);
-        verify(traineeDao, times(1)).getTrainee(userId);
+        verify(userRepository).findByUsername("nonExistentUser");
+        verify(userRepository, never()).update(any(UserEntity.class));
     }
 
     @Test
-    void testGetAllTrainees() {
-        List<TraineeEntity> traineeList = Arrays.asList(traineeEntity, new TraineeEntity());
-        when(traineeDao.getAllTrainees()).thenReturn(traineeList);
+    public void testDeleteTraineeByUsername_Success() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
+        doNothing().when(traineeRepository).delete(traineeEntity);
 
-        List<TraineeEntity> result = traineeService.getAllTrainees();
+        traineeService.deleteTraineeByUsername("testUser");
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(traineeDao, times(1)).getAllTrainees();
+        verify(userRepository).findByUsername("testUser");
+        verify(traineeRepository).findByTraineeFromUsername("testUser");
+        verify(traineeRepository).delete(traineeEntity);
     }
 
     @Test
-    void testGetTraineeNotFound() {
-        String userId = "nonExistingTrainee";
-        when(traineeDao.getTrainee(userId)).thenReturn(null);
+    public void testDeleteTraineeByUsername_UserNotFound() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        TraineeEntity result = traineeService.getTrainee(userId);
+        assertThrows(ResourceNotFoundException.class, () ->
+                traineeService.deleteTraineeByUsername("nonExistentUser"));
 
-        assertNull(result);
-        verify(traineeDao, times(1)).getTrainee(userId);
+        verify(userRepository).findByUsername("nonExistentUser");
+        verify(traineeRepository, never()).findByTraineeFromUsername(anyString());
+        verify(traineeRepository, never()).delete(any(TraineeEntity.class));
+    }
+
+    @Test
+    public void testDeleteTraineeByUsername_TraineeNotFound() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                traineeService.deleteTraineeByUsername("testUser"));
+
+        verify(userRepository).findByUsername("testUser");
+        verify(traineeRepository).findByTraineeFromUsername("testUser");
+        verify(traineeRepository, never()).delete(any(TraineeEntity.class));
     }
 }

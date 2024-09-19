@@ -1,8 +1,9 @@
 package org.example.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,48 +11,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class UserUtilsTest {
+    private final UserUtils userUtils = new UserUtils();
 
     @Test
     public void testGenerateUsernameUnique() {
-        List<String> existingUsernames = new ArrayList<>();
-        existingUsernames.add("john.doe");
-        existingUsernames.add("john.doe1");
-
-        String username = UserUtils.generateUsername("john", "doe", existingUsernames);
-
-        assertThat(username).isEqualTo("john.doe2");
+        List<String> existingUsernames = Arrays.asList("john.doe", "john.doe1", "john.doe2");
+        String username = userUtils.generateUsername("john", "doe", existingUsernames);
+        assertEquals("john.doe3", username, "Username should be unique and not exist in the list.");
     }
 
     @Test
-    public void testGenerateUsernameNonUnique() {
-        List<String> existingUsernames = new ArrayList<>();
-        existingUsernames.add("john.doe");
-
-        String username = UserUtils.generateUsername("john", "doe", existingUsernames);
-
-        assertThat(username).isEqualTo("john.doe1");
+    public void testGenerateUsernameBaseCase() {
+        List<String> existingUsernames = Arrays.asList("john.doe");
+        String username = userUtils.generateUsername("john", "doe", existingUsernames);
+        assertEquals("john.doe1", username, "Username should be generated "
+                + "with a serial number if the base username exists.");
     }
 
-    @Test
-    public void testGenerateUsernameEmptyList() {
-        List<String> existingUsernames = new ArrayList<>();
-
-        String username = UserUtils.generateUsername("john", "doe", existingUsernames);
-
-        assertThat(username).isEqualTo("john.doe");
-    }
 
     @Test
     public void testGeneratePasswordLength() {
-        String password = UserUtils.generatePassword();
-
-        assertThat(password).hasSize(10);
+        String password = userUtils.generatePassword();
+        assertEquals(10, password.length(), "Password length should be 10.");
     }
 
     @Test
     public void testGeneratePasswordCharacters() {
-        String password = UserUtils.generatePassword();
-
-        assertThat(password).matches("[A-Za-z0-9]{10}");
+        String password = userUtils.generatePassword();
+        assertTrue(password.chars().allMatch(ch -> Character.isLetterOrDigit(ch)),
+                "Password should only contain letters and digits.");
     }
 }
