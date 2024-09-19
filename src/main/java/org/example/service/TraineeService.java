@@ -56,7 +56,7 @@ public class TraineeService {
 
         trainee.setUser(user);
 
-        userService.authenticateUser(user.getUsername(),user.getPassword());
+        userService.authenticateUser(user.getUsername(), user.getPassword());
         traineeRepository.save(trainee);
 
         log.info("Trainee profile created successfully for {}", user.getUsername());

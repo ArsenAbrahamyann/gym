@@ -15,9 +15,7 @@ import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.repository.TrainingTypeRepository;
-import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +31,8 @@ public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
     private final TrainingTypeRepository trainingTypeRepository;
-    private final UserRepository userRepository;
     private final TrainerRepository trainerRepository;
     private final ValidationUtils validationUtils;
-    private final ModelMapper modelMapper;
 
     /**
      * Adds a new training record.
@@ -101,8 +97,8 @@ public class TrainingService {
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
     @Transactional
-    public List<TrainingEntity> getTrainingsForTrainer(String trainerUsername, LocalDateTime fromDate, LocalDateTime toDate,
-                                                       String traineeName) {
+    public List<TrainingEntity> getTrainingsForTrainer(String trainerUsername, LocalDateTime fromDate,
+                                                       LocalDateTime toDate, String traineeName) {
 
         log.info("Fetching trainings for trainer: {}", trainerUsername);
 

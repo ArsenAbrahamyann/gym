@@ -1,7 +1,6 @@
 package org.example.repository.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -153,7 +152,8 @@ public class TrainerRepositoryImplTest {
         // Arrange
         Long traineeId = 1L;
         Query<TrainerEntity> query = mock(Query.class);
-        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId", TrainerEntity.class))
+        when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId",
+                TrainerEntity.class))
                 .thenReturn(query);
         when(query.setParameter("traineeId", traineeId)).thenReturn(query);
 

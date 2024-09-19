@@ -37,7 +37,7 @@ public class TrainerEntity {
     private TrainingTypeEntity specialization;
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true,nullable = false)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private UserEntity user;
 
     @ManyToMany(mappedBy = "trainers", fetch = FetchType.LAZY)
