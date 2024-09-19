@@ -66,17 +66,19 @@ public class TrainingRepositoryImpl implements TrainingRepository {
     /**
      * Finds a list of {@link TrainingEntity} for a given trainee based on criteria.
      *
-     * @param traineeId the ID of the trainee
-     * @param fromDate the starting date of the training period
-     * @param toDate the ending date of the training period
-     * @param trainerName the name of the trainer (optional)
+     * @param traineeId    the ID of the trainee
+     * @param fromDate     the starting date of the training period
+     * @param toDate       the ending date of the training period
+     * @param trainerName  the name of the trainer (optional)
      * @param trainingType the type of training (optional)
      * @return an {@link Optional} containing a list of {@link TrainingEntity}, or empty if no trainings match the criteria
      */
     @Override
     public Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
-                                                                  LocalDateTime toDate, String trainerName, String trainingType) {
-        log.debug("Finding trainings for trainee ID: {} with criteria [fromDate: {}, toDate: {}, trainerName: {}, trainingType: {}]",
+                                                                  LocalDateTime toDate, String trainerName,
+                                                                  String trainingType) {
+        log.debug("Finding trainings for trainee ID: {} with criteria [fromDate: {},"
+                        + " toDate: {}, trainerName: {}, trainingType: {}]",
                 traineeId, fromDate, toDate, trainerName, trainingType);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<TrainingEntity> cq = cb.createQuery(TrainingEntity.class);
@@ -84,22 +86,29 @@ public class TrainingRepositoryImpl implements TrainingRepository {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (traineeId != null) {
+        if (traineeId
+                != null) {
             predicates.add(cb.equal(training.get("trainee").get("id"), traineeId));
         }
 
-        if (fromDate != null) {
+        if (fromDate
+                != null) {
             predicates.add(cb.greaterThanOrEqualTo(training.get("trainingDate"), fromDate));
         }
-        if (toDate != null) {
+        if (toDate
+                != null) {
             predicates.add(cb.lessThanOrEqualTo(training.get("trainingDate"), toDate));
         }
 
-        if (trainerName != null && !trainerName.isEmpty()) {
+        if (trainerName
+                != null
+                && ! trainerName.isEmpty()) {
             Join<TrainingEntity, TrainerEntity> trainerJoin = training.join("trainer");
         }
 
-        if (trainingType != null && !trainingType.isEmpty()) {
+        if (trainingType
+                != null
+                && ! trainingType.isEmpty()) {
             predicates.add(cb.equal(training.get("trainingType").get("trainingTypeName"), trainingType));
         }
 
@@ -111,20 +120,22 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         } else {
             log.info("Found {} trainings for trainee ID: {}", resultList.size(), traineeId);
         }
-        return Optional.of(resultList);    }
+        return Optional.of(resultList);
+    }
 
     /**
      * Finds a list of {@link TrainingEntity} for a given trainer based on criteria.
      *
-     * @param trainerId the ID of the trainer
-     * @param fromDate the starting date of the training period
-     * @param toDate the ending date of the training period
+     * @param trainerId   the ID of the trainer
+     * @param fromDate    the starting date of the training period
+     * @param toDate      the ending date of the training period
      * @param traineeName the name of the trainee (optional)
      * @return an {@link Optional} containing a list of {@link TrainingEntity}, or empty if no trainings match the criteria
      */
     @Override
-    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate, LocalDateTime toDate,
-                                                        String traineeName) {
+    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate,
+                                                                  LocalDateTime toDate,
+                                                                  String traineeName) {
         log.debug("Finding trainings for trainer ID: {} with criteria [fromDate: {}, toDate: {}, traineeName: {}]",
                 trainerId, fromDate, toDate, traineeName);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -133,23 +144,30 @@ public class TrainingRepositoryImpl implements TrainingRepository {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (trainerId != null) {
+        if (trainerId
+                != null) {
             predicates.add(cb.equal(training.get("trainer").get("id"), trainerId));
         }
 
-        if (fromDate != null) {
+        if (fromDate
+                != null) {
             predicates.add(cb.greaterThanOrEqualTo(training.get("trainingDate"), fromDate));
         }
 
-        if (toDate != null) {
+        if (toDate
+                != null) {
             predicates.add(cb.lessThanOrEqualTo(training.get("trainingDate"), toDate));
         }
 
-        if (traineeName != null && !traineeName.isEmpty()) {
+        if (traineeName
+                != null
+                && ! traineeName.isEmpty()) {
             Join<TrainingEntity, TraineeEntity> trainee = training.join("trainee");
             Join<TraineeEntity, UserEntity> user = trainee.join("user");
 
-            Predicate usernamePredicate = cb.like(cb.lower(user.get("username")), "%" + traineeName.toLowerCase() + "%");
+            Predicate usernamePredicate = cb.like(cb.lower(user.get("username")), "%"
+                    + traineeName.toLowerCase()
+                    + "%");
 
             predicates.add(usernamePredicate);
         }
@@ -162,5 +180,6 @@ public class TrainingRepositoryImpl implements TrainingRepository {
         } else {
             log.info("Found {} trainings for trainer ID: {}", resultList.size(), trainerId);
         }
-        return Optional.of(resultList);    }
+        return Optional.of(resultList);
+    }
 }

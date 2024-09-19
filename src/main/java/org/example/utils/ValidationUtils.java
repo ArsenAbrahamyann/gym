@@ -185,8 +185,8 @@ public class ValidationUtils {
      * @param trainingType Optional training type for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
-    public void validateTraineeTrainingsCriteria(String traineeUsername, LocalDateTime fromDate, LocalDateTime toDate, String trainerName,
-                                                 String trainingType) {
+    public void validateTraineeTrainingsCriteria(String traineeUsername, LocalDateTime fromDate,
+                                                 LocalDateTime toDate, String trainerName, String trainingType) {
         if (traineeUsername == null || traineeUsername.isEmpty()) {
             throw new ValidationException("Trainee username is required for fetching training list.");
         }

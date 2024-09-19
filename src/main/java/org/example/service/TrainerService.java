@@ -50,17 +50,18 @@ public class TrainerService {
         validationUtils.validateTrainer(trainer);
         TrainingTypeEntity trainingType = trainer.getSpecialization();
 
-        if (trainingType.getId() == null) {
+        if (trainingType.getId()
+                == null) {
             trainingTypeRepository.save(trainingType);
         }
 
         Optional<UserEntity> existingUser = userRepository.findByUsername(trainerDto.getUser().getUsername());
         if (existingUser.isPresent()) {
             trainer.getUser().setId(existingUser.get().getId());
-        }else {
+        } else {
             userRepository.save(trainer.getUser());
         }
-        userService.authenticateUser(trainer.getUser().getUsername(),trainer.getUser().getPassword());
+        userService.authenticateUser(trainer.getUser().getUsername(), trainer.getUser().getPassword());
         trainerRepository.save(trainer);
         log.debug("Trainer profile created: {}", trainer);
         return trainerDto;

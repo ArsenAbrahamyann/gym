@@ -38,10 +38,10 @@ public interface TraineeRepository {
      */
     void update(TraineeEntity trainee);
 
-    /**
-     * Delete an existing {@Link TraineeEntity}.
+    /**.
+     * Delete an existing {@Link TraineeEntity}
      *
-     * @param trainee
+     * @param trainee the {@link TraineeEntity}.
      */
     void delete(TraineeEntity trainee);
 }

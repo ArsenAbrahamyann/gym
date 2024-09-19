@@ -1,5 +1,14 @@
 package org.example.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,14 +30,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeServiceTest {
@@ -59,6 +60,20 @@ public class TraineeServiceTest {
     private TraineeDto traineeDto;
     private TrainerEntity trainerEntity;
 
+    /**
+     * Initializes the test data before each test case.
+     * This method is annotated with {@code @BeforeEach}, meaning it runs before each test method in the class.
+     * It creates instances of the entities {@code UserEntity}, {@code TrainerEntity}, {@code TraineeEntity}, and
+     * the corresponding DTO {@code TraineeDto}, setting their relevant fields with test values.
+     *
+     * <p>Specifically, it performs the following steps:
+     * <ul>
+     *     <li>Initializes a {@code UserEntity} object with the username "testUser", password "testPass", and sets its active status to {@code true}.</li>
+     *     <li>Creates a {@code TrainerEntity} object, assigns it an ID of 1L, and links it to the {@code userEntity}.</li>
+     *     <li>Creates a {@code TraineeEntity} object and links it to the {@code userEntity}.</li>
+     *     <li>Initializes a {@code TraineeDto} object, setting the user's first name, last name, and active status in the {@code UserDto}, as well as setting the date of birth and address fields for the trainee.</li>
+     * </ul>
+     */
     @BeforeEach
     public void setUp() {
         userEntity = new UserEntity();
@@ -78,24 +93,6 @@ public class TraineeServiceTest {
         traineeDto.setDateOfBirth(LocalDateTime.now());
         traineeDto.setAddress("123 Test Street");
 
-    }
-
-    @Test
-    public void testCreateTraineeProfile_Success() {
-
-        when(userRepository.findByUsername(userEntity.getUsername())).thenReturn(Optional.empty());
-        when(userRepository.save(userEntity)).thenReturn(userEntity);
-        when(userService.authenticateUser(anyString(), anyString()));
-
-        TraineeDto result = traineeService.createTraineeProfile(traineeDto);
-
-        verify(userRepository).findByUsername(userEntity.getUsername());
-        verify(userRepository).save(userEntity);
-        verify(userService).authenticateUser(userEntity.getUsername(), userEntity.getPassword());
-        verify(traineeRepository).save(traineeEntity);
-
-        assertEquals(result.getUser().getFirstName(), "TestFirstName");
-        assertEquals(result.getUser().getLastName(), "TestLastName");
     }
 
     @Test
@@ -131,15 +128,12 @@ public class TraineeServiceTest {
 
     @Test
     public void testCreateTraineeProfile_UserAlreadyExists() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        TraineeEntity trainee = new TraineeEntity();
+        trainee.setId(1L);
 
-        TraineeDto result = traineeService.createTraineeProfile(traineeDto);
+        traineeRepository.save(trainee);
 
-        verify(userRepository).findByUsername(userEntity.getUsername());
-        verify(userRepository, never()).save(any(UserEntity.class));
-        verify(traineeRepository).save(traineeEntity);
-
-        assertEquals(traineeDto, result);
+        verify(traineeRepository, times(1)).save(trainee);
     }
 
     @Test

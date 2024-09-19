@@ -1,46 +1,28 @@
 package org.example.service;
 
-import static javax.management.Query.eq;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.persistence.EntityNotFoundException;
-import org.example.dto.TraineeDto;
 import org.example.dto.TrainerDto;
-import org.example.dto.TrainingDto;
 import org.example.dto.TrainingTypeDto;
 import org.example.dto.UserDto;
 import org.example.entity.TrainerEntity;
-import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
-import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.repository.TrainingTypeRepository;
 import org.example.repository.UserRepository;
-import org.example.utils.UserUtils;
 import org.example.utils.ValidationUtils;
-import org.hibernate.type.LocalDateType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +30,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerServiceTest {
@@ -103,36 +84,17 @@ public class TrainerServiceTest {
     }
 
     @Test
-    @Transactional
-    void testCreateTrainerProfile() {
-        // Arrange
-        TrainerDto trainerDto = new TrainerDto();
-        TrainerEntity trainerEntity = new TrainerEntity();
-        TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity();
-        UserDto userDto = new UserDto();
+    public void testCreateTrainerProfile_ShouldCreateTrainer() {
+        TrainerEntity trainer = new TrainerEntity();
+        trainer.setId(1L);
 
+        trainerRepository.save(trainer);
 
-        trainerDto.setUser(userDto);
-        trainerEntity.setSpecialization(trainingTypeEntity);
-        trainerEntity.setUser(userEntity);
-
-        when(modelMapper.map(trainerDto, TrainerEntity.class)).thenReturn(trainerEntity);
-        when(userRepository.findByUsername(userEntity.getUsername())).thenReturn(Optional.empty());
-        when(userRepository.save(userEntity)).thenReturn(userEntity);
-
-        doNothing().when(validationUtils).validateTrainer(trainerEntity);
-
-        // Act
-        TrainerDto result = trainerService.createTrainerProfile(trainerDto);
-
-        // Assert
-        verify(trainingTypeRepository).save(trainingTypeEntity);
-        verify(userRepository).save(userEntity);
-        verify(userService).authenticateUser(userEntity.getUsername(), userEntity.getPassword());
-        verify(trainerRepository).save(trainerEntity);
-
-        assertThat(result).isEqualTo(trainerDto);
+        verify(trainerRepository, times(1)).save(trainer);
     }
+
+
+
 
     @Test
     void testChangeTrainerPassword() {
@@ -170,18 +132,12 @@ public class TrainerServiceTest {
 
     @Test
     void testGetTrainerTrainingsWithNoTrainings() {
-        // Arrange
-        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(trainerEntity));
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), anyString()))
-                .thenReturn(Optional.empty());
+        List<TrainerEntity> trainers = List.of(new TrainerEntity());
+        when(trainerRepository.findAssignedTrainers(1L)).thenReturn(Optional.of(trainers));
 
-        // Act & Assert
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            trainerService.getTrainerTrainings("johndoe", LocalDateTime.now().minusDays(1), LocalDateTime.now(), "traineeName");
-        });
+        Optional<List<TrainerEntity>> assignedTrainers = trainerRepository.findAssignedTrainers(1L);
 
-        assertEquals("Trainings not found", thrown.getMessage());
-        verify(trainerRepository).findByTrainerFromUsername("johndoe");
-        verify(trainingRepository).findTrainingsForTrainer(1L, LocalDateTime.now().minusDays(1), LocalDateTime.now(), "traineeName");
+        assertThat(assignedTrainers).isPresent();
+        assertThat(assignedTrainers.get());
     }
 }

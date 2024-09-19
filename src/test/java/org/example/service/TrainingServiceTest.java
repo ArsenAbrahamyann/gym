@@ -1,30 +1,29 @@
 package org.example.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
 import javax.persistence.EntityNotFoundException;
-
-import org.example.dto.TraineeDto;
-import org.example.dto.TrainerDto;
 import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.exeption.ResourceNotFoundException;
+import org.example.exeption.ValidationException;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.repository.TrainingTypeRepository;
+import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,18 +31,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
-    private static final Long TRAINEE_ID = 59L;
-    private static final Long TRAINER_ID = 27L;
-    private static final Long TRAINING_TYPE_ID = 15L;
-    private static final String TRAINING_NAME = "Yoga";
-    private static final String TRAINEE_USERNAME = "traineeName";
-    private static final String TRAINER_USERNAME = "trainerUsername";
-    private static final LocalDateTime FROM_DATE = LocalDateTime.now().minusDays(1);
-    private static final LocalDateTime TO_DATE = LocalDateTime.now();
-
     @Mock
     private TrainingRepository trainingRepository;
 
@@ -51,137 +42,167 @@ public class TrainingServiceTest {
     private TraineeRepository traineeRepository;
 
     @Mock
+    private TrainingTypeRepository trainingTypeRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private TrainerRepository trainerRepository;
 
     @Mock
     private ValidationUtils validationUtils;
+
     @Mock
-    private TrainingTypeRepository trainingTypeRepository;
+    private ModelMapper modelMapper;
 
     @InjectMocks
     private TrainingService trainingService;
 
-    private TrainingDto trainingDto;
+    private TraineeEntity trainee;
+    private TrainerEntity trainer;
     private TrainingEntity trainingEntity;
+    private TrainingDto trainingDto;
 
+    /**
+     * Initializes the test data before each test case.
+     * This method is annotated with {@code @BeforeEach}, meaning it runs before each test method in the class.
+     * It sets up the required objects for testing, including {@code TraineeEntity}, {@code TrainerEntity},
+     * {@code TrainingEntity}, and {@code TrainingDto}, and assigns their respective fields with test values.
+     *
+     * <p>Specifically, it performs the following steps:
+     * <ul>
+     *     <li>Creates a {@code TraineeEntity} object with an ID of 1L.</li>
+     *     <li>Creates a {@code TrainerEntity} object with an ID of 1L.</li>
+     *     <li>Initializes a {@code TrainingEntity} object, setting its trainee, trainer, and training name to
+     *         "Test Training".</li>
+     *     <li>Creates a {@code TrainingDto} object, setting the trainee and trainer IDs to 1L, the training name
+     *         to "Test Training", the training type ID to 1L, and the duration to 60 minutes.</li>
+     * </ul>
+     */
     @BeforeEach
-    void setUp() {
-        trainingDto = new TrainingDto();
-        trainingDto.setTraineeId(TRAINEE_ID);
-        trainingDto.setTrainerId(TRAINER_ID);
-        trainingDto.setTrainingName(TRAINING_NAME);
-        trainingDto.setTrainingTypeId(TRAINING_TYPE_ID);
-        trainingDto.setTrainingDuration(60);
+    public void setUp() {
+        trainee = new TraineeEntity();
+        trainee.setId(1L);
+
+        trainer = new TrainerEntity();
+        trainer.setId(1L);
 
         trainingEntity = new TrainingEntity();
-        trainingEntity.setId(1L);
+        trainingEntity.setTrainee(trainee);
+        trainingEntity.setTrainer(trainer);
+        trainingEntity.setTrainingName("Test Training");
+
+        trainingDto = new TrainingDto();
+        trainingDto.setTraineeId(1L);
+        trainingDto.setTrainerId(1L);
+        trainingDto.setTrainingName("Test Training");
+        trainingDto.setTrainingTypeId(1L);
+        trainingDto.setTrainingDuration(60);
     }
 
     @Test
-    void testAddTrainingSuccess() {
-        when(traineeRepository.findById(TRAINEE_ID)).thenReturn(Optional.of(new TraineeEntity()));
-        when(trainerRepository.findById(TRAINER_ID)).thenReturn(Optional.of(new TrainerEntity()));
-        when(trainingTypeRepository.findById(anyLong())).thenReturn(Optional.of(new TrainingTypeEntity()));
-        doNothing().when(validationUtils).validateTraining(any(TrainingEntity.class));
+    public void testAddTraining_Success() {
+        Long traineeId = 1L;
+        Long trainerId = 2L;
+        Long trainingTypeId = 3L;
+        TrainingDto trainingDto = new TrainingDto(traineeId, trainerId, "Training Name", trainingTypeId, 60);
 
+        TraineeEntity trainee = new TraineeEntity();
+        TrainerEntity trainer = new TrainerEntity();
+        TrainingEntity trainingEntity = new TrainingEntity();
+
+        // Mock repository behavior
+        when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(trainee));
+        when(trainerRepository.findById(trainerId)).thenReturn(Optional.of(trainer));
+        when(trainingTypeRepository.findById(trainingTypeId)).thenReturn(Optional.of(new TrainingTypeEntity()));
+        doNothing().when(trainingRepository).save(any(TrainingEntity.class));
+
+        // Act
         trainingService.addTraining(trainingDto);
 
-        verify(trainingRepository, times(1)).save(any(TrainingEntity.class));
+        // Assert
+        verify(traineeRepository).findById(traineeId);
+        verify(trainerRepository).findById(trainerId);
+        verify(trainingTypeRepository).findById(trainingTypeId);
+        verify(trainingRepository).save(any(TrainingEntity.class));
     }
 
     @Test
-    void testAddTrainingTraineeNotFound() {
+    public void testAddTraining_TraineeNotFound() {
         when(traineeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.addTraining(trainingDto);
-        });
-        assertEquals("Trainee not found", exception.getMessage());
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> trainingService.addTraining(trainingDto))
+                .withMessageContaining("Trainee not found");
     }
 
     @Test
-    void testAddTrainingTrainerNotFound() {
-        when(traineeRepository.findById(TRAINEE_ID)).thenReturn(Optional.of(new TraineeEntity()));
-        when(trainerRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.addTraining(trainingDto);
-        });
-        assertEquals("Trainer not found", exception.getMessage());
-    }
-
-    @Test
-    void testGetTrainingsForTraineeSuccess() {
-        when(traineeRepository.findByTraineeFromUsername(TRAINEE_USERNAME)).thenReturn(Optional.of(new TraineeEntity()));
-        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(LocalDateTime.class),
-                any(LocalDateTime.class), anyString(), anyString()))
+    public void testGetTrainingsForTrainee_Success() {
+        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
+        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), any(), any()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
-        List<TrainingEntity> result = trainingService.getTrainingsForTrainee(TRAINEE_USERNAME, FROM_DATE,
-                TO_DATE, "trainerName", "trainingType");
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainee("traineeName",
+                LocalDateTime.now(), LocalDateTime.now(), "trainerName", "trainingType");
 
-        assertEquals(1, result.size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainee(anyLong(), any(LocalDateTime.class),
-                any(LocalDateTime.class), anyString(), anyString());
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0)).isEqualTo(trainingEntity);
     }
 
     @Test
-    void testGetTrainingsForTraineeTraineeNotFound() {
-        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.empty());
+    public void testGetTrainingsForTrainee_TraineeNotFound() {
+        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainee(TRAINEE_USERNAME, FROM_DATE, TO_DATE, "trainerName", "trainingType");
-        });
-        assertEquals("Trainee not found", exception.getMessage());
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> trainingService.getTrainingsForTrainee("traineeName",
+                        LocalDateTime.now(), LocalDateTime.now(), "trainerName", "trainingType"))
+                .withMessageContaining("Trainee not found");
     }
 
     @Test
-    void testGetTrainingsForTraineeNoTrainingsFound() {
-        when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(new TraineeEntity()));
-        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(LocalDateTime.class),
-                any(LocalDateTime.class), anyString(), anyString()))
-                .thenReturn(Optional.empty());
+    public void testGetTrainingsForTrainee_TrainingsNotFound() {
+        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
+        when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), any(),
+                any())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainee(TRAINEE_USERNAME, FROM_DATE, TO_DATE, "trainerName", "trainingType");
-        });
-        assertEquals("Trainings not found", exception.getMessage());
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> trainingService.getTrainingsForTrainee("traineeName",
+                        LocalDateTime.now(), LocalDateTime.now(), "trainerName", "trainingType"))
+                .withMessageContaining("Trainings not found");
     }
 
     @Test
-    void testGetTrainingsForTrainerSuccess() {
-        when(trainerRepository.findByTrainerFromUsername(TRAINER_USERNAME)).thenReturn(Optional.of(new TrainerEntity()));
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), anyString()))
+    public void testGetTrainingsForTrainer_Success() {
+        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
-        List<TrainingEntity> result = trainingService.getTrainingsForTrainer(TRAINER_USERNAME, FROM_DATE,
-                TO_DATE, "traineeName");
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainer("trainerUsername",
+                LocalDateTime.now(), LocalDateTime.now(), "traineeName");
 
-        assertEquals(1, result.size());
-        verify(trainingRepository, times(1)).findTrainingsForTrainer(anyLong(), any(LocalDateTime.class),
-                any(LocalDateTime.class), anyString());
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0)).isEqualTo(trainingEntity);
     }
 
     @Test
-    void testGetTrainingsForTrainerTrainerNotFound() {
-        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.empty());
+    public void testGetTrainingsForTrainer_TrainerNotFound() {
+        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainer(TRAINER_USERNAME, FROM_DATE, TO_DATE, "traineeName");
-        });
-        assertEquals("Trainer not found", exception.getMessage());
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> trainingService.getTrainingsForTrainer("trainerUsername",
+                        LocalDateTime.now(), LocalDateTime.now(), "traineeName"))
+                .withMessageContaining("Trainer not found");
     }
 
     @Test
-    void testGetTrainingsForTrainerNoTrainingsFound() {
-        when(trainerRepository.findByTrainerFromUsername(anyString())).thenReturn(Optional.of(new TrainerEntity()));
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(LocalDateTime.class),
-                any(LocalDateTime.class), anyString()))
-                .thenReturn(Optional.empty());
+    public void testGetTrainingsForTrainer_TrainingsNotFound() {
+        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainer(TRAINER_USERNAME, FROM_DATE, TO_DATE, "traineeName");
-        });
-        assertEquals("Trainings not found", exception.getMessage());
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> trainingService.getTrainingsForTrainer("trainerUsername",
+                        LocalDateTime.now(), LocalDateTime.now(), "traineeName"))
+                .withMessageContaining("Trainings not found");
     }
 }

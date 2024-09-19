@@ -37,7 +37,7 @@ public interface TrainingRepository {
      * @return an {@link Optional} containing a list of matching {@link TrainingEntity}, or empty if none found
      */
     Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
-                                                           LocalDateTime toDate, String trainerName, String trainingType);
+                                                         LocalDateTime toDate, String trainerName, String trainingType);
 
     /**
      * Finds trainings for a specific trainer based on optional criteria such as date range and trainee name.

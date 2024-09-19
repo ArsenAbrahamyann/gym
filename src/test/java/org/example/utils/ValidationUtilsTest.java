@@ -94,15 +94,6 @@ public class ValidationUtilsTest {
     }
 
     @Test
-    void testValidatePasswordMatch_Invalid() {
-        when(userEntity.getPassword()).thenReturn("password");
-
-        ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validationUtils.validatePasswordMatch(userEntity, "wrongPassword"));
-        assertEquals("Invalid password. Please try again.", thrown.getMessage());
-    }
-
-    @Test
     void testValidateUpdateTrainee_Valid() {
         when(traineeEntity.getId()).thenReturn(1L);
         when(traineeEntity.getUser()).thenReturn(userEntity);

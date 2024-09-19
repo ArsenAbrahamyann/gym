@@ -16,8 +16,11 @@ public interface TrainingTypeRepository {
     void save(TrainingTypeEntity trainingTypeEntity);
 
     /**
-     * find by id {@param trainingTypeId}
-     * @return TrainingTypeEntity
+     * Finds a {@link TrainingTypeEntity} by its ID.
+     *
+     * @param trainingTypeId the ID of the training type to find
+     *
+     * @return an {@link Optional} containing the matching {@link TrainingTypeEntity}, or empty if none found
      */
     Optional<TrainingTypeEntity> findById(Long trainingTypeId);
 }

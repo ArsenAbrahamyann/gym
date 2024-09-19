@@ -2,7 +2,6 @@ package org.example.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -14,15 +13,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
-import org.hibernate.type.LocalDateTimeType;
-import org.hibernate.type.LocalDateType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +42,22 @@ public class TrainingRepositoryTest {
     @Mock
     private TrainingTypeEntity trainingType;
 
+    /**
+     * Initializes the test data before each test case.
+     * This method is annotated with {@code @BeforeEach}, meaning it runs before each test method in the class.
+     * It creates instances of {@code TrainingEntity}, {@code TraineeEntity}, {@code TrainerEntity}, and
+     * {@code TrainingTypeEntity}, setting their fields with test values.
+     *
+     * <p>Specifically, it performs the following steps:
+     * <ul>
+     *     <li>Initializes a {@code TrainingEntity} object with an ID of 1L, training name "Yoga Basics",
+     *         the current date and time for {@code trainingDate}, a duration of 60 minutes, a training type,
+     *         and assigns a {@code trainee} and {@code trainer}.</li>
+     *     <li>Creates a {@code TraineeEntity} object with an ID of 1L.</li>
+     *     <li>Creates a {@code TrainerEntity} object with an ID of 1L.</li>
+     *     <li>Initializes a {@code TrainingTypeEntity} object with an ID of 1L and sets the training type name to "Yoga".</li>
+     * </ul>
+     */
     @BeforeEach
     public void setUp() {
         training = new TrainingEntity();
