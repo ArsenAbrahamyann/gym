@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,6 @@ public class AppConfig {
         sessionFactory.setPackagesToScan("org.example.entity");
         sessionFactory.setHibernateProperties(hibernateProperties());
 
-        // Debug log to check properties
         log.debug("Hibernate properties: {}", hibernateProperties());
 
         return sessionFactory;
@@ -63,14 +63,14 @@ public class AppConfig {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        log.debug("Driver class name: {}", env.getProperty("spring.datasource.driver-class-name"));
-        log.debug("DataSource URL: {}", env.getProperty("spring.datasource.url"));
-        log.debug("DataSource username: {}", env.getProperty("spring.datasource.username"));
+        log.debug("Driver class name: {}", env.getProperty("spring.flyway.driver-class-name"));
+        log.debug("DataSource URL: {}", env.getProperty("spring.flyway.url"));
+        log.debug("DataSource username: {}", env.getProperty("spring.flyway.username"));
 
-        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
-        dataSource.setUrl(env.getProperty("spring.datasource.url"));
-        dataSource.setUsername(env.getProperty("spring.datasource.username"));
-        dataSource.setPassword(env.getProperty("spring.datasource.password"));
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.flyway.driver-class-name")));
+        dataSource.setUrl(env.getProperty("spring.flyway.url"));
+        dataSource.setUsername(env.getProperty("spring.flyway.username"));
+        dataSource.setPassword(env.getProperty("spring.flyway.password"));
         return dataSource;
     }
 
@@ -115,6 +115,23 @@ public class AppConfig {
             properties.put("spring.jpa.hibernate.ddl-auto", ddl);
         }
         return properties;
+    }
+
+    /**
+     * Configures and initializes a Flyway bean for database migrations.
+     *
+     * @param dataSource the data source to be used for connecting to the database.
+     * @return a configured and initialized Flyway instance.
+     * @see Flyway#configure()
+     */
+    @Bean(initMethod = "migrate")
+    public Flyway flyway(DataSource dataSource) {
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .baselineOnMigrate(true)
+                .load();
+        flyway.migrate();
+        return flyway;
     }
 
     /**
