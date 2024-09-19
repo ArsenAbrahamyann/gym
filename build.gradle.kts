@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     // Spring dependencies
-    implementation("org.springframework:spring-core:5.3.30") // Update to your Spring version if necessary
+    implementation("org.springframework:spring-core:5.3.30")
     implementation("org.springframework:spring-beans:5.3.30")
     implementation("org.springframework:spring-context:5.3.30")
     implementation("org.springframework:spring-jdbc:5.3.30")
@@ -31,6 +31,9 @@ dependencies {
     // Hibernate dependencies
     implementation("org.hibernate:hibernate-core:5.6.15.Final")
     implementation("org.hibernate:hibernate-entitymanager:5.6.15.Final")
+
+    implementation ("org.flywaydb:flyway-core:9.0.0")
+
 
     // PostgreSQL Driver
     runtimeOnly("org.postgresql:postgresql:42.6.0")

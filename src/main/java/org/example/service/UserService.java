@@ -1,5 +1,7 @@
 package org.example.service;
 
+import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,4 +43,17 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves all usernames from the repository.
+     *
+     * @return a list of usernames. If no usernames are found, an empty list is returned.
+     */
+    @Transactional
+    public List<String> findAllUsernames() {
+
+        log.info("Fetching all usernames from the repository.");
+        Optional<List<String>> allUsernames = userRepository.findAllUsername();
+
+        return allUsernames.get();
+    }
 }

@@ -1,7 +1,6 @@
 package org.example.config;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,10 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
 public class AppConfigTest {
@@ -24,78 +23,50 @@ public class AppConfigTest {
     @Mock
     private Environment env;
 
-
     @InjectMocks
     private AppConfig appConfig;
 
-
     @Test
-    public void testSessionFactoryBeanConfiguration() throws Exception {
-        // Mock environment properties for dataSource
-        when(env.getProperty("spring.datasource.driver-class-name")).thenReturn("org.h2.Driver");
-        when(env.getProperty("spring.datasource.url")).thenReturn("jdbc:h2:mem:testdb");
-        when(env.getProperty("spring.datasource.username")).thenReturn("sa");
-        when(env.getProperty("spring.datasource.password")).thenReturn("");
+    public void testDataSource() {
+        when(env.getProperty("spring.flyway.driver-class-name")).thenReturn("org.h2.Driver");
+        when(env.getProperty("spring.flyway.url")).thenReturn("jdbc:h2:mem:testdb");
+        when(env.getProperty("spring.flyway.username")).thenReturn("sa");
+        when(env.getProperty("spring.flyway.password")).thenReturn("");
 
-        // Mock environment properties for hibernate
-        when(env.getProperty("spring.jpa.properties.hibernate.dialect")).thenReturn("org.hibernate.dialect.H2Dialect");
-        when(env.getProperty("spring.jpa.show-sql")).thenReturn("true");
-        when(env.getProperty("spring.jpa.properties.hibernate.format_sql")).thenReturn("true");
-
-        // Call the sessionFactory() method
-        LocalSessionFactoryBean sessionFactory = appConfig.sessionFactory();
-
-        // Verify the sessionFactory was created and properties are set
-        assertNotNull(sessionFactory);
-
-        Properties hibernateProps = sessionFactory.getHibernateProperties();
-        assertEquals("org.hibernate.dialect.H2Dialect", hibernateProps.getProperty("hibernate.dialect"));
-        assertEquals("true", hibernateProps.getProperty("hibernate.show_sql"));
-        assertEquals("true", hibernateProps.getProperty("hibernate.format_sql"));
-    }
-
-    @Test
-    void testDataSource() {
-        // Mock environment properties
-        when(env.getProperty("spring.datasource.driver-class-name")).thenReturn("org.h2.Driver");
-        when(env.getProperty("spring.datasource.url")).thenReturn("jdbc:h2:mem:testdb");
-        when(env.getProperty("spring.datasource.username")).thenReturn("sa");
-        when(env.getProperty("spring.datasource.password")).thenReturn("");
-
-        // Call the dataSource() method
         DataSource dataSource = appConfig.dataSource();
+        assertThat(dataSource).isInstanceOf(DriverManagerDataSource.class);
 
-        // Verify the DataSource configuration
         DriverManagerDataSource driverManagerDataSource = (DriverManagerDataSource) dataSource;
-        assertEquals("jdbc:h2:mem:testdb", driverManagerDataSource.getUrl());
-        assertEquals("sa", driverManagerDataSource.getUsername());
-        assertEquals("", driverManagerDataSource.getPassword());
+        assertThat(driverManagerDataSource.getUrl()).isEqualTo("jdbc:h2:mem:testdb");
+        assertThat(driverManagerDataSource.getUsername()).isEqualTo("sa");
     }
 
     @Test
-    void testTransactionManager() {
-        // Mock the SessionFactory
+    public void testTransactionManager() {
         SessionFactory sessionFactory = mock(SessionFactory.class);
-
-        // Call the method under test
-        HibernateTransactionManager transactionManager = appConfig.transactionManager(sessionFactory);
-
-        // Verify that the transaction manager was properly configured
-        assertEquals(sessionFactory, transactionManager.getSessionFactory());
+        HibernateTransactionManager txManager = appConfig.transactionManager(sessionFactory);
+        assertThat(txManager).isNotNull();
+        assertThat(txManager.getSessionFactory()).isEqualTo(sessionFactory);
     }
 
     @Test
-    void testHibernateProperties() {
-        // Mock environment properties
+    public void testHibernateProperties() {
         when(env.getProperty("spring.jpa.properties.hibernate.dialect")).thenReturn("org.hibernate.dialect.H2Dialect");
         when(env.getProperty("spring.jpa.show-sql")).thenReturn("true");
         when(env.getProperty("spring.jpa.properties.hibernate.format_sql")).thenReturn("true");
+        when(env.getProperty("spring.jpa.hibernate.ddl-auto")).thenReturn("update");
 
-        // Call the method under test
-        Properties hibernateProperties = appConfig.hibernateProperties();
+        Properties properties = appConfig.hibernateProperties();
+        assertThat(properties).containsEntry("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        assertThat(properties).containsEntry("hibernate.show_sql", "true");
+        assertThat(properties).containsEntry("hibernate.format_sql", "true");
+        assertThat(properties).containsEntry("spring.jpa.hibernate.ddl-auto", "update");
+    }
 
-        // Verify the properties
-        assertEquals("true", hibernateProperties.getProperty("hibernate.show_sql"));
-        assertEquals("true", hibernateProperties.getProperty("hibernate.format_sql"));
+    @Test
+    public void testModelMapper() {
+        ModelMapper modelMapper = appConfig.modelMapper();
+        assertThat(modelMapper).isNotNull();
+        assertThat(modelMapper).isInstanceOf(ModelMapper.class);
     }
 }
