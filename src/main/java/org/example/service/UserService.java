@@ -53,7 +53,20 @@ public class UserService {
 
         log.info("Fetching all usernames from the repository.");
         Optional<List<String>> allUsernames = userRepository.findAllUsername();
-
         return allUsernames.get();
+    }
+
+    @Transactional
+    public Optional<UserEntity> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public void save(UserEntity user) {
+        userRepository.save(user);
+    }
+
+    public void update(UserEntity user) {
+        userRepository.save(user);
     }
 }

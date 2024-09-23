@@ -20,8 +20,6 @@ import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
-import org.example.repository.TrainerRepository;
-import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,10 +36,7 @@ public class TraineeServiceTest {
     private TraineeRepository traineeRepository;
 
     @Mock
-    private TrainerRepository trainerRepository;
-
-    @Mock
-    private UserRepository userRepository;
+    private TrainerService trainerService;
 
     @Mock
     private UserService userService;
@@ -102,13 +97,13 @@ public class TraineeServiceTest {
         newTrainerEntity.setUser(userEntity);
 
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
-        when(trainerRepository.findAllById(any())).thenReturn(Optional.of(List.of(newTrainerEntity)));
+        when(trainerService.findAllById(any())).thenReturn(Optional.of(List.of(newTrainerEntity)));
         doNothing().when(validationUtils).validateUpdateTraineeTrainerList(any(TraineeEntity.class), any());
 
         traineeService.updateTraineeTrainers("testUser", List.of(2L));
 
         verify(traineeRepository).findByTraineeFromUsername("testUser");
-        verify(trainerRepository).findAllById(List.of(2L));
+        verify(trainerService).findAllById(List.of(2L));
         verify(validationUtils).validateUpdateTraineeTrainerList(traineeEntity, List.of(newTrainerEntity));
         verify(traineeRepository).update(traineeEntity);
     }
@@ -116,7 +111,7 @@ public class TraineeServiceTest {
     @Test
     public void testUpdateTraineeProfile_Success() {
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(userService.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
         doNothing().when(validationUtils).validateUpdateTrainee(any(TraineeEntity.class));
 
         traineeService.updateTraineeProfile("testUser", traineeDto);
@@ -138,49 +133,49 @@ public class TraineeServiceTest {
 
     @Test
     public void testChangeTraineePassword_UserNotFound() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userService.findByUsername(anyString())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
                 traineeService.changeTraineePassword("nonExistentUser", "newPass"));
 
-        verify(userRepository).findByUsername("nonExistentUser");
-        verify(userRepository, never()).update(any(UserEntity.class));
+        verify(userService).findByUsername("nonExistentUser");
+        verify(userService, never()).update(any(UserEntity.class));
     }
 
     @Test
     public void testDeleteTraineeByUsername_Success() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(userService.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
         doNothing().when(traineeRepository).delete(traineeEntity);
 
         traineeService.deleteTraineeByUsername("testUser");
 
-        verify(userRepository).findByUsername("testUser");
+        verify(userService).findByUsername("testUser");
         verify(traineeRepository).findByTraineeFromUsername("testUser");
         verify(traineeRepository).delete(traineeEntity);
     }
 
     @Test
     public void testDeleteTraineeByUsername_UserNotFound() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userService.findByUsername(anyString())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
                 traineeService.deleteTraineeByUsername("nonExistentUser"));
 
-        verify(userRepository).findByUsername("nonExistentUser");
+        verify(userService).findByUsername("nonExistentUser");
         verify(traineeRepository, never()).findByTraineeFromUsername(anyString());
         verify(traineeRepository, never()).delete(any(TraineeEntity.class));
     }
 
     @Test
     public void testDeleteTraineeByUsername_TraineeNotFound() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(userService.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
                 traineeService.deleteTraineeByUsername("testUser"));
 
-        verify(userRepository).findByUsername("testUser");
+        verify(userService).findByUsername("testUser");
         verify(traineeRepository).findByTraineeFromUsername("testUser");
         verify(traineeRepository, never()).delete(any(TraineeEntity.class));
     }

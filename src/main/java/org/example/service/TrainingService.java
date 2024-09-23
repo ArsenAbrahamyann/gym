@@ -2,6 +2,7 @@ package org.example.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +12,9 @@ import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.exeption.ValidationException;
-import org.example.repository.TraineeRepository;
-import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
-import org.example.repository.TrainingTypeRepository;
 import org.example.utils.ValidationUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Lazy
 public class TrainingService {
 
     private final TrainingRepository trainingRepository;
-    private final TraineeRepository traineeRepository;
-    private final TrainingTypeRepository trainingTypeRepository;
-    private final TrainerRepository trainerRepository;
+    private final TraineeService traineeService;
+    private final TrainingTypeService trainingTypeService;
+    private final TrainerService trainerService;
     private final ValidationUtils validationUtils;
 
     /**
@@ -43,12 +43,12 @@ public class TrainingService {
     @Transactional
     public void addTraining(TrainingDto trainingDto) {
         TrainingEntity trainingEntity = new TrainingEntity();
-        trainingEntity.setTrainee(traineeRepository.findById(trainingDto.getTraineeId())
+        trainingEntity.setTrainee(traineeService.findById(trainingDto.getTraineeId())
                 .orElseThrow(() -> new ValidationException("Trainee not found")));
-        trainingEntity.setTrainer(trainerRepository.findById(trainingDto.getTrainerId())
+        trainingEntity.setTrainer(trainerService.findById(trainingDto.getTrainerId())
                 .orElseThrow(() -> new ValidationException("Trainer not found")));
         trainingEntity.setTrainingName(trainingDto.getTrainingName());
-        trainingEntity.setTrainingType(trainingTypeRepository.findById(trainingDto.getTrainingTypeId())
+        trainingEntity.setTrainingType(trainingTypeService.findById(trainingDto.getTrainingTypeId())
                 .orElseThrow(() -> new ValidationException("Training type not found")));
         trainingEntity.setTrainingDuration(trainingDto.getTrainingDuration());
 
@@ -75,7 +75,7 @@ public class TrainingService {
 
         validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
 
-        TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeName)
+        TraineeEntity trainee = traineeService.findByTraineeFromUsername(traineeName)
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(), fromDate, toDate,
@@ -104,7 +104,7 @@ public class TrainingService {
 
         validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
 
-        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
+        TrainerEntity trainer = trainerService.findByTrainerFromUsername(trainerUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate,
@@ -112,5 +112,11 @@ public class TrainingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
 
         return trainings;
+    }
+
+    @Transactional
+    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
+                                                    String traineeName) {
+        return trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
     }
 }
