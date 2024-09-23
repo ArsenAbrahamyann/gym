@@ -9,11 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -32,7 +32,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Slf4j
 public class AppConfig {
 
-    private final Environment env;
+    @Value("${hibernate.db.driver-class-name}")
+    private String driverClassName;
+
+    @Value("${hibernate.db.url}")
+    private String url;
+
+    @Value("${hibernate.db.username}")
+    private String username;
+
+    @Value("${hibernate.db.password}")
+    private String password;
+
+    @Value("${spring.jpa.properties.hibernate.dialect}")
+    private String hibernateDialect;
+
+    @Value("${spring.jpa.show-sql}")
+    private String showSql;
+
+    @Value("${spring.jpa.hibernate.ddl-auto}")
+    private String ddlAuto;
 
     /**
      * Configures the Hibernate session factory bean.
@@ -63,14 +82,14 @@ public class AppConfig {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        log.debug("Driver class name: {}", env.getProperty("spring.flyway.driver-class-name"));
-        log.debug("DataSource URL: {}", env.getProperty("spring.flyway.url"));
-        log.debug("DataSource username: {}", env.getProperty("spring.flyway.username"));
+        log.debug("Driver class name: {}", driverClassName);
+        log.debug("DataSource URL: {}", url);
+        log.debug("DataSource username: {}", username);
 
-        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.flyway.driver-class-name")));
-        dataSource.setUrl(env.getProperty("spring.flyway.url"));
-        dataSource.setUsername(env.getProperty("spring.flyway.username"));
-        dataSource.setPassword(env.getProperty("spring.flyway.password"));
+        dataSource.setDriverClassName(Objects.requireNonNull(driverClassName));
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         return dataSource;
     }
 
@@ -97,23 +116,9 @@ public class AppConfig {
      */
     Properties hibernateProperties() {
         Properties properties = new Properties();
-        String dialect = env.getProperty("spring.jpa.properties.hibernate.dialect");
-        String showSql = env.getProperty("spring.jpa.show-sql");
-        String formatSql = env.getProperty("spring.jpa.properties.hibernate.format_sql");
-        String ddl = env.getProperty("spring.jpa.hibernate.ddl-auto");
-
-        if (dialect != null) {
-            properties.put("hibernate.dialect", dialect);
-        }
-        if (showSql != null) {
-            properties.put("hibernate.show_sql", showSql);
-        }
-        if (formatSql != null) {
-            properties.put("hibernate.format_sql", formatSql);
-        }
-        if (ddl != null) {
-            properties.put("spring.jpa.hibernate.ddl-auto", ddl);
-        }
+        properties.put("hibernate.dialect", hibernateDialect);
+        properties.put("hibernate.show_sql", showSql);
+        properties.put("spring.jpa.hibernate.ddl-auto", ddlAuto);
         return properties;
     }
 

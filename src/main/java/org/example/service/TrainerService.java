@@ -13,11 +13,9 @@ import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainerRepository;
-import org.example.repository.TrainingRepository;
-import org.example.repository.TrainingTypeRepository;
-import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Lazy
 public class TrainerService {
 
     private final TrainerRepository trainerRepository;
-    private final UserRepository userRepository;
+    private final TrainingService trainingService;
+    private final TrainingTypeService trainingTypeService;
     private final UserService userService;
-    private final TrainingRepository trainingRepository;
-    private final TrainingTypeRepository trainingTypeRepository;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
 
@@ -50,16 +48,15 @@ public class TrainerService {
         validationUtils.validateTrainer(trainer);
         TrainingTypeEntity trainingType = trainer.getSpecialization();
 
-        if (trainingType.getId()
-                == null) {
-            trainingTypeRepository.save(trainingType);
+        if (trainingType.getId() == null) {
+            trainingTypeService.save(trainingType);
         }
 
-        Optional<UserEntity> existingUser = userRepository.findByUsername(trainerDto.getUser().getUsername());
+        Optional<UserEntity> existingUser = userService.findByUsername(trainerDto.getUser().getUsername());
         if (existingUser.isPresent()) {
             trainer.getUser().setId(existingUser.get().getId());
         } else {
-            userRepository.save(trainer.getUser());
+            userService.save(trainer.getUser());
         }
         userService.authenticateUser(trainer.getUser().getUsername(), trainer.getUser().getPassword());
         trainerRepository.save(trainer);
@@ -76,13 +73,13 @@ public class TrainerService {
     @Transactional
     public void changeTrainerPassword(String username, String newPassword) {
         log.info("Changing password for trainer {}", username);
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userService.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
                         + username));
 
         validationUtils.validatePasswordMatch(user, newPassword);
         user.setPassword(newPassword);
-        userRepository.update(user);
+        userService.update(user);
         log.info("Password updated successfully for trainer {}", username);
     }
 
@@ -94,12 +91,12 @@ public class TrainerService {
     @Transactional
     public void toggleTrainerStatus(String username) {
         log.info("Toggling trainer status for {}", username);
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userService.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
                         + username));
 
         user.setIsActive(! user.getIsActive());
-        userRepository.update(user);
+        userService.update(user);
         log.info("Trainer status toggled successfully for {}", username);
     }
 
@@ -115,14 +112,14 @@ public class TrainerService {
         TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
                         + username));
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userService.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         validationUtils.validateUpdateTrainer(trainer);
         TrainingTypeEntity trainingType = modelMapper.map(trainerDto.getSpecialization().getTrainingTypeName(),
                 TrainingTypeEntity.class);
         trainingType.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
-        trainingTypeRepository.save(trainingType);
+        trainingTypeService.save(trainingType);
         trainer.setSpecialization(trainingType);
         trainer.setUser(user);
         trainerRepository.update(trainer);
@@ -147,11 +144,36 @@ public class TrainerService {
                         + trainerUsername));
         validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
 
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(
+        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(
                         trainer.getId(), fromDate, toDate, traineeName)
                 .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
 
         log.info("Found {} trainings for trainer: {}", trainings.size(), trainerUsername);
         return trainings;
+    }
+
+    @Transactional
+    public Optional<List<TrainerEntity>> findAll() {
+        return trainerRepository.findAll();
+    }
+
+    @Transactional
+    public Optional<List<TrainerEntity>> findAssignedTrainers(Long id) {
+        return trainerRepository.findAssignedTrainers(id);
+    }
+
+    @Transactional
+    public Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds) {
+        return trainerRepository.findAllById(trainerIds);
+    }
+
+    @Transactional
+    public Optional<TrainerEntity> findById(Long trainerId) {
+        return trainerRepository.findById(trainerId);
+    }
+
+    @Transactional
+    public Optional<TrainerEntity> findByTrainerFromUsername(String trainerUsername) {
+        return trainerRepository.findByTrainerFromUsername(trainerUsername);
     }
 }
