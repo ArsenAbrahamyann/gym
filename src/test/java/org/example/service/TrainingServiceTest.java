@@ -19,11 +19,7 @@ import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.exeption.ValidationException;
-import org.example.repository.TraineeRepository;
-import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
-import org.example.repository.TrainingTypeRepository;
-import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,16 +35,16 @@ public class TrainingServiceTest {
     private TrainingRepository trainingRepository;
 
     @Mock
-    private TraineeRepository traineeRepository;
+    private TraineeService traineeService;
 
     @Mock
-    private TrainingTypeRepository trainingTypeRepository;
+    private TrainingTypeService trainingTypeService;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private TrainerRepository trainerRepository;
+    private TrainerService trainerService;
 
     @Mock
     private ValidationUtils validationUtils;
@@ -113,24 +109,24 @@ public class TrainingServiceTest {
         TrainingEntity trainingEntity = new TrainingEntity();
 
         // Mock repository behavior
-        when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findById(trainerId)).thenReturn(Optional.of(trainer));
-        when(trainingTypeRepository.findById(trainingTypeId)).thenReturn(Optional.of(new TrainingTypeEntity()));
+        when(traineeService.findById(traineeId)).thenReturn(Optional.of(trainee));
+        when(trainerService.findById(trainerId)).thenReturn(Optional.of(trainer));
+        when(trainingTypeService.findById(trainingTypeId)).thenReturn(Optional.of(new TrainingTypeEntity()));
         doNothing().when(trainingRepository).save(any(TrainingEntity.class));
 
         // Act
         trainingService.addTraining(trainingDto);
 
         // Assert
-        verify(traineeRepository).findById(traineeId);
-        verify(trainerRepository).findById(trainerId);
-        verify(trainingTypeRepository).findById(trainingTypeId);
+        verify(traineeService).findById(traineeId);
+        verify(trainerService).findById(trainerId);
+        verify(trainingTypeService).findById(trainingTypeId);
         verify(trainingRepository).save(any(TrainingEntity.class));
     }
 
     @Test
     public void testAddTraining_TraineeNotFound() {
-        when(traineeRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(traineeService.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> trainingService.addTraining(trainingDto))
@@ -139,7 +135,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainee_Success() {
-        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
+        when(traineeService.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), any(), any()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
@@ -152,7 +148,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainee_TraineeNotFound() {
-        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.empty());
+        when(traineeService.findByTraineeFromUsername(any())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> trainingService.getTrainingsForTrainee("traineeName",
@@ -162,7 +158,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainee_TrainingsNotFound() {
-        when(traineeRepository.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
+        when(traineeService.findByTraineeFromUsername(any())).thenReturn(Optional.of(trainee));
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), any(),
                 any())).thenReturn(Optional.empty());
 
@@ -174,7 +170,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainer_Success() {
-        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
+        when(trainerService.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
                 .thenReturn(Optional.of(List.of(trainingEntity)));
 
@@ -187,7 +183,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainer_TrainerNotFound() {
-        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.empty());
+        when(trainerService.findByTrainerFromUsername(any())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> trainingService.getTrainingsForTrainer("trainerUsername",
@@ -197,7 +193,7 @@ public class TrainingServiceTest {
 
     @Test
     public void testGetTrainingsForTrainer_TrainingsNotFound() {
-        when(trainerRepository.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
+        when(trainerService.findByTrainerFromUsername(any())).thenReturn(Optional.of(trainer));
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)

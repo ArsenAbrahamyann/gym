@@ -19,9 +19,6 @@ import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
 import org.example.repository.TrainerRepository;
-import org.example.repository.TrainingRepository;
-import org.example.repository.TrainingTypeRepository;
-import org.example.repository.UserRepository;
 import org.example.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,15 +35,13 @@ public class TrainerServiceTest {
     private TrainerRepository trainerRepository;
 
     @Mock
-    private UserRepository userRepository;
-    @Mock
     private UserService userService;
 
     @Mock
-    private TrainingRepository trainingRepository;
+    private TrainingService trainingService;
 
     @Mock
-    private TrainingTypeRepository trainingTypeRepository;
+    private TrainingTypeService trainingTypeService;
 
     @Mock
     private ValidationUtils validationUtils;
@@ -98,23 +93,23 @@ public class TrainerServiceTest {
 
     @Test
     void testChangeTrainerPassword() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(userService.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
 
         trainerService.changeTrainerPassword("johndoe", "newpassword");
 
-        verify(userRepository).findByUsername("johndoe");
-        verify(userRepository).update(userEntity);
+        verify(userService).findByUsername("johndoe");
+        verify(userService).update(userEntity);
         assertEquals("newpassword", userEntity.getPassword());
     }
 
     @Test
     void testToggleTrainerStatus() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+        when(userService.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
 
         trainerService.toggleTrainerStatus("johndoe");
 
-        verify(userRepository).findByUsername("johndoe");
-        verify(userRepository).update(userEntity);
+        verify(userService).findByUsername("johndoe");
+        verify(userService).update(userEntity);
         assertNotEquals(true, userEntity.getIsActive());
     }
 
