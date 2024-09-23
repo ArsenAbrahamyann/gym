@@ -1,6 +1,5 @@
 package org.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -16,14 +15,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 
 @Entity
 @Table(name = "trainer")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TrainerEntity {
@@ -41,14 +40,9 @@ public class TrainerEntity {
     private UserEntity user;
 
     @ManyToMany(mappedBy = "trainers", fetch = FetchType.LAZY)
-    @JsonIgnore
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<TraineeEntity> trainees = new HashSet<>();
 
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @JsonIgnore
     private Set<TrainingEntity> training = new HashSet<>();
 
 }
