@@ -15,7 +15,6 @@ import org.example.dto.TrainerDto;
 import org.example.dto.TrainingDto;
 import org.example.dto.TrainingTypeDto;
 import org.example.dto.UserDto;
-import org.example.service.TrainingService;
 import org.example.service.UserService;
 import org.example.utils.UserUtils;
 import org.springframework.context.ApplicationContext;
@@ -82,12 +81,12 @@ public class Main {
 
         traineeController.getUnassignedTrainers("Arsen.Abrahamyan");
 
-        trainerController.changeTrainerPassword("Arsen.Abrahamyan1", "changePassword");
-        trainerController.toggleTrainerStatus("Arsen.Abrahamyan1");
+        trainerController.changeTrainerPassword("Arsen.Abrahamyan", "changePassword");
+        trainerController.toggleTrainerStatus("Arsen.Abrahamyan");
 
         traineeDtos.add(traineeDto);
         trainerDto.setTrainees(traineeDtos);
-        trainerController.updateTrainerProfile("Arsen.Abrahamyan1", trainerDto);
+        trainerController.updateTrainerProfile("Arsen.Abrahamyan", trainerDto);
 
         TrainingDto trainingDto = new TrainingDto(1L, 1L, "teacher",
                 1L, 12);
@@ -98,13 +97,12 @@ public class Main {
         trainingController.getTrainingsForTrainee("Arsen.Abrahamyan",
                 LocalDateTime.parse("2022-12-12T10:15:30"), LocalDateTime.now(),
                 "Arsen.Abrahamyan1", "Java");
-        trainingController.getTrainingsForTrainer("Arsen.Abrahamyan1",
+        trainingController.getTrainingsForTrainer("Arsen.Abrahamyan",
                 LocalDateTime.parse("2022-12-12T10:15:30"), LocalDateTime.now(),
                 "Arsen.Abrahamyan");
 
         List<Long> trainersId = new ArrayList<>();
         trainersId.add(1L);
-        trainersId.add(2L);
 
         traineeController.assignTrainersToTrainee("Arsen.Abrahamyan", trainersId);
 

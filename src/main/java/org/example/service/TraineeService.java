@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TraineeDto;
 import org.example.entity.TraineeEntity;
@@ -15,7 +13,6 @@ import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TraineeRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +21,23 @@ import org.springframework.transaction.annotation.Transactional;
  * Service class for managing Trainee profiles and related operations.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-
 public class TraineeService {
 
     private final TraineeRepository traineeRepository;
     private final TrainerService trainerService;
-
     private final UserService userService;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
+
+    public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
+                          UserService userService, ValidationUtils validationUtils, ModelMapper modelMapper) {
+        this.trainerService = trainerService;
+        this.traineeRepository = traineeRepository;
+        this.userService = userService;
+        this.validationUtils = validationUtils;
+        this.modelMapper = modelMapper;
+    }
 
 
     /**
