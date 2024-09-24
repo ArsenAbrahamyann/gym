@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 @Lazy
 public class TrainingService {
 
@@ -33,6 +31,16 @@ public class TrainingService {
     private final TrainingTypeService trainingTypeService;
     private final TrainerService trainerService;
     private final ValidationUtils validationUtils;
+
+    public TrainingService(TrainingRepository trainingRepository, @Lazy TraineeService traineeService,
+                           @Lazy TrainingTypeService trainingTypeService, @Lazy TrainerService trainerService,
+                           ValidationUtils validationUtils) {
+        this.trainingRepository = trainingRepository;
+        this.traineeService = traineeService;
+        this.trainingTypeService = trainingTypeService;
+        this.trainerService = trainerService;
+        this.validationUtils = validationUtils;
+    }
 
     /**
      * Adds a new training record.
