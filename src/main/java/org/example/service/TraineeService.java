@@ -30,6 +30,18 @@ public class TraineeService {
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
 
+    /**
+     * Constructs a new {@code TraineeService} instance with dependencies injected for handling trainee-related operations.
+     * The {@link TrainerService} is injected lazily to avoid circular dependency issues that could arise from direct
+     * initialization. This constructor also accepts repositories and utilities needed for performing trainee-related tasks.
+     *
+     * @param trainerService     the {@link TrainerService} used for managing trainer-related functionalities.
+     *                           This service is injected lazily to prevent circular dependency.
+     * @param traineeRepository  the {@link TraineeRepository} used for performing CRUD operations on trainee entities.
+     * @param userService        the {@link UserService} responsible for handling user-related operations.
+     * @param validationUtils    the {@link ValidationUtils} used for validating trainee data during service operations.
+     * @param modelMapper        the {@link ModelMapper} used for mapping between DTOs and entities.
+     */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
                           UserService userService, ValidationUtils validationUtils, ModelMapper modelMapper) {
         this.trainerService = trainerService;
