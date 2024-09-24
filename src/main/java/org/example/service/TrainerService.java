@@ -33,6 +33,21 @@ public class TrainerService {
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
 
+    /**
+     * Constructs a new {@code TrainerService} instance with dependencies injected for handling trainer-related operations.
+     * Several services are injected lazily to avoid circular dependency issues that could arise during initialization.
+     * This constructor takes repositories, services, and utilities necessary for managing trainer entities and related business logic.
+     *
+     * @param trainerRepository    the {@link TrainerRepository} used for performing CRUD operations on trainer entities.
+     * @param trainingService      the {@link TrainingService} used for managing training sessions. This service is injected
+     *                             lazily to prevent circular dependency.
+     * @param trainingTypeService  the {@link TrainingTypeService} used for handling training type entities. This service is injected
+     *                             lazily to avoid circular dependency.
+     * @param userService          the {@link UserService} responsible for managing user-related operations. This service is injected
+     *                             lazily due to its interaction with multiple services.
+     * @param validationUtils      the {@link ValidationUtils} used for performing validation tasks for trainer data.
+     * @param modelMapper          the {@link ModelMapper} used for mapping between entities and DTOs.
+     */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingService trainingService,
                           @Lazy TrainingTypeService trainingTypeService, @Lazy UserService userService,
                           ValidationUtils validationUtils, ModelMapper modelMapper) {
