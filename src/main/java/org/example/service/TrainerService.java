@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TrainerDto;
 import org.example.entity.TrainerEntity;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 @Lazy
 public class TrainerService {
 
@@ -34,6 +32,17 @@ public class TrainerService {
     private final UserService userService;
     private final ValidationUtils validationUtils;
     private final ModelMapper modelMapper;
+
+    public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingService trainingService,
+                          @Lazy TrainingTypeService trainingTypeService, @Lazy UserService userService,
+                          ValidationUtils validationUtils, ModelMapper modelMapper) {
+        this.trainerRepository = trainerRepository;
+        this.trainingService = trainingService;
+        this.trainingTypeService = trainingTypeService;
+        this.userService = userService;
+        this.validationUtils = validationUtils;
+        this.modelMapper = modelMapper;
+    }
 
     /**
      * Creates a new trainer profile.
