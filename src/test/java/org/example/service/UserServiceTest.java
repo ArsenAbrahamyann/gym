@@ -2,14 +2,13 @@ package org.example.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import org.example.entity.UserEntity;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,54 +37,108 @@ public class UserServiceTest {
 
     @Test
     void testAuthenticateUserSuccess() {
-        // Given
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
 
-        // When
         boolean result = userService.authenticateUser("testUser", "testPassword");
 
-        // Then
         assertTrue(result, "User authentication should succeed with correct password.");
         verify(userRepository).findByUsername("testUser");
     }
 
     @Test
     void testAuthenticateUserFailureDueToIncorrectPassword() {
-        // Given
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
 
-        // When
         boolean result = userService.authenticateUser("testUser", "wrongPassword");
 
-        // Then
         assertFalse(result, "User authentication should fail with incorrect password.");
         verify(userRepository).findByUsername("testUser");
     }
 
     @Test
-    void testAuthenticateUserThrowsEntityNotFoundException() {
-        // Given
-        when(userRepository.findByUsername("nonExistingUser")).thenReturn(Optional.empty());
+    void testAuthenticateUserFailureDueToUserNotFound() {
+        when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
-        // When
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            userService.authenticateUser("nonExistingUser", "somePassword");
-        });
+        boolean result = userService.authenticateUser("nonExistentUser", "anyPassword");
 
-        // Then
-        assertEquals("User not found", exception.getMessage(), "Exception message should match expected output.");
-        verify(userRepository).findByUsername("nonExistingUser");
+        assertFalse(result, "User authentication should fail for non-existent user.");
+        verify(userRepository).findByUsername("nonExistentUser");
+    }
+
+    @Test
+    void testAuthenticateUserHandlesUnexpectedError() {
+        when(userRepository.findByUsername("testUser")).thenThrow(new RuntimeException("Database error"));
+
+        boolean result = userService.authenticateUser("testUser", "testPassword");
+
+        assertFalse(result, "User authentication should fail on unexpected error.");
+        verify(userRepository).findByUsername("testUser");
     }
 
     @Test
     void testAuthenticateUserRepositoryInteraction() {
-        // Given
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
 
-        // When
         userService.authenticateUser("testUser", "testPassword");
 
-        // Then
         verify(userRepository, times(1)).findByUsername("testUser");
+    }
+
+    @Test
+    void testFindAllUsernamesReturnsList() {
+        when(userRepository.findAllUsername()).thenReturn(Optional.of(List.of("testUser", "anotherUser")));
+
+        List<String> usernames = userService.findAllUsernames();
+
+        assertEquals(2, usernames.size(), "Should return 2 usernames.");
+        assertTrue(usernames.contains("testUser"), "Usernames should contain 'testUser'.");
+        assertTrue(usernames.contains("anotherUser"), "Usernames should contain 'anotherUser'.");
+        verify(userRepository).findAllUsername();
+    }
+
+    @Test
+    void testFindAllUsernamesReturnsEmptyList() {
+        when(userRepository.findAllUsername()).thenReturn(Optional.empty());
+
+        List<String> usernames = userService.findAllUsernames();
+
+        assertTrue(usernames.isEmpty(), "Should return an empty list when no usernames are found.");
+        verify(userRepository).findAllUsername();
+    }
+
+    @Test
+    void testFindByUsernameFound() {
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(userEntity));
+
+        Optional<UserEntity> result = userService.findByUsername("testUser");
+
+        assertTrue(result.isPresent(), "Should find the user.");
+        assertEquals("testUser", result.get().getUsername(),
+                "The found user's username should be 'testUser'.");
+        verify(userRepository).findByUsername("testUser");
+    }
+
+    @Test
+    void testFindByUsernameNotFound() {
+        when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
+
+        Optional<UserEntity> result = userService.findByUsername("nonExistentUser");
+
+        assertFalse(result.isPresent(), "Should not find a user for a non-existent username.");
+        verify(userRepository).findByUsername("nonExistentUser");
+    }
+
+    @Test
+    void testSaveUser() {
+        userService.save(userEntity);
+
+        verify(userRepository).save(userEntity);
+    }
+
+    @Test
+    void testUpdateUser() {
+        userService.update(userEntity);
+
+        verify(userRepository).save(userEntity);
     }
 }
