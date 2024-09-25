@@ -24,9 +24,8 @@ dependencies {
     implementation("org.springframework:spring-context:5.3.30")
     implementation("org.springframework:spring-jdbc:5.3.30")
     implementation("org.springframework:spring-tx:5.3.30")
-
-    // Spring ORM for Hibernate integration
     implementation ("org.springframework:spring-orm:5.3.30")
+
 
     // Hibernate dependencies
     implementation("org.hibernate:hibernate-core:5.6.15.Final")

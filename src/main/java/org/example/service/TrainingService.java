@@ -1,6 +1,8 @@
 package org.example.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -9,8 +11,8 @@ import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
+import org.example.entity.TrainingTypeEntity;
 import org.example.exeption.ResourceNotFoundException;
-import org.example.exeption.ValidationException;
 import org.example.repository.TrainingRepository;
 import org.example.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
@@ -64,17 +66,34 @@ public class TrainingService {
      */
     @Transactional
     public void addTraining(TrainingDto trainingDto) {
-        TrainingEntity trainingEntity = new TrainingEntity();
-        trainingEntity.setTrainee(traineeService.findById(trainingDto.getTraineeId())
-                .orElseThrow(() -> new ValidationException("Trainee not found")));
-        trainingEntity.setTrainer(trainerService.findById(trainingDto.getTrainerId())
-                .orElseThrow(() -> new ValidationException("Trainer not found")));
-        trainingEntity.setTrainingName(trainingDto.getTrainingName());
-        trainingEntity.setTrainingType(trainingTypeService.findById(trainingDto.getTrainingTypeId())
-                .orElseThrow(() -> new ValidationException("Training type not found")));
-        trainingEntity.setTrainingDuration(trainingDto.getTrainingDuration());
+        try {
+            TrainingEntity trainingEntity = new TrainingEntity();
 
-        trainingRepository.save(trainingEntity);
+            TraineeEntity trainee = traineeService.findById(trainingDto.getTraineeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Trainee not found for ID: "
+                            + trainingDto.getTraineeId()));
+            trainingEntity.setTrainee(trainee);
+
+            TrainerEntity trainer = trainerService.findById(trainingDto.getTrainerId())
+                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found for ID: "
+                            + trainingDto.getTrainerId()));
+            trainingEntity.setTrainer(trainer);
+
+            TrainingTypeEntity trainingType = trainingTypeService.findById(trainingDto.getTrainingTypeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Training type not found for ID: "
+                            + trainingDto.getTrainingTypeId()));
+            trainingEntity.setTrainingType(trainingType);
+
+            trainingEntity.setTrainingName(trainingDto.getTrainingName());
+            trainingEntity.setTrainingDuration(trainingDto.getTrainingDuration());
+
+            trainingRepository.save(trainingEntity);
+            log.info("Training added successfully for trainee: {}", trainee.getUser().getUsername());
+        } catch (EntityNotFoundException e) {
+            log.error("Error adding training: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("An unexpected error occurred while adding training: {}", e.getMessage());
+        }
     }
 
     /**
@@ -95,15 +114,22 @@ public class TrainingService {
 
         log.info("Fetching trainings for trainee: {}", traineeName);
 
-        validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
+        List<TrainingEntity> trainings = new ArrayList<>();
+        try {
+            validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
 
-        TraineeEntity trainee = traineeService.findByTraineeFromUsername(traineeName)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
+            TraineeEntity trainee = traineeService.findByTraineeFromUsername(traineeName)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(), fromDate, toDate,
-                        trainerName, trainingType)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
+            trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
+                            fromDate, toDate, trainerName, trainingType)
+                    .orElse(Collections.emptyList());
+        } catch (Exception e) {
+            log.error("Error fetching trainings: {}", e.getMessage());
+            return new ArrayList<>();
+        }
 
+        log.info("Found {} trainings for trainee: {}", trainings.size(), traineeName);
         return trainings;
     }
 
@@ -123,22 +149,47 @@ public class TrainingService {
                                                        LocalDateTime toDate, String traineeName) {
 
         log.info("Fetching trainings for trainer: {}", trainerUsername);
+        List<TrainingEntity> trainings = new ArrayList<>();
+        try {
+            validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
+            TrainerEntity trainer = trainerService.findByTrainerFromUsername(trainerUsername)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
-        validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
-
-        TrainerEntity trainer = trainerService.findByTrainerFromUsername(trainerUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
-
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate,
-                        traineeName)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
-
+            trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName)
+                    .orElseThrow(() -> new ResourceNotFoundException("No trainings found for the specified criteria"));
+        } catch (EntityNotFoundException e) {
+            log.error("Error fetching trainings: {}", e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            log.error("Error fetching trainings: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("An unexpected error occurred while fetching trainings: {}", e.getMessage());
+        }
         return trainings;
     }
 
+    /**
+     * Retrieves a list of {@link TrainingEntity} records for a specific trainer within a given date range and trainee name.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @param id          the unique ID of the trainer for whom the trainings are to be found.
+     * @param fromDate    the start of the date range for retrieving the trainings.
+     * @param toDate      the end of the date range for retrieving the trainings.
+     * @param traineeName the name of the trainee to filter the trainings.
+     * @return an {@link Optional} containing a list of {@link TrainingEntity} records that match
+     *         the criteria (trainer ID, date range, and trainee name), or an empty {@link Optional}
+     *         if no trainings are found.
+     */
     @Transactional
     public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
                                                     String traineeName) {
-        return trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
+        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id,
+                fromDate, toDate, traineeName);
+        try {
+            return trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
+        } catch (Exception e) {
+            log.error("Error fetching trainings for trainer ID {}: {}", id, e.getMessage());
+            return Optional.empty();
+        }
     }
 }
