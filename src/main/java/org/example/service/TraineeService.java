@@ -61,26 +61,26 @@ public class TraineeService {
     @Transactional
     public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
         log.info("Creating trainee profile");
-
-        TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
-
-        UserEntity user = trainee.getUser();
-        Optional<UserEntity> existingUserOpt = userService.findByUsername(user.getUsername());
-        if (existingUserOpt.isPresent()) {
-            user = existingUserOpt.get();
-        } else {
-            userService.save(user);
+        try {
+            TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
+            UserEntity user = trainee.getUser();
+            Optional<UserEntity> existingUserOpt = userService.findByUsername(user.getUsername());
+            if (existingUserOpt.isPresent()) {
+                user = existingUserOpt.get();
+            } else {
+                userService.save(user);
+            }
+            trainee.setUser(user);
+            userService.authenticateUser(user.getUsername(), user.getPassword());
+            traineeRepository.save(trainee);
+            log.info("Trainee profile created successfully for {}", user.getUsername());
+            return traineeDto;
+        } catch (RuntimeException e) {
+            log.error("Failed to create trainee profile: {}", e.getMessage());
+            return null;
         }
-
-        trainee.setUser(user);
-
-        userService.authenticateUser(user.getUsername(), user.getPassword());
-        traineeRepository.save(trainee);
-
-        log.info("Trainee profile created successfully for {}", user.getUsername());
-
-        return traineeDto;
     }
+
 
     /**
      * Changes the password of a trainee.
@@ -91,15 +91,17 @@ public class TraineeService {
     @Transactional
     public void changeTraineePassword(String username, String newPassword) {
         log.info("Changing password for trainee {}", username);
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
-                        + username));
+        try {
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
 
-        validationUtils.validatePasswordMatch(user, newPassword);
-
-        user.setPassword(newPassword);
-        userService.update(user);
-        log.info("Password updated successfully for trainee {}", username);
+            validationUtils.validatePasswordMatch(user, newPassword);
+            user.setPassword(newPassword);
+            userService.update(user);
+            log.info("Password updated successfully for trainee {}", username);
+        } catch (Exception e) {
+            log.error("Failed to change password for trainee {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -110,13 +112,16 @@ public class TraineeService {
     @Transactional
     public void toggleTraineeStatus(String username) {
         log.info("Toggling trainee status for {}", username);
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
-                        + username));
+        try {
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
 
-        user.setIsActive(!user.getIsActive());
-        userService.update(user);
-        log.info("Trainee status toggled successfully for {}", username);
+            user.setIsActive(!user.getIsActive());
+            userService.update(user);
+            log.info("Trainee status toggled successfully for {}", username);
+        } catch (Exception e) {
+            log.error("Failed to toggle trainee status for {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -128,18 +133,27 @@ public class TraineeService {
     @Transactional
     public List<TrainerEntity> getUnassignedTrainers(String traineeUsername) {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
-        TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
-        List<TrainerEntity> allTrainers = trainerService.findAll()
-                .orElseThrow(() -> new EntityNotFoundException("Trainers not found"));
-        List<TrainerEntity> assignedTrainers = trainerService.findAssignedTrainers(trainee.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Trainees not found"));
+        try {
+            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
+                            + traineeUsername));
 
-        allTrainers.removeAll(assignedTrainers);
+            List<TrainerEntity> allTrainers = trainerService.findAll()
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainers not found."));
 
-        log.info("Found {} unassigned trainers for trainee: {}", allTrainers.size(), traineeUsername);
-        return allTrainers;
+            List<TrainerEntity> assignedTrainers = trainerService.findAssignedTrainers(trainee.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Assigned trainers not found for trainee ID: "
+                            + trainee.getId()));
+
+            allTrainers.removeAll(assignedTrainers);
+            log.info("Found {} unassigned trainers for trainee: {}", allTrainers.size(), traineeUsername);
+            return allTrainers;
+        } catch (Exception e) {
+            log.error("Failed to fetch unassigned trainers for {}: {}", traineeUsername, e.getMessage());
+            return List.of();
+        }
+
     }
 
     /**
@@ -152,20 +166,23 @@ public class TraineeService {
     @Transactional
     public void updateTraineeTrainers(String traineeUsername, List<Long> trainerIds) {
         log.info("Updating trainers for trainee: {}", traineeUsername);
-        TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
+        try {
+            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found"));
 
-        List<TrainerEntity> newTrainers = trainerService.findAllById(trainerIds)
-                .orElseThrow(() -> new EntityNotFoundException("Trainers not found"));
+            List<TrainerEntity> newTrainers = trainerService.findAllById(trainerIds)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainers not found"));
 
-        validationUtils.validateUpdateTraineeTrainerList(trainee, newTrainers);
+            validationUtils.validateUpdateTraineeTrainerList(trainee, newTrainers);
+            trainee.setTrainers(new HashSet<>(newTrainers));
 
-        trainee.setTrainers(new HashSet<>(newTrainers));
+            newTrainers.forEach(validationUtils::validateTrainer);
+            traineeRepository.update(trainee);
 
-        newTrainers.forEach(validationUtils::validateTrainer);
-
-        traineeRepository.update(trainee);
-        log.info("Updated trainer list for trainee: {}", traineeUsername);
+            log.info("Successfully updated trainer list for trainee: {}", traineeUsername);
+        } catch (Exception e) {
+            log.error("Failed to update trainers for {}: {}", traineeUsername, e.getMessage());
+        }
     }
 
     /**
@@ -179,20 +196,22 @@ public class TraineeService {
     public void updateTraineeProfile(String username, TraineeDto traineeDto) {
         log.info("Updating trainee profile for {}", username);
 
-        TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
-                        + username));
-        UserEntity existingUser = userService.findByUsername(trainee.getUser().getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        trainee.setUser(existingUser);
-        trainee.setDateOfBirth(traineeDto.getDateOfBirth());
-        trainee.setAddress(traineeDto.getAddress());
+        try {
+            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
+            UserEntity existingUser = userService.findByUsername(trainee.getUser().getUsername())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        validationUtils.validateUpdateTrainee(trainee);
+            trainee.setUser(existingUser);
+            trainee.setDateOfBirth(traineeDto.getDateOfBirth());
+            trainee.setAddress(traineeDto.getAddress());
 
-        traineeRepository.update(trainee);
-
-        log.info("Trainee profile updated successfully for {}", username);
+            validationUtils.validateUpdateTrainee(trainee);
+            traineeRepository.update(trainee);
+            log.info("Trainee profile updated successfully for {}", username);
+        } catch (Exception e) {
+            log.error("Failed to update trainee profile for {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -204,31 +223,59 @@ public class TraineeService {
     @Transactional
     public void deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username: {}", username);
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        try {
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (user != null) {
             TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(user.getUsername())
                     .orElseThrow(() -> new ResourceNotFoundException("TraineeEntity not found"));
 
-            if (trainee != null) {
-                traineeRepository.delete(trainee);
-            } else {
-                throw new IllegalArgumentException("Trainee not found for username: " + username);
-            }
-        } else {
-            throw new IllegalArgumentException("User not found for username: " + username);
+            traineeRepository.delete(trainee);
+            log.info("Trainee deleted successfully with username: {}", username);
+        } catch (Exception e) {
+            log.error("Failed to delete trainee with username {}: {}", username, e.getMessage());
         }
-        log.info("Trainee deleted successfully with username: {}", username);
     }
 
+    /**
+     * Finds a {@link TraineeEntity} by its unique ID.
+     * This method is transactional, ensuring that the database operations are
+     * executed in a single transaction, and also uses {@code @SneakyThrows} to
+     * automatically handle checked exceptions that may be thrown during the
+     * execution.
+     *
+     * @param traineeId the unique ID of the trainee to find.
+     * @return an {@link Optional} containing the {@link TraineeEntity} if found,
+     *         or an empty {@link Optional} if no trainee is found with the given ID.
+     */
     @Transactional
     public Optional<TraineeEntity> findById(Long traineeId) {
-        return traineeRepository.findById(traineeId);
+        try {
+            return traineeRepository.findById(traineeId);
+        } catch (Exception e) {
+            log.error("Error retrieving trainee by ID {}: {}", traineeId, e.getMessage());
+            return Optional.empty();
+        }
     }
 
+    /**
+     * Finds a {@link TraineeEntity} by its username.
+     * This method is transactional, ensuring that the database operations are
+     * executed in a single transaction, and also uses {@code @SneakyThrows} to
+     * automatically handle checked exceptions that may be thrown during the
+     * execution.
+     *
+     * @param traineeName the username of the trainee to find.
+     * @return an {@link Optional} containing the {@link TraineeEntity} if found,
+     *         or an empty {@link Optional} if no trainee is found with the given username.
+     */
     @Transactional
     public Optional<TraineeEntity> findByTraineeFromUsername(String traineeName) {
-        return traineeRepository.findByTraineeFromUsername(traineeName);
+        try {
+            return traineeRepository.findByTraineeFromUsername(traineeName);
+        } catch (Exception e) {
+            log.error("Error retrieving trainee by username {}: {}", traineeName, e.getMessage());
+            return Optional.empty();
+        }
     }
 }

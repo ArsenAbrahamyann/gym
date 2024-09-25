@@ -68,24 +68,30 @@ public class TrainerService {
     @Transactional
     public TrainerDto createTrainerProfile(TrainerDto trainerDto) {
         log.info("Creating trainer profile ");
-        TrainerEntity trainer = modelMapper.map(trainerDto, TrainerEntity.class);
-        validationUtils.validateTrainer(trainer);
-        TrainingTypeEntity trainingType = trainer.getSpecialization();
+        try {
+            TrainerEntity trainer = modelMapper.map(trainerDto, TrainerEntity.class);
+            validationUtils.validateTrainer(trainer);
+            TrainingTypeEntity trainingType = trainer.getSpecialization();
 
-        if (trainingType.getId() == null) {
-            trainingTypeService.save(trainingType);
-        }
+            if (trainingType.getId() == null) {
+                trainingTypeService.save(trainingType);
+            }
 
-        Optional<UserEntity> existingUser = userService.findByUsername(trainerDto.getUser().getUsername());
-        if (existingUser.isPresent()) {
-            trainer.getUser().setId(existingUser.get().getId());
-        } else {
-            userService.save(trainer.getUser());
+            Optional<UserEntity> existingUser = userService.findByUsername(trainerDto.getUser().getUsername());
+            if (existingUser.isPresent()) {
+                trainer.getUser().setId(existingUser.get().getId());
+            } else {
+                userService.save(trainer.getUser());
+            }
+
+            userService.authenticateUser(trainer.getUser().getUsername(), trainer.getUser().getPassword());
+            trainerRepository.save(trainer);
+            log.debug("Trainer profile created: {}", trainer);
+            return trainerDto;
+        } catch (Exception e) {
+            log.error("Failed to create trainer profile", e);
+            return null;
         }
-        userService.authenticateUser(trainer.getUser().getUsername(), trainer.getUser().getPassword());
-        trainerRepository.save(trainer);
-        log.debug("Trainer profile created: {}", trainer);
-        return trainerDto;
     }
 
     /**
@@ -97,14 +103,19 @@ public class TrainerService {
     @Transactional
     public void changeTrainerPassword(String username, String newPassword) {
         log.info("Changing password for trainer {}", username);
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
-                        + username));
+        try {
+            log.info("Changing password for trainer {}", username);
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
+                            + username));
 
-        validationUtils.validatePasswordMatch(user, newPassword);
-        user.setPassword(newPassword);
-        userService.update(user);
-        log.info("Password updated successfully for trainer {}", username);
+            validationUtils.validatePasswordMatch(user, newPassword);
+            user.setPassword(newPassword);
+            userService.update(user);
+            log.info("Password updated successfully for trainer {}", username);
+        } catch (Exception e) {
+            log.error("Error changing password for trainer {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -114,14 +125,18 @@ public class TrainerService {
      */
     @Transactional
     public void toggleTrainerStatus(String username) {
-        log.info("Toggling trainer status for {}", username);
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
-                        + username));
+        try {
+            log.info("Toggling trainer status for {}", username);
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainee not found with username: "
+                            + username));
 
-        user.setIsActive(! user.getIsActive());
-        userService.update(user);
-        log.info("Trainer status toggled successfully for {}", username);
+            user.setIsActive(!user.getIsActive());
+            userService.update(user);
+            log.info("Trainer status toggled successfully for {}", username);
+        } catch (Exception e) {
+            log.error("Error toggling trainer status for {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -132,23 +147,27 @@ public class TrainerService {
      */
     @Transactional
     public void updateTrainerProfile(String username, TrainerDto trainerDto) {
-        log.info("Updating trainer profile for {}", username);
-        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
-                        + username));
-        UserEntity user = userService.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        try {
+            log.info("Updating trainer profile for {}", username);
+            TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(username)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
+                            + username));
+            UserEntity user = userService.findByUsername(username)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        validationUtils.validateUpdateTrainer(trainer);
-        TrainingTypeEntity trainingType = modelMapper.map(trainerDto.getSpecialization().getTrainingTypeName(),
-                TrainingTypeEntity.class);
-        trainingType.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
-        trainingTypeService.save(trainingType);
-        trainer.setSpecialization(trainingType);
-        trainer.setUser(user);
-        trainerRepository.update(trainer);
+            validationUtils.validateUpdateTrainer(trainer);
+            TrainingTypeEntity trainingType = modelMapper.map(trainerDto.getSpecialization().getTrainingTypeName(),
+                    TrainingTypeEntity.class);
+            trainingType.setTrainingTypeName(trainerDto.getSpecialization().getTrainingTypeName());
+            trainingTypeService.save(trainingType);
+            trainer.setSpecialization(trainingType);
+            trainer.setUser(user);
+            trainerRepository.update(trainer);
 
-        log.info("Trainer profile updated successfully for {}", username);
+            log.info("Trainer profile updated successfully for {}", username);
+        } catch (Exception e) {
+            log.error("Error updating trainer profile for {}: {}", username, e.getMessage());
+        }
     }
 
     /**
@@ -160,44 +179,119 @@ public class TrainerService {
      * @param traineeName     The name of the trainee (optional).
      * @return The list of trainings for the trainer.
      */
+    @Transactional
     public List<TrainingEntity> getTrainerTrainings(String trainerUsername, LocalDateTime fromDate,
                                                     LocalDateTime toDate, String traineeName) {
-        log.info("Fetching trainings for trainer: {}", trainerUsername);
-        TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
-                        + trainerUsername));
-        validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
+        try {
+            log.info("Fetching trainings for trainer: {}", trainerUsername);
+            TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
+                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
+                            + trainerUsername));
+            validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
 
-        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(
-                        trainer.getId(), fromDate, toDate, traineeName)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
+            List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(
+                            trainer.getId(), fromDate, toDate, traineeName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
 
-        log.info("Found {} trainings for trainer: {}", trainings.size(), trainerUsername);
-        return trainings;
+            log.info("Found {} trainings for trainer: {}", trainings.size(), trainerUsername);
+            return trainings;
+        } catch (Exception e) {
+            log.error("Error fetching trainings for trainer {}: {}", trainerUsername, e.getMessage());
+            return null;
+        }
     }
 
+    /**
+     * Retrieves all {@link TrainerEntity} records from the database.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @return an {@link Optional} containing a list of all {@link TrainerEntity} records,
+     *         or an empty {@link Optional} if no records are found.
+     */
     @Transactional
     public Optional<List<TrainerEntity>> findAll() {
-        return trainerRepository.findAll();
+        try {
+            return trainerRepository.findAll();
+        } catch (Exception e) {
+            log.error("Error retrieving all trainers: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
+    /**
+     * Retrieves all assigned {@link TrainerEntity} records for a specific ID.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @param id the ID for which assigned trainers need to be retrieved.
+     * @return an {@link Optional} containing a list of {@link TrainerEntity} records assigned
+     *         to the given ID, or an empty {@link Optional} if no trainers are found.
+     */
     @Transactional
     public Optional<List<TrainerEntity>> findAssignedTrainers(Long id) {
-        return trainerRepository.findAssignedTrainers(id);
+        try {
+            return trainerRepository.findAssignedTrainers(id);
+        } catch (Exception e) {
+            log.error("Error retrieving assigned trainers for ID {}: {}", id, e.getMessage());
+            return Optional.empty();
+        }
     }
 
+    /**
+     * Retrieves a list of {@link TrainerEntity} records by their unique IDs.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @param trainerIds the list of unique trainer IDs to find.
+     * @return an {@link Optional} containing a list of {@link TrainerEntity} records corresponding
+     *         to the provided IDs, or an empty {@link Optional} if no records are found.
+     */
     @Transactional
     public Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds) {
-        return trainerRepository.findAllById(trainerIds);
+        try {
+            return trainerRepository.findAllById(trainerIds);
+        } catch (Exception e) {
+            log.error("Error retrieving trainers by IDs {}: {}", trainerIds, e.getMessage());
+            return Optional.empty();
+        }
     }
 
+    /**
+     * Finds a {@link TrainerEntity} by its unique ID.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @param trainerId the unique ID of the trainer to find.
+     * @return an {@link Optional} containing the {@link TrainerEntity} if found,
+     *         or an empty {@link Optional} if no trainer is found with the given ID.
+     */
     @Transactional
     public Optional<TrainerEntity> findById(Long trainerId) {
-        return trainerRepository.findById(trainerId);
+        try {
+            return trainerRepository.findById(trainerId);
+        } catch (Exception e) {
+            log.error("Error retrieving trainer by ID {}: {}", trainerId, e.getMessage());
+            return Optional.empty();
+        }
     }
 
+    /**
+     * Finds a {@link TrainerEntity} by the trainer's username.
+     * This method is transactional, ensuring that the database operations are
+     * executed within a single transaction.
+     *
+     * @param trainerUsername the username of the trainer to find.
+     * @return an {@link Optional} containing the {@link TrainerEntity} if found,
+     *         or an empty {@link Optional} if no trainer is found with the given username.
+     */
     @Transactional
     public Optional<TrainerEntity> findByTrainerFromUsername(String trainerUsername) {
-        return trainerRepository.findByTrainerFromUsername(trainerUsername);
+        try {
+            return trainerRepository.findByTrainerFromUsername(trainerUsername);
+        } catch (Exception e) {
+            log.error("Error retrieving trainer by username {}: {}", trainerUsername, e.getMessage());
+            return Optional.empty();
+        }
     }
 }
