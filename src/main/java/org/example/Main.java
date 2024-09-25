@@ -88,8 +88,8 @@ public class Main {
         trainerDto.setTrainees(traineeDtos);
         trainerController.updateTrainerProfile("Arsen.Abrahamyan", trainerDto);
 
-        TrainingDto trainingDto = new TrainingDto(29L, 29L, "teacher",
-                38L, 12);
+        TrainingDto trainingDto = new TrainingDto(1L, 1L, "teacher",
+                1L, 12);
 
         TrainingController trainingController = context.getBean(TrainingController.class);
         trainingController.addTraining(trainingDto);
