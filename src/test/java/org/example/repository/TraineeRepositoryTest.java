@@ -62,13 +62,10 @@ public class TraineeRepositoryTest {
 
     @Test
     public void testFindByTraineeFromUsername_Success() {
-        // Arrange
         when(traineeRepository.findByTraineeFromUsername(any(String.class))).thenReturn(Optional.of(trainee));
 
-        // Act
         Optional<TraineeEntity> result = traineeRepository.findByTraineeFromUsername("testuser");
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(trainee.getUser().getUsername(), result.get().getUser().getUsername());
         verify(traineeRepository, times(1)).findByTraineeFromUsername(any(String.class));
@@ -76,26 +73,20 @@ public class TraineeRepositoryTest {
 
     @Test
     public void testFindByTraineeFromUsername_NotFound() {
-        // Arrange
         when(traineeRepository.findByTraineeFromUsername(any(String.class))).thenReturn(Optional.empty());
 
-        // Act
         Optional<TraineeEntity> result = traineeRepository.findByTraineeFromUsername("nonexistentuser");
 
-        // Assert
         assertFalse(result.isPresent());
         verify(traineeRepository, times(1)).findByTraineeFromUsername(any(String.class));
     }
 
     @Test
     public void testFindById_Success() {
-        // Arrange
         when(traineeRepository.findById(anyLong())).thenReturn(Optional.of(trainee));
 
-        // Act
         Optional<TraineeEntity> result = traineeRepository.findById(1L);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(trainee.getId(), result.get().getId());
         verify(traineeRepository, times(1)).findById(anyLong());
@@ -103,51 +94,38 @@ public class TraineeRepositoryTest {
 
     @Test
     public void testFindById_NotFound() {
-        // Arrange
         when(traineeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act
         Optional<TraineeEntity> result = traineeRepository.findById(99L);
 
-        // Assert
         assertFalse(result.isPresent());
         verify(traineeRepository, times(1)).findById(anyLong());
     }
 
     @Test
     public void testSave() {
-        // Arrange
         doNothing().when(traineeRepository).save(any(TraineeEntity.class));
 
-        // Act
         traineeRepository.save(trainee);
 
-        // Assert
         verify(traineeRepository, times(1)).save(any(TraineeEntity.class));
     }
 
     @Test
     public void testUpdate() {
-        // Arrange
         doNothing().when(traineeRepository).update(any(TraineeEntity.class));
 
-        // Act
         traineeRepository.update(trainee);
 
-        // Assert
         verify(traineeRepository, times(1)).update(any(TraineeEntity.class));
     }
 
     @Test
     public void testDelete() {
-        // Arrange
         doNothing().when(traineeRepository).delete(any(TraineeEntity.class));
 
-        // Act
         traineeRepository.delete(trainee);
 
-        // Assert
         verify(traineeRepository, times(1)).delete(any(TraineeEntity.class));
     }
-
 }

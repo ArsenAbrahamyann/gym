@@ -93,7 +93,7 @@ public class TrainingServiceTest {
 
         when(traineeService.findByTraineeFromUsername(traineeName)).thenReturn(Optional.of(trainee));
         when(trainingRepository.findTrainingsForTrainee(1L, fromDate, toDate, trainerName, trainingType))
-                .thenReturn(Optional.of(Collections.singletonList(new TrainingEntity())));
+                .thenReturn(Collections.singletonList(new TrainingEntity()));
 
         List<TrainingEntity> result = trainingService.getTrainingsForTrainee(traineeName, fromDate, toDate,
                 trainerName, trainingType);
@@ -112,7 +112,7 @@ public class TrainingServiceTest {
 
         when(trainerService.findByTrainerFromUsername(trainerUsername)).thenReturn(Optional.of(trainer));
         when(trainingRepository.findTrainingsForTrainer(1L, fromDate, toDate, traineeName))
-                .thenReturn(Optional.of(Collections.singletonList(new TrainingEntity())));
+                .thenReturn(Collections.singletonList(new TrainingEntity()));
 
         List<TrainingEntity> result = trainingService.getTrainingsForTrainer(trainerUsername,
                 fromDate, toDate, traineeName);
@@ -130,13 +130,12 @@ public class TrainingServiceTest {
         String traineeName = null;
 
         when(trainingRepository.findTrainingsForTrainer(trainerId, fromDate, toDate, traineeName))
-                .thenReturn(Optional.of(Collections.singletonList(new TrainingEntity())));
+                .thenReturn(Collections.singletonList(new TrainingEntity()));
 
-        Optional<List<TrainingEntity>> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
+        List<TrainingEntity> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
                 toDate, traineeName);
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isNotEmpty();
+        assertThat(result).isNotEmpty();
         verify(trainingRepository, times(1)).findTrainingsForTrainer(trainerId, fromDate,
                 toDate, traineeName);
     }
@@ -149,9 +148,9 @@ public class TrainingServiceTest {
         String traineeName = null;
 
         when(trainingRepository.findTrainingsForTrainer(trainerId, fromDate, toDate, traineeName))
-                .thenReturn(Optional.empty());
+                .thenReturn(Collections.EMPTY_LIST);
 
-        Optional<List<TrainingEntity>> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
+        List<TrainingEntity> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
                 toDate, traineeName);
 
         assertThat(result).isEmpty();

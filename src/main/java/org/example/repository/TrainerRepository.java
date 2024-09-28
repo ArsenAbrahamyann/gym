@@ -37,7 +37,7 @@ public interface TrainerRepository {
      *
      * @return an {@link Optional} containing a list of {@link TrainerEntity}, or empty if none found
      */
-    Optional<List<TrainerEntity>> findAll();
+    List<TrainerEntity> findAll();
 
     /**
      * Finds all assigned trainers for a specific trainee.
@@ -45,7 +45,7 @@ public interface TrainerRepository {
      * @param id the ID of the trainee
      * @return an {@link Optional} containing a list of assigned {@link TrainerEntity}, or empty if none found
      */
-    Optional<List<TrainerEntity>> findAssignedTrainers(Long id);
+    List<TrainerEntity> findAssignedTrainers(Long id);
 
     /**
      * Finds all {@link TrainerEntity} records by a list of trainer IDs.
@@ -53,7 +53,7 @@ public interface TrainerRepository {
      * @param trainerIds the list of trainer IDs
      * @return an {@link Optional} containing a list of {@link TrainerEntity}, or empty if none found
      */
-    Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds);
+    List<TrainerEntity> findAllById(List<Long> trainerIds);
 
     /**
      * Updates an existing {@link TrainerEntity}.

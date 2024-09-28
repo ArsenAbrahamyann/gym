@@ -116,7 +116,7 @@ public class TraineeServiceTest {
     @Test
     void testUpdateTraineeTrainers_Success() {
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
-        when(trainerService.findAllById(any())).thenReturn(Optional.of(List.of(trainerEntity)));
+        when(trainerService.findAllById(any())).thenReturn(List.of(trainerEntity));
 
         traineeService.updateTraineeTrainers("username", List.of(1L));
 

@@ -22,7 +22,7 @@ public interface UserRepository {
      *
      * @return an {@link Optional} containing a list of usernames, or empty if none found
      */
-    Optional<List<String>> findAllUsername();
+    List<String> findAllUsername();
 
     /**
      * Saves a new {@link UserEntity} to the database.

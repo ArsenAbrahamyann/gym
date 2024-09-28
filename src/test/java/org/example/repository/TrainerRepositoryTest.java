@@ -67,13 +67,10 @@ public class TrainerRepositoryTest {
 
     @Test
     public void testFindByTrainerFromUsername() {
-        // Arrange
         when(trainerRepository.findByTrainerFromUsername(any(String.class))).thenReturn(Optional.of(trainer));
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findByTrainerFromUsername("testtrainer");
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(trainer.getUser().getUsername(), result.get().getUser().getUsername());
         verify(trainerRepository, times(1)).findByTrainerFromUsername(any(String.class));
@@ -81,13 +78,10 @@ public class TrainerRepositoryTest {
 
     @Test
     public void testFindById() {
-        // Arrange
         when(trainerRepository.findById(anyLong())).thenReturn(Optional.of(trainer));
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findById(1L);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(trainer.getId(), result.get().getId());
         verify(trainerRepository, times(1)).findById(anyLong());
@@ -95,73 +89,55 @@ public class TrainerRepositoryTest {
 
     @Test
     public void testSave() {
-        // Arrange
         doNothing().when(trainerRepository).save(any(TrainerEntity.class));
 
-        // Act
         trainerRepository.save(trainer);
 
-        // Assert
         verify(trainerRepository, times(1)).save(any(TrainerEntity.class));
     }
 
     @Test
     public void testUpdate() {
-        // Arrange
         doNothing().when(trainerRepository).update(any(TrainerEntity.class));
 
-        // Act
         trainerRepository.update(trainer);
 
-        // Assert
         verify(trainerRepository, times(1)).update(any(TrainerEntity.class));
     }
 
     @Test
     public void testFindAll() {
-        // Arrange
         List<TrainerEntity> trainers = new ArrayList<>();
         trainers.add(trainer);
-        when(trainerRepository.findAll()).thenReturn(Optional.of(trainers));
+        when(trainerRepository.findAll()).thenReturn(trainers);
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAll();
+        List<TrainerEntity> result = trainerRepository.findAll();
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(trainers.size(), result.get().size());
+        assertEquals(trainers.size(), result.size());
         verify(trainerRepository, times(1)).findAll();
     }
 
     @Test
     public void testFindAssignedTrainers() {
-        // Arrange
         List<TrainerEntity> trainers = new ArrayList<>();
         trainers.add(trainer);
-        when(trainerRepository.findAssignedTrainers(anyLong())).thenReturn(Optional.of(trainers));
+        when(trainerRepository.findAssignedTrainers(anyLong())).thenReturn(trainers);
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAssignedTrainers(1L);
+        List<TrainerEntity> result = trainerRepository.findAssignedTrainers(1L);
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(trainers.size(), result.get().size());
+        assertEquals(trainers.size(), result.size());
         verify(trainerRepository, times(1)).findAssignedTrainers(anyLong());
     }
 
     @Test
     public void testFindAllById() {
-        // Arrange
         List<TrainerEntity> trainers = new ArrayList<>();
         trainers.add(trainer);
-        when(trainerRepository.findAllById(anyList())).thenReturn(Optional.of(trainers));
+        when(trainerRepository.findAllById(anyList())).thenReturn(trainers);
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAllById(List.of(1L));
+        List<TrainerEntity> result = trainerRepository.findAllById(List.of(1L));
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(trainers.size(), result.get().size());
+        assertEquals(trainers.size(), result.size());
         verify(trainerRepository, times(1)).findAllById(anyList());
     }
 }

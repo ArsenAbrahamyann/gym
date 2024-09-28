@@ -1,5 +1,6 @@
 package org.example.repository.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class UserRepositoryImpl implements UserRepository {
      * @return an {@link Optional} containing a {@link List} of usernames, or an empty {@link Optional} if none are found
      */
     @Override
-    public Optional<List<String>> findAllUsername() {
+    public List<String> findAllUsername() {
         log.debug("Retrieving all usernames from the database");
         List<String> usernames = sessionFactory.getCurrentSession()
                 .createQuery("select u.username from UserEntity u", String.class)
@@ -58,11 +59,12 @@ public class UserRepositoryImpl implements UserRepository {
 
         if (usernames.isEmpty()) {
             log.info("No usernames found");
+            return Collections.emptyList();
         } else {
             log.info("Retrieved {} usernames", usernames.size());
         }
 
-        return Optional.of(usernames);
+        return usernames;
     }
 
     /**
