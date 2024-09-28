@@ -41,22 +41,17 @@ public class TrainingTypeRepositoryTest {
     public void testSave() {
         doNothing().when(trainingTypeRepository).save(any(TrainingTypeEntity.class));
 
-        // Act
         trainingTypeRepository.save(trainingTypeEntity);
 
-        // Assert
         verify(trainingTypeRepository, times(1)).save(any(TrainingTypeEntity.class));
     }
 
     @Test
     public void testFindById() {
-        // Arrange
         when(trainingTypeRepository.findById(anyLong())).thenReturn(Optional.of(trainingTypeEntity));
 
-        // Act
         Optional<TrainingTypeEntity> result = trainingTypeRepository.findById(1L);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(trainingTypeEntity.getId(), result.get().getId());
         assertEquals(trainingTypeEntity.getTrainingTypeName(), result.get().getTrainingTypeName());

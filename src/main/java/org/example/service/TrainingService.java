@@ -122,8 +122,10 @@ public class TrainingService {
                     .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
             trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
-                            fromDate, toDate, trainerName, trainingType)
-                    .orElse(Collections.emptyList());
+                            fromDate, toDate, trainerName, trainingType);
+            if (trainings == null) {
+                trainings = Collections.emptyList();
+            }
         } catch (Exception e) {
             log.error("Error fetching trainings: {}", e.getMessage());
             return new ArrayList<>();
@@ -155,11 +157,11 @@ public class TrainingService {
             TrainerEntity trainer = trainerService.findByTrainerFromUsername(trainerUsername)
                     .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
-            trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName)
-                    .orElseThrow(() -> new ResourceNotFoundException("No trainings found for the specified criteria"));
+            trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName);
+            if (trainings == null) {
+                log.info("No trainings found for the specified criteria");
+            }
         } catch (EntityNotFoundException e) {
-            log.error("Error fetching trainings: {}", e.getMessage());
-        } catch (ResourceNotFoundException e) {
             log.error("Error fetching trainings: {}", e.getMessage());
         } catch (Exception e) {
             log.error("An unexpected error occurred while fetching trainings: {}", e.getMessage());
@@ -181,7 +183,7 @@ public class TrainingService {
      *         if no trainings are found.
      */
     @Transactional
-    public Optional<List<TrainingEntity>> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
+    public List<TrainingEntity> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
                                                     String traineeName) {
         log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id,
                 fromDate, toDate, traineeName);
@@ -189,7 +191,7 @@ public class TrainingService {
             return trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
         } catch (Exception e) {
             log.error("Error fetching trainings for trainer ID {}: {}", id, e.getMessage());
-            return Optional.empty();
+            return Collections.emptyList();
         }
     }
 }

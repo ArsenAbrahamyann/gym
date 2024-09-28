@@ -1,6 +1,7 @@
 package org.example.service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -10,7 +11,6 @@ import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
 import org.example.entity.TrainingTypeEntity;
 import org.example.entity.UserEntity;
-import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainerRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
@@ -190,8 +190,10 @@ public class TrainerService {
             validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
 
             List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(
-                            trainer.getId(), fromDate, toDate, traineeName)
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainings not found"));
+                            trainer.getId(), fromDate, toDate, traineeName);
+            if (trainings == null) {
+                log.info("Trainings not found");
+            }
 
             log.info("Found {} trainings for trainer: {}", trainings.size(), trainerUsername);
             return trainings;
@@ -210,12 +212,12 @@ public class TrainerService {
      *         or an empty {@link Optional} if no records are found.
      */
     @Transactional
-    public Optional<List<TrainerEntity>> findAll() {
+    public List<TrainerEntity> findAll() {
         try {
             return trainerRepository.findAll();
         } catch (Exception e) {
             log.error("Error retrieving all trainers: {}", e.getMessage());
-            return Optional.empty();
+            return Collections.emptyList();
         }
     }
 
@@ -229,12 +231,12 @@ public class TrainerService {
      *         to the given ID, or an empty {@link Optional} if no trainers are found.
      */
     @Transactional
-    public Optional<List<TrainerEntity>> findAssignedTrainers(Long id) {
+    public List<TrainerEntity> findAssignedTrainers(Long id) {
         try {
             return trainerRepository.findAssignedTrainers(id);
         } catch (Exception e) {
             log.error("Error retrieving assigned trainers for ID {}: {}", id, e.getMessage());
-            return Optional.empty();
+            return Collections.emptyList();
         }
     }
 
@@ -248,12 +250,12 @@ public class TrainerService {
      *         to the provided IDs, or an empty {@link Optional} if no records are found.
      */
     @Transactional
-    public Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds) {
+    public List<TrainerEntity> findAllById(List<Long> trainerIds) {
         try {
             return trainerRepository.findAllById(trainerIds);
         } catch (Exception e) {
             log.error("Error retrieving trainers by IDs {}: {}", trainerIds, e.getMessage());
-            return Optional.empty();
+            return Collections.emptyList();
         }
     }
 

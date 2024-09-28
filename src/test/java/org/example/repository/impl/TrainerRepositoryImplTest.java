@@ -37,7 +37,6 @@ public class TrainerRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
-        // Setup UserEntity
         userEntity = new UserEntity();
         userEntity.setId(1L);
         userEntity.setFirstName("Jane");
@@ -46,60 +45,49 @@ public class TrainerRepositoryImplTest {
         userEntity.setPassword("password123");
         userEntity.setIsActive(true);
 
-        // Setup TrainerEntity
         trainerEntity = new TrainerEntity();
         trainerEntity.setId(1L);
         trainerEntity.setUser(userEntity);
 
-        // Mock the session factory to return a session
         when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
     @Test
     void save_ShouldPersistTrainerEntity() {
-        // Act
         trainerRepository.save(trainerEntity);
 
-        // Assert that the session's saveOrUpdate method was called
         verify(session).saveOrUpdate(trainerEntity);
     }
 
     @Test
     void findById_ShouldReturnTrainerEntity_WhenIdExists() {
-        // Arrange
         Long trainerId = 1L;
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("from TrainerEntity where id = :trainerId", TrainerEntity.class)).thenReturn(query);
         when(query.setParameter("trainerId", trainerId)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(trainerEntity);
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findById(trainerId);
 
-        // Assert
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(trainerId);
     }
 
     @Test
     void findById_ShouldReturnEmpty_WhenIdDoesNotExist() {
-        // Arrange
         Long trainerId = 2L;
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("from TrainerEntity where id = :trainerId", TrainerEntity.class)).thenReturn(query);
         when(query.setParameter("trainerId", trainerId)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(null);
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findById(trainerId);
 
-        // Assert
         assertThat(result).isNotPresent();
     }
 
     @Test
     void findByTrainerFromUsername_ShouldReturnTrainerEntity_WhenUsernameExists() {
-        // Arrange
         String username = "janedoe";
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("from TrainerEntity te where te.user.username = :username", TrainerEntity.class))
@@ -107,17 +95,14 @@ public class TrainerRepositoryImplTest {
         when(query.setParameter("username", username)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(trainerEntity);
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findByTrainerFromUsername(username);
 
-        // Assert
         assertThat(result).isPresent();
         assertThat(result.get().getUser().getUsername()).isEqualTo(username);
     }
 
     @Test
     void findByTrainerFromUsername_ShouldReturnEmpty_WhenUsernameDoesNotExist() {
-        // Arrange
         String username = "non_existing_user";
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("from TrainerEntity te where te.user.username = :username", TrainerEntity.class))
@@ -125,31 +110,25 @@ public class TrainerRepositoryImplTest {
         when(query.setParameter("username", username)).thenReturn(query);
         when(query.uniqueResult()).thenReturn(null);
 
-        // Act
         Optional<TrainerEntity> result = trainerRepository.findByTrainerFromUsername(username);
 
-        // Assert
         assertThat(result).isNotPresent();
     }
 
     @Test
     void findAll_ShouldReturnListOfTrainers() {
-        // Arrange
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("from TrainerEntity", TrainerEntity.class)).thenReturn(query);
         when(query.getResultList()).thenReturn(Arrays.asList(trainerEntity));
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAll();
+        List<TrainerEntity> result = trainerRepository.findAll();
 
-        // Assert
-        assertThat(result).isPresent();
-        assertThat(result.get()).contains(trainerEntity);
+        assertThat(result).isNotEmpty();
+        assertThat(result).contains(trainerEntity);
     }
 
     @Test
     void findAssignedTrainers_ShouldReturnListOfAssignedTrainers() {
-        // Arrange
         Long traineeId = 1L;
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId",
@@ -157,36 +136,27 @@ public class TrainerRepositoryImplTest {
                 .thenReturn(query);
         when(query.setParameter("traineeId", traineeId)).thenReturn(query);
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAssignedTrainers(traineeId);
-
-        // Assert
-        assertThat(result).isPresent();
+        List<TrainerEntity> result = trainerRepository.findAssignedTrainers(traineeId);
     }
 
     @Test
     void findAllById_ShouldReturnListOfTrainers_WhenIdsAreGiven() {
-        // Arrange
         List<Long> trainerIds = Arrays.asList(1L, 2L);
         Query<TrainerEntity> query = mock(Query.class);
         when(session.createQuery("FROM TrainerEntity t WHERE t.id IN :ids", TrainerEntity.class)).thenReturn(query);
         when(query.setParameter("ids", trainerIds)).thenReturn(query);
         when(query.getResultList()).thenReturn(Arrays.asList(trainerEntity));
 
-        // Act
-        Optional<List<TrainerEntity>> result = trainerRepository.findAllById(trainerIds);
+        List<TrainerEntity> result = trainerRepository.findAllById(trainerIds);
 
-        // Assert
-        assertThat(result).isPresent();
-        assertThat(result.get()).contains(trainerEntity);
+        assertThat(result).isNotEmpty();
+        assertThat(result).contains(trainerEntity);
     }
 
     @Test
     void update_ShouldSaveOrUpdateTrainerEntity() {
-        // Act
         trainerRepository.update(trainerEntity);
 
-        // Assert
         verify(session).saveOrUpdate(trainerEntity);
     }
 }
