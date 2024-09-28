@@ -139,12 +139,16 @@ public class TraineeService {
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
                             + traineeUsername));
 
-            List<TrainerEntity> allTrainers = trainerService.findAll()
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainers not found."));
+            List<TrainerEntity> allTrainers = trainerService.findAll();
+            if (allTrainers == null) {
+                log.info("Trainers not found.");
+            }
 
-            List<TrainerEntity> assignedTrainers = trainerService.findAssignedTrainers(trainee.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Assigned trainers not found for trainee ID: "
-                            + trainee.getId()));
+            List<TrainerEntity> assignedTrainers = trainerService.findAssignedTrainers(trainee.getId());
+            if (assignedTrainers.isEmpty()) {
+                log.info("Assigned trainers not found for trainee ID: "
+                        + trainee.getId());
+            }
 
             allTrainers.removeAll(assignedTrainers);
             log.info("Found {} unassigned trainers for trainee: {}", allTrainers.size(), traineeUsername);
@@ -170,8 +174,10 @@ public class TraineeService {
             TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found"));
 
-            List<TrainerEntity> newTrainers = trainerService.findAllById(trainerIds)
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainers not found"));
+            List<TrainerEntity> newTrainers = trainerService.findAllById(trainerIds);
+            if (newTrainers.isEmpty()) {
+                log.info("Trainers not found");
+            }
 
             validationUtils.validateUpdateTraineeTrainerList(trainee, newTrainers);
             trainee.setTrainers(new HashSet<>(newTrainers));

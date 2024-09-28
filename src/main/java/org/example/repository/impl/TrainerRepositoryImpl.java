@@ -1,5 +1,6 @@
 package org.example.repository.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -81,17 +82,18 @@ public class TrainerRepositoryImpl implements TrainerRepository {
      * @return an {@link Optional} containing a list of {@link TrainerEntity}, or empty if none found
      */
     @Override
-    public Optional<List<TrainerEntity>> findAll() {
+    public List<TrainerEntity> findAll() {
         log.debug("Finding all TrainerEntity instances");
         List<TrainerEntity> trainers = sessionFactory.getCurrentSession()
                 .createQuery("from TrainerEntity", TrainerEntity.class)
                 .getResultList();
         if (trainers.isEmpty()) {
             log.info("No TrainerEntity instances found");
+            return Collections.emptyList();
         } else {
             log.info("Found {} TrainerEntity instances", trainers.size());
         }
-        return Optional.ofNullable(trainers);
+        return trainers;
     }
 
     /**
@@ -101,7 +103,7 @@ public class TrainerRepositoryImpl implements TrainerRepository {
      * @return an {@link Optional} containing a list of assigned {@link TrainerEntity}, or empty if none found
      */
     @Override
-    public Optional<List<TrainerEntity>> findAssignedTrainers(Long traineeId) {
+    public List<TrainerEntity> findAssignedTrainers(Long traineeId) {
         log.debug("Finding trainers assigned to trainee with ID: {}", traineeId);
         List<TrainerEntity> trainers = sessionFactory.getCurrentSession()
                 .createQuery("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId",
@@ -110,10 +112,11 @@ public class TrainerRepositoryImpl implements TrainerRepository {
                 .list();
         if (trainers.isEmpty()) {
             log.info("No trainers assigned to trainee with ID: {}", traineeId);
+            return Collections.emptyList();
         } else {
             log.info("Found {} trainers assigned to trainee with ID: {}", trainers.size(), traineeId);
         }
-        return Optional.of(trainers);
+        return trainers;
     }
 
     /**
@@ -123,7 +126,7 @@ public class TrainerRepositoryImpl implements TrainerRepository {
      * @return an {@link Optional} containing a list of {@link TrainerEntity}, or empty if none found
      */
     @Override
-    public Optional<List<TrainerEntity>> findAllById(List<Long> trainerIds) {
+    public List<TrainerEntity> findAllById(List<Long> trainerIds) {
         log.debug("Finding trainers by IDs: {}", trainerIds);
         List<TrainerEntity> trainers = sessionFactory.getCurrentSession()
                 .createQuery("FROM TrainerEntity t WHERE t.id IN :ids", TrainerEntity.class)
@@ -131,10 +134,11 @@ public class TrainerRepositoryImpl implements TrainerRepository {
                 .getResultList();
         if (trainers.isEmpty()) {
             log.info("No trainers found for IDs: {}", trainerIds);
+            return Collections.emptyList();
         } else {
             log.info("Found {} trainers for IDs: {}", trainers.size(), trainerIds);
         }
-        return Optional.ofNullable(trainers);
+        return trainers;
     }
 
     /**

@@ -131,31 +131,31 @@ public class TrainerServiceTest {
 
     @Test
     public void testFindAll_Success() {
-        when(trainerRepository.findAll()).thenReturn(Optional.of(Collections.singletonList(trainerEntity)));
+        when(trainerRepository.findAll()).thenReturn(Collections.singletonList(trainerEntity));
 
-        Optional<List<TrainerEntity>> trainers = trainerService.findAll();
+        List<TrainerEntity> trainers = trainerService.findAll();
 
-        assertThat(trainers).isPresent();
+        assertThat(trainers).isNotNull();
     }
 
     @Test
     public void testFindAssignedTrainers_Success() {
         when(trainerRepository.findAssignedTrainers(1L))
-                .thenReturn(Optional.of(Collections.singletonList(trainerEntity)));
+                .thenReturn(Collections.singletonList(trainerEntity));
 
-        Optional<List<TrainerEntity>> trainers = trainerService.findAssignedTrainers(1L);
+        List<TrainerEntity> trainers = trainerService.findAssignedTrainers(1L);
 
-        assertThat(trainers).isPresent();
+        assertThat(trainers).isNotNull();
     }
 
     @Test
     public void testFindAllById_Success() {
         when(trainerRepository.findAllById(Collections.singletonList(1L)))
-                .thenReturn(Optional.of(Collections.singletonList(trainerEntity)));
+                .thenReturn(Collections.singletonList(trainerEntity));
 
-        Optional<List<TrainerEntity>> trainers = trainerService.findAllById(Collections.singletonList(1L));
+        List<TrainerEntity> trainers = trainerService.findAllById(Collections.singletonList(1L));
 
-        assertThat(trainers).isPresent();
+        assertThat(trainers).isNotNull();
     }
 
     @Test

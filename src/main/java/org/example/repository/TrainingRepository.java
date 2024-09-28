@@ -36,18 +36,18 @@ public interface TrainingRepository {
      * @param trainingType the type of training (optional)
      * @return an {@link Optional} containing a list of matching {@link TrainingEntity}, or empty if none found
      */
-    Optional<List<TrainingEntity>> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
+    List<TrainingEntity> findTrainingsForTrainee(Long traineeId, LocalDateTime fromDate,
                                                          LocalDateTime toDate, String trainerName, String trainingType);
 
     /**
      * Finds trainings for a specific trainer based on optional criteria such as date range and trainee name.
      *
-     * @param trainerId the ID of the trainer
-     * @param fromDate the starting date of the training period
-     * @param toDate the ending date of the training period
+     * @param trainerId   the ID of the trainer
+     * @param fromDate    the starting date of the training period
+     * @param toDate      the ending date of the training period
      * @param traineeName the name of the trainee (optional)
      * @return an {@link Optional} containing a list of matching {@link TrainingEntity}, or empty if none found
      */
-    Optional<List<TrainingEntity>> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate,
-                                                           LocalDateTime toDate, String traineeName);
+    List<TrainingEntity> findTrainingsForTrainer(Long trainerId, LocalDateTime fromDate,
+                                                 LocalDateTime toDate, String traineeName);
 }

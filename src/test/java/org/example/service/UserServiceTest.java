@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.example.entity.UserEntity;
@@ -86,7 +87,7 @@ public class UserServiceTest {
 
     @Test
     void testFindAllUsernamesReturnsList() {
-        when(userRepository.findAllUsername()).thenReturn(Optional.of(List.of("testUser", "anotherUser")));
+        when(userRepository.findAllUsername()).thenReturn(List.of("testUser", "anotherUser"));
 
         List<String> usernames = userService.findAllUsernames();
 
@@ -98,7 +99,7 @@ public class UserServiceTest {
 
     @Test
     void testFindAllUsernamesReturnsEmptyList() {
-        when(userRepository.findAllUsername()).thenReturn(Optional.empty());
+        when(userRepository.findAllUsername()).thenReturn(Collections.EMPTY_LIST);
 
         List<String> usernames = userService.findAllUsernames();
 

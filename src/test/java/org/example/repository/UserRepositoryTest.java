@@ -45,13 +45,10 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindByUsername() {
-        // Arrange
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
-        // Act
         Optional<UserEntity> result = userRepository.findByUsername("testuser");
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(user.getUsername(), result.get().getUsername());
         verify(userRepository, times(1)).findByUsername(anyString());
@@ -59,51 +56,39 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindAllUsername() {
-        // Arrange
         List<String> usernames = new ArrayList<>();
         usernames.add("testuser");
-        when(userRepository.findAllUsername()).thenReturn(Optional.of(usernames));
+        when(userRepository.findAllUsername()).thenReturn(usernames);
 
-        // Act
-        Optional<List<String>> result = userRepository.findAllUsername();
+        List<String> result = userRepository.findAllUsername();
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(usernames.size(), result.get().size());
-        assertEquals("testuser", result.get().get(0));
+        assertEquals(usernames.size(), result.size());
+        assertEquals("testuser", result.get(0));
         verify(userRepository, times(1)).findAllUsername();
     }
 
     @Test
     public void testSave() {
-        // Act
         userRepository.save(user);
 
-        // Assert
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }
 
     @Test
     public void testUpdate() {
-        // Arrange
         doNothing().when(userRepository).update(any(UserEntity.class));
 
-        // Act
         userRepository.update(user);
 
-        // Assert
         verify(userRepository, times(1)).update(any(UserEntity.class));
     }
 
     @Test
     public void testDeleteByUsername() {
-        // Arrange
         doNothing().when(userRepository).deleteByUsername(anyString());
 
-        // Act
         userRepository.deleteByUsername("testuser");
 
-        // Assert
         verify(userRepository, times(1)).deleteByUsername(anyString());
     }
 }

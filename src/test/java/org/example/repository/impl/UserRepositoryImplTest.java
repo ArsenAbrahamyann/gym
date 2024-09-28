@@ -73,10 +73,9 @@ public class UserRepositoryImplTest {
         when(session.createQuery("select u.username from UserEntity u", String.class)).thenReturn(query);
         when(query.getResultList()).thenReturn(usernames);
 
-        Optional<List<String>> result = userRepository.findAllUsername();
+        List<String> result = userRepository.findAllUsername();
 
-        assertTrue(result.isPresent());
-        assertEquals(usernames, result.get());
+        assertEquals(usernames, result);
     }
 
     @Test
