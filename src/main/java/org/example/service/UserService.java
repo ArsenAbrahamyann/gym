@@ -1,5 +1,6 @@
 package org.example.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -60,8 +61,11 @@ public class UserService {
     public List<String> findAllUsernames() {
         log.info("Fetching all usernames from the repository.");
         try {
-            Optional<List<String>> allUsernames = userRepository.findAllUsername();
-            return allUsernames.orElseGet(List::of);
+            List<String> allUsernames = userRepository.findAllUsername();
+            if (allUsernames.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return allUsernames;
         } catch (Exception e) {
             log.error("Error fetching usernames: {}", e.getMessage());
             return List.of();

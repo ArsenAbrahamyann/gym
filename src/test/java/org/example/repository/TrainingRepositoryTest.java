@@ -82,13 +82,10 @@ public class TrainingRepositoryTest {
 
     @Test
     public void testFindByTrainingName() {
-        // Arrange
         when(trainingRepository.findByTrainingName(anyString())).thenReturn(Optional.of(training));
 
-        // Act
         Optional<TrainingEntity> result = trainingRepository.findByTrainingName("Yoga Basics");
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(training.getTrainingName(), result.get().getTrainingName());
         verify(trainingRepository, times(1)).findByTrainingName(anyString());
@@ -96,97 +93,76 @@ public class TrainingRepositoryTest {
 
     @Test
     public void testFindByTrainingName_NotFound() {
-        // Arrange
         when(trainingRepository.findByTrainingName(anyString())).thenReturn(Optional.empty());
 
-        // Act
         Optional<TrainingEntity> result = trainingRepository.findByTrainingName("Nonexistent Training");
 
-        // Assert
         assertFalse(result.isPresent());
         verify(trainingRepository, times(1)).findByTrainingName(anyString());
     }
 
     @Test
     public void testSave() {
-        // Arrange
         doNothing().when(trainingRepository).save(any(TrainingEntity.class));
 
-        // Act
         trainingRepository.save(training);
 
-        // Assert
         verify(trainingRepository, times(1)).save(any(TrainingEntity.class));
     }
 
     @Test
     public void testFindTrainingsForTrainee() {
-        // Arrange
         List<TrainingEntity> trainings = new ArrayList<>();
         trainings.add(training);
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), anyString(), anyString()))
-                .thenReturn(Optional.of(trainings));
+                .thenReturn(trainings);
 
-        // Act
-        Optional<List<TrainingEntity>> result = trainingRepository.findTrainingsForTrainee(
+        List<TrainingEntity> result = trainingRepository.findTrainingsForTrainee(
                 1L, LocalDateTime.now(), LocalDateTime.now(), "John Doe", "Yoga");
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get().size());
+        assertEquals(1, result.size());
         verify(trainingRepository, times(1))
                 .findTrainingsForTrainee(anyLong(), any(), any(), anyString(), anyString());
     }
 
     @Test
     public void testFindTrainingsForTrainee_EmptyList() {
-        // Arrange
         when(trainingRepository.findTrainingsForTrainee(anyLong(), any(), any(), anyString(), anyString()))
-                .thenReturn(Optional.of(new ArrayList<>()));
+                .thenReturn(new ArrayList<>());
 
-        // Act
-        Optional<List<TrainingEntity>> result = trainingRepository.findTrainingsForTrainee(
+        List<TrainingEntity> result = trainingRepository.findTrainingsForTrainee(
                 1L, LocalDateTime.now(), LocalDateTime.now(), "John Doe", "Yoga");
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(0, result.get().size());
+        assertEquals(0, result.size());
         verify(trainingRepository, times(1))
                 .findTrainingsForTrainee(anyLong(), any(), any(), anyString(), anyString());
     }
 
     @Test
     public void testFindTrainingsForTrainer() {
-        // Arrange
         List<TrainingEntity> trainings = new ArrayList<>();
         trainings.add(training);
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), anyString()))
-                .thenReturn(Optional.of(trainings));
+                .thenReturn(trainings);
 
-        // Act
-        Optional<List<TrainingEntity>> result = trainingRepository.findTrainingsForTrainer(
+        List<TrainingEntity> result = trainingRepository.findTrainingsForTrainer(
                 1L, LocalDateTime.now(), LocalDateTime.now(), "Jane Doe");
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get().size());
+        assertEquals(1, result.size());
         verify(trainingRepository, times(1))
                 .findTrainingsForTrainer(anyLong(), any(), any(), anyString());
     }
 
     @Test
     public void testFindTrainingsForTrainer_EmptyList() {
-        // Arrange
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), anyString()))
-                .thenReturn(Optional.of(new ArrayList<>()));
+                .thenReturn(new ArrayList<>());
 
-        // Act
-        Optional<List<TrainingEntity>> result = trainingRepository.findTrainingsForTrainer(
+        List<TrainingEntity> result = trainingRepository.findTrainingsForTrainer(
                 1L, LocalDateTime.now(), LocalDateTime.now(), "Jane Doe");
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(0, result.get().size());
+
+        assertEquals(0, result.size());
         verify(trainingRepository, times(1))
                 .findTrainingsForTrainer(anyLong(), any(), any(), anyString());
     }
