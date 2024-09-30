@@ -45,7 +45,6 @@ public class Main {
         // Because in the main method we should directly call the create method of the controller with only input dto values.
         // I would move the username and password generation method calls, userDto object creation and setting the user of the trainee
         // to the trainee service methods.
-
         List<String> allUsername = userService.findAllUsernames();
 
         String generatedUsername = userUtils.generateUsername("Arsen", "Abrahamyan", allUsername);
