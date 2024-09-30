@@ -147,6 +147,7 @@ public class TraineeService {
             // I think getting all trainers from the db is not a good idea.
             // Because it is an expensive operation.
             // I would write a query that filters the trainers by trainee username.
+
             TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
                             + traineeUsername));
