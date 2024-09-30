@@ -41,6 +41,11 @@ public class Main {
         UserService userService = context.getBean(UserService.class);
         UserUtils userUtils = context.getBean(UserUtils.class);
 
+        // I think constructing the trainee object in the main method is not a good idea.
+        // Because in the main method we should directly call the create method of the controller with only input dto values.
+        // I would move the username and password generation method calls, userDto object creation and setting the user of the trainee
+        // to the trainee service methods.
+
         List<String> allUsername = userService.findAllUsernames();
 
         String generatedUsername = userUtils.generateUsername("Arsen", "Abrahamyan", allUsername);

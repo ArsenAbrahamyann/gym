@@ -66,6 +66,10 @@ public class TraineeService {
             UserEntity user = trainee.getUser();
             Optional<UserEntity> existingUserOpt = userService.findByUsername(user.getUsername());
 
+            // I think checking if the user exists is redundant
+            // Because User and Trainee have a one-to-one relationship and user should be created when the trainee is created.
+            // I would create a user object from traineeDto input data and save the user to the db when saving the trainee.
+
             if (existingUserOpt.isPresent()) {
                 user = existingUserOpt.get();
             } else {
@@ -97,6 +101,10 @@ public class TraineeService {
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
 
 
+            // I think validating the new password is redundant.
+            // Because the new password shouldn't be in the db.
+            // I would remove the validation for the new password.
+
             validationUtils.validatePasswordMatch(user, newPassword);
             user.setPassword(newPassword);
             userService.update(user);
@@ -127,6 +135,10 @@ public class TraineeService {
     }
 
 
+    // I think this method should be in the TrainerService class.
+    // Because it's return type is TrainerEntity.
+    // I would move this method to the TrainerService class.
+
 
     /**
      * Retrieves unassigned trainers for a trainee.
@@ -140,6 +152,9 @@ public class TraineeService {
 
         try {
 
+            // I think getting all trainers from the db is not a good idea.
+            // Because it is an expensive operation.
+            // I would write a query that filters the trainers by trainee username.
             TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
                             + traineeUsername));
@@ -235,6 +250,10 @@ public class TraineeService {
     public void deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username: {}", username);
         try {
+
+            // I think checking if the user exists is redundant.
+            // Because user will exist with the given username,if trainee exists with the given username.
+            // I would only check if trainee exists.
 
             UserEntity user = userService.findByUsername(username)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
