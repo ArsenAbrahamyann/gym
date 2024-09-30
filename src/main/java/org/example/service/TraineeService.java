@@ -133,6 +133,7 @@ public class TraineeService {
     // I think this method should be in the TrainerService class.
     // Because it's return type is TrainerEntity.
     // I would move this method to the TrainerService class.
+
     /**
      * Retrieves unassigned trainers for a trainee.
      *

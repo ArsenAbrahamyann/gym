@@ -39,8 +39,6 @@ public class UserUtils {
         // I don't think passing all usernames to this method as an argument is not a good idea.
         // Because it is a very expensive operation to get all usernames.
         // I would use getUserByUsername method to check if a user with the given username exists.
-
-
         while (existingUsernames.contains(username)) {
             username = baseUsername
                     + serialNumber;
