@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TrainerDto;
 import org.example.entity.TrainerEntity;
@@ -17,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing Trainer profiles and related operations.

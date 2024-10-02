@@ -168,7 +168,7 @@ public class TraineeServiceTest {
     void testFindByTraineeFromUsername_Success() {
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.of(traineeEntity));
 
-        Optional<TraineeEntity> result = traineeService.findByTraineeFromUsername("username");
+        Optional<TraineeEntity> result = traineeService.getTrainee("username");
 
         assertEquals(traineeEntity, result.get());
     }
@@ -177,7 +177,7 @@ public class TraineeServiceTest {
     void testFindByTraineeFromUsername_NotFound() {
         when(traineeRepository.findByTraineeFromUsername(anyString())).thenReturn(Optional.empty());
 
-        Optional<TraineeEntity> result = traineeService.findByTraineeFromUsername("username");
+        Optional<TraineeEntity> result = traineeService.getTrainee("username");
 
         assertEquals(Optional.empty(), result);
     }

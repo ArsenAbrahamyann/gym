@@ -1,81 +1,89 @@
 package org.example.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.TrainerDto;
-import org.example.entity.TrainingEntity;
+import org.example.paylod.request.UsernameRequestDto;
+import org.example.paylod.request.IsActiveRequestDto;
+import org.example.paylod.request.TrainerRegistrationRequestDto;
+import org.example.paylod.request.UpdateTrainerRequestDto;
+import org.example.paylod.response.GetTrainerProfileResponseDto;
+import org.example.paylod.response.RegistrationResponseDto;
+import org.example.paylod.response.UpdateTrainerProfileResponseDto;
 import org.example.service.TrainerService;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller class responsible for handling trainer-related operations.
  * Acts as a facade between the client and the TrainerService.
  */
-@Controller
+@RestController
+@RequestMapping("api/trainer")
+@CrossOrigin
 @RequiredArgsConstructor
 @Slf4j
 public class TrainerController {
     private final TrainerService trainerService;
 
-    /**
-     * Creates a new trainer profile.
-     *
-     * @param trainerDto Data Transfer Object containing trainer information.
-     * @return The created TrainerDto object with the trainer's profile details.
-     */
-    public TrainerDto createTrainer(TrainerDto trainerDto) {
-        log.info("Controller: Creating trainer");
-        return trainerService.createTrainerProfile(trainerDto);
+    @PostMapping(value = "/trainer/registration")
+    public ResponseEntity<?> trainerRegistration(@RequestPart String firstName,
+                                              @RequestPart String lastName,
+                                              @PathVariable("trainingTypeId") Long trainingTypeId) {
+        log.info("Controller: Registration trainer");
+        TrainerRegistrationRequestDto registrationDto = new TrainerRegistrationRequestDto(firstName,
+                lastName, trainingTypeId);
+        //...
+        RegistrationResponseDto responseDto = new RegistrationResponseDto();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    /**
-     * Updates an existing trainer's profile by username.
-     *
-     * @param username The username of the trainer to update.
-     * @param trainerDto Data Transfer Object containing updated trainer information.
-     */
-    public void updateTrainerProfile(String username, TrainerDto trainerDto) {
-        log.info("Controller: Updating trainer profile for {}", username);
-        trainerService.updateTrainerProfile(username, trainerDto);
+    @GetMapping
+    public ResponseEntity<?> getTrainerProfile(@RequestPart String username) {
+        log.info("Controller: Get trainer profile");
+        UsernameRequestDto usernameRequestDto = new UsernameRequestDto(username);
+        //...
+        GetTrainerProfileResponseDto responseDto = new GetTrainerProfileResponseDto();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    /**
-     * Changes the password for a trainer.
-     *
-     * @param username The username of the trainer whose password is to be changed.
-     * @param newPassword The new password for the trainer.
-     */
-    public void changeTrainerPassword(String username, String newPassword) {
-        log.info("Controller: Changing password for trainer {}", username);
-        trainerService.changeTrainerPassword(username, newPassword);
+    @PutMapping(value = "/update")
+    public ResponseEntity<?> updateTrainerProfile(@RequestPart String username,
+                                                  @RequestPart String firstName,
+                                                  @RequestPart String lastName,
+                                                  @PathVariable("trainingTypeId") Long trainingTypeId,
+                                                  @RequestParam boolean isActive) {
+        log.info("Controller: update trainer profile");
+        UpdateTrainerRequestDto updateTrainerRequestDto = new UpdateTrainerRequestDto(username, firstName, lastName,
+                trainingTypeId, isActive);
+        //...
+        UpdateTrainerProfileResponseDto responseDto = new UpdateTrainerProfileResponseDto();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    /**
-     * Toggles the active status of a trainer (e.g., active/inactive).
-     *
-     * @param username The username of the trainer whose status is to be toggled.
-     */
-    public void toggleTrainerStatus(String username) {
-        log.info("Controller: Toggling status for trainer {}", username);
-        trainerService.toggleTrainerStatus(username);
+    @PatchMapping(value = "/activate")
+    public ResponseEntity<?> activateTrainer(@RequestPart String username,
+                                             @RequestParam boolean isActive) {
+        log.info("Controller: Activate trainer.");
+        IsActiveRequestDto isActiveRequestDto = new IsActiveRequestDto(username, isActive);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * Fetches the list of trainings for a trainer within a specified date range, optionally filtered by a trainee's name.
-     *
-     * @param trainerUsername The username of the trainer for whom to fetch the trainings.
-     * @param fromDate The start date of the training period.
-     * @param toDate The end date of the training period.
-     * @param traineeName Optional parameter to filter trainings by trainee name.
-     * @return A list of TrainingEntity objects representing the trainer's scheduled trainings.
-     */
-    public List<TrainingEntity> getTrainerTrainings(String trainerUsername,
-                                                    LocalDateTime fromDate,
-                                                    LocalDateTime toDate,
-                                                    String traineeName) {
-        log.info("Controller: Fetching trainings for trainer {}", trainerUsername);
-        return trainerService.getTrainerTrainings(trainerUsername, fromDate, toDate, traineeName);
+    @PatchMapping(value = "/de-activate")
+    public ResponseEntity<?> deActivateTrainer(@RequestPart String username,
+                                               @RequestParam boolean isActive) {
+        log.info("Controller: DeActivate trainer.");
+        IsActiveRequestDto isActiveRequestDto = new IsActiveRequestDto(username, isActive);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

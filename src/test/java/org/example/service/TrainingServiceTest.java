@@ -91,7 +91,7 @@ public class TrainingServiceTest {
         String trainerName = null;
         String trainingType = null;
 
-        when(traineeService.findByTraineeFromUsername(traineeName)).thenReturn(Optional.of(trainee));
+        when(traineeService.getTrainee(traineeName)).thenReturn(Optional.of(trainee));
         when(trainingRepository.findTrainingsForTrainee(1L, fromDate, toDate, trainerName, trainingType))
                 .thenReturn(Collections.singletonList(new TrainingEntity()));
 

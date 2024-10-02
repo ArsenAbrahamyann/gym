@@ -3,13 +3,14 @@ package org.example.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.UserEntity;
+import org.example.paylod.request.UserLoginRequestDto;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing user-related operations.
@@ -31,23 +32,23 @@ public class UserService {
      * @throws EntityNotFoundException If the user with the specified username is not found.
      */
     @Transactional
-    public boolean authenticateUser(String username, String password) {
-        log.info("Authenticating user: {}", username);
+    public boolean authenticateUser(UserLoginRequestDto requestDto) {
+        log.info("Authenticating user: {}", requestDto.getUsername());
         try {
-            UserEntity user = userRepository.findByUsername(username)
+            UserEntity user = userRepository.findByUsername(requestDto.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
-            if (user.getPassword().equals(password)) {
-                log.info("User {} authenticated successfully", username);
+            if (user.getPassword().equals(requestDto.getPassword())) {
+                log.info("User {} authenticated successfully", requestDto.getUsername());
                 return true;
             } else {
-                log.warn("Authentication failed for user {}", username);
+                log.warn("Authentication failed for user {}", requestDto.getUsername());
                 return false;
             }
         } catch (EntityNotFoundException e) {
-            log.error("Authentication error for user {}: {}", username, e.getMessage());
+            log.error("Authentication error for user {}: {}", requestDto.getUsername(), e.getMessage());
             return false;
         } catch (Exception e) {
-            log.error("Unexpected error during authentication for user {}: {}", username, e.getMessage());
+            log.error("Unexpected error during authentication for user {}: {}", requestDto.getUsername(), e.getMessage());
             return false;
         }
     }

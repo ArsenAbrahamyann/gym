@@ -1,15 +1,21 @@
 package org.example.service;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TraineeDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.UserEntity;
 import org.example.exeption.ResourceNotFoundException;
+import org.example.paylod.request.TraineeRegistrationRequestDto;
+import org.example.paylod.request.UserLoginRequestDto;
+import org.example.paylod.response.GetTraineeProfileResponseDto;
+import org.example.paylod.response.RegistrationResponseDto;
+import org.example.paylod.response.TrainerListResponseDto;
 import org.example.repository.TraineeRepository;
 import org.example.utils.ValidationUtils;
 import org.modelmapper.ModelMapper;
@@ -55,14 +61,14 @@ public class TraineeService {
     /**
      * Creates a new trainee profile.
      *
-     * @param traineeDto The data transfer object containing trainee information.
+     * @param registrationRequestDto The data transfer object containing trainee information.
      * @return The created TraineeDto object.
      */
     @Transactional
-    public TraineeDto createTraineeProfile(TraineeDto traineeDto) {
+    public RegistrationResponseDto createTraineeProfile(TraineeRegistrationRequestDto registrationRequestDto) {
         log.info("Creating trainee profile");
         try {
-            TraineeEntity trainee = modelMapper.map(traineeDto, TraineeEntity.class);
+            TraineeEntity trainee = modelMapper.map(registrationRequestDto, TraineeEntity.class);
             UserEntity user = trainee.getUser();
             Optional<UserEntity> existingUserOpt = userService.findByUsername(user.getUsername());
             if (existingUserOpt.isPresent()) {
@@ -71,10 +77,14 @@ public class TraineeService {
                 userService.save(user);
             }
             trainee.setUser(user);
-            userService.authenticateUser(user.getUsername(), user.getPassword());
+            UserLoginRequestDto loginRequestDto = new UserLoginRequestDto(trainee.getUser().getUsername(),
+                    trainee.getUser().getPassword());
+            userService.authenticateUser(loginRequestDto);
             traineeRepository.save(trainee);
             log.info("Trainee profile created successfully for {}", user.getUsername());
-            return traineeDto;
+            RegistrationResponseDto responseDto = new RegistrationResponseDto(loginRequestDto.getUsername(),
+                    loginRequestDto.getPassword());
+            return responseDto;
         } catch (RuntimeException e) {
             log.error("Failed to create trainee profile: {}", e.getMessage());
             return null;
@@ -165,7 +175,6 @@ public class TraineeService {
      *
      * @param traineeUsername The username of the trainee.
      * @param trainerIds      The list of trainer IDs to be assigned to the trainee.
-     * @throws EntityNotFoundException If the trainee or any trainers are not found.
      */
     @Transactional
     public void updateTraineeTrainers(String traineeUsername, List<Long> trainerIds) {
@@ -196,7 +205,6 @@ public class TraineeService {
      *
      * @param username   The username of the trainee.
      * @param traineeDto The updated trainee information.
-     * @throws EntityNotFoundException If the trainee is not found.
      */
     @Transactional
     public void updateTraineeProfile(String username, TraineeDto traineeDto) {
@@ -276,12 +284,32 @@ public class TraineeService {
      *         or an empty {@link Optional} if no trainee is found with the given username.
      */
     @Transactional
-    public Optional<TraineeEntity> findByTraineeFromUsername(String traineeName) {
+    public GetTraineeProfileResponseDto getTrainee(String traineeName) {
         try {
-            return traineeRepository.findByTraineeFromUsername(traineeName);
+            Optional<TraineeEntity> byTraineeFromUsername = traineeRepository.findByTraineeFromUsername(traineeName);
+            GetTraineeProfileResponseDto profileResponseDto = new GetTraineeProfileResponseDto();
+            if (byTraineeFromUsername.isPresent()) {
+                TraineeEntity trainee = byTraineeFromUsername.get();
+                profileResponseDto.setAddress(trainee.getAddress());
+                profileResponseDto.setActive(trainee.getUser().getIsActive());
+                profileResponseDto.setDateOfBride(String.valueOf(trainee.getDateOfBirth()));
+                profileResponseDto.setLastName(trainee.getUser().getLastName());
+                profileResponseDto.setFirstName(trainee.getUser().getLastName());
+                Set<TrainerEntity> trainers = trainee.getTrainers();
+                Set<TrainerListResponseDto> trainerList = profileResponseDto.getTrainerList();
+                for (TrainerEntity entity : trainers) {
+                    TrainerListResponseDto trainerListResponseDto = new TrainerListResponseDto(
+                            entity.getUser().getUsername(), entity.getUser().getFirstName(),
+                            entity.getUser().getLastName());
+                    trainerList.add(trainerListResponseDto);
+                }
+                profileResponseDto.setTrainerList(trainerList);
+            }
+            return profileResponseDto;
         } catch (Exception e) {
             log.error("Error retrieving trainee by username {}: {}", traineeName, e.getMessage());
-            return Optional.empty();
+            return null;
         }
     }
+
 }

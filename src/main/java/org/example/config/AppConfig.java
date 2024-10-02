@@ -53,6 +53,8 @@ public class AppConfig {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
+
+
     /**
      * Configures the Hibernate session factory bean.
      * The session factory is responsible for managing Hibernate sessions,

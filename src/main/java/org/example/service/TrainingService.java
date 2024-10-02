@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
@@ -18,6 +17,7 @@ import org.example.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing training records.
@@ -118,7 +118,7 @@ public class TrainingService {
         try {
             validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
 
-            TraineeEntity trainee = traineeService.findByTraineeFromUsername(traineeName)
+            TraineeEntity trainee = traineeService.getTrainee(traineeName)
                     .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
             trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),

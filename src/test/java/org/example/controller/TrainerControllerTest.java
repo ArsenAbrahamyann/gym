@@ -59,7 +59,7 @@ public class TrainerControllerTest {
         when(trainerService.createTrainerProfile(any(TrainerDto.class)))
                 .thenReturn(trainerDto);
 
-        TrainerDto createdTrainer = trainerController.createTrainer(trainerDto);
+        TrainerDto createdTrainer = trainerController.trainerRegistration(trainerDto);
 
         assertNotNull(createdTrainer);
         verify(trainerService, times(1)).createTrainerProfile(trainerDto);
