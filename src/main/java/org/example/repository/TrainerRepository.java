@@ -61,4 +61,6 @@ public interface TrainerRepository {
      * @param trainer the {@link TrainerEntity} to be updated
      */
     void update(TrainerEntity trainer);
+
+    List<TrainerEntity> findByUsernames(List<String> trainerUsernames);
 }

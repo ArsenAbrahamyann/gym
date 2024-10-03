@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
@@ -29,12 +30,12 @@ public class ValidationUtils {
      * @throws ValidationException if any required fields are missing or invalid.
      */
     public void validateTrainee(TraineeEntity trainee) {
-        if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()) {
+        if (trainee.getUsername() == null || trainee.getUsername().isEmpty()) {
             throw new ValidationException("Trainee username is required.");
         }
 
-        if (trainee.getUser() == null || trainee.getUser().getPassword() == null
-                || trainee.getUser().getPassword().isEmpty()) {
+        if (trainee == null || trainee.getPassword() == null
+                || trainee.getPassword().isEmpty()) {
             throw new ValidationException("Trainee password is required.");
         }
 
@@ -42,7 +43,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainee address is required.");
         }
 
-        if (trainee.getUser().getIsActive() == null) {
+        if (trainee.getIsActive() == null) {
             throw new ValidationException("Trainee active state (IsActive) must be provided.");
         }
     }
@@ -54,12 +55,12 @@ public class ValidationUtils {
      * @throws ValidationException if any required fields are missing or invalid.
      */
     public void validateTrainer(TrainerEntity trainer) {
-        if (trainer.getUser().getUsername() == null || trainer.getUser().getUsername().isEmpty()) {
+        if (trainer.getUsername() == null || trainer.getUsername().isEmpty()) {
             throw new ValidationException("Trainer username is required.");
         }
 
-        if (trainer.getUser() == null || trainer.getUser().getPassword() == null
-                || trainer.getUser().getPassword().isEmpty()) {
+        if (trainer == null || trainer.getPassword() == null
+                || trainer.getPassword().isEmpty()) {
             throw new ValidationException("Trainer password is required.");
         }
 
@@ -67,7 +68,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainer specialization is required.");
         }
 
-        if (trainer.getUser().getIsActive() == null) {
+        if (trainer.getIsActive() == null) {
             throw new ValidationException("Trainer active state (IsActive) must be provided.");
         }
     }
@@ -126,7 +127,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainee ID is required for activation/deactivation.");
         }
 
-        if (trainee.getUser().getIsActive() == null) {
+        if (trainee.getIsActive() == null) {
             throw new ValidationException("Trainee active state must be provided.");
         }
     }
@@ -140,7 +141,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainer ID is required for activation/deactivation.");
         }
 
-        if (trainer.getUser().getIsActive() == null) {
+        if (trainer.getIsActive() == null) {
             throw new ValidationException("Trainer active state must be provided.");
         }
     }
@@ -288,7 +289,7 @@ public class ValidationUtils {
      * @param trainers The list of TrainerEntity to validate.
      * @throws ValidationException if the trainee ID or trainers list is missing.
      */
-    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, List<TrainerEntity> trainers) {
+    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, Set<TrainerEntity> trainers) {
         if (trainee == null || trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required.");
         }

@@ -1,5 +1,6 @@
 package org.example.repository.impl;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,5 +53,14 @@ public class TrainingTypeRepositoryImpl implements TrainingTypeRepository {
         }
 
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public List<TrainingTypeEntity> findAll() {
+        log.debug("finding All TrainingType.");
+        List<TrainingTypeEntity> resultList = sessionFactory.getCurrentSession()
+                .createQuery("SELECT * from TrainingTypeEntity", TrainingTypeEntity.class)
+                .getResultList();
+        return resultList;
     }
 }

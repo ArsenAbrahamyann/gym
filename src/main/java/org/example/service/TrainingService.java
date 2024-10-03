@@ -6,11 +6,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.TrainingDto;
 import org.example.entity.TraineeEntity;
 import org.example.entity.TrainerEntity;
 import org.example.entity.TrainingEntity;
-import org.example.entity.TrainingTypeEntity;
 import org.example.exeption.ResourceNotFoundException;
 import org.example.repository.TrainingRepository;
 import org.example.utils.ValidationUtils;
@@ -61,34 +59,14 @@ public class TrainingService {
     /**
      * Adds a new training record.
      *
-     * @param trainingDto The details of the training to be added.
+     * @param training The details of the training to be added.
      * @throws EntityNotFoundException If the specified trainee or trainer is not found.
      */
     @Transactional
-    public void addTraining(TrainingDto trainingDto) {
+    public void addTraining(TrainingEntity training) {
         try {
-            TrainingEntity trainingEntity = new TrainingEntity();
-
-            TraineeEntity trainee = traineeService.findById(trainingDto.getTraineeId())
-                    .orElseThrow(() -> new EntityNotFoundException("Trainee not found for ID: "
-                            + trainingDto.getTraineeId()));
-            trainingEntity.setTrainee(trainee);
-
-            TrainerEntity trainer = trainerService.findById(trainingDto.getTrainerId())
-                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found for ID: "
-                            + trainingDto.getTrainerId()));
-            trainingEntity.setTrainer(trainer);
-
-            TrainingTypeEntity trainingType = trainingTypeService.findById(trainingDto.getTrainingTypeId())
-                    .orElseThrow(() -> new EntityNotFoundException("Training type not found for ID: "
-                            + trainingDto.getTrainingTypeId()));
-            trainingEntity.setTrainingType(trainingType);
-
-            trainingEntity.setTrainingName(trainingDto.getTrainingName());
-            trainingEntity.setTrainingDuration(trainingDto.getTrainingDuration());
-
-            trainingRepository.save(trainingEntity);
-            log.info("Training added successfully for trainee: {}", trainee.getUser().getUsername());
+            trainingRepository.save(training);
+            log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
         } catch (EntityNotFoundException e) {
             log.error("Error adding training: {}", e.getMessage());
         } catch (Exception e) {
@@ -118,8 +96,7 @@ public class TrainingService {
         try {
             validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
 
-            TraineeEntity trainee = traineeService.getTrainee(traineeName)
-                    .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
+            TraineeEntity trainee = traineeService.getTrainee(traineeName);
 
             trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
                             fromDate, toDate, trainerName, trainingType);
@@ -154,9 +131,7 @@ public class TrainingService {
         List<TrainingEntity> trainings = new ArrayList<>();
         try {
             validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
-            TrainerEntity trainer = trainerService.findByTrainerFromUsername(trainerUsername)
-                    .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
-
+            TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
             trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName);
             if (trainings == null) {
                 log.info("No trainings found for the specified criteria");

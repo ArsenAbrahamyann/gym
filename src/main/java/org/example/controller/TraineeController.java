@@ -3,12 +3,12 @@ package org.example.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.paylod.request.GetNotAssignedOnTraineeActiveTrainersRequestDto;
-import org.example.paylod.request.IsActiveRequestDto;
+import org.example.entity.TraineeEntity;
+import org.example.entity.TrainerEntity;
+import org.example.mapper.TraineeMapper;
 import org.example.paylod.request.TraineeRegistrationRequestDto;
 import org.example.paylod.request.UpdateTraineeRequestDto;
 import org.example.paylod.request.UpdateTraineeTrainerListRequestDto;
-import org.example.paylod.request.UsernameRequestDto;
 import org.example.paylod.response.GetTraineeProfileResponseDto;
 import org.example.paylod.response.RegistrationResponseDto;
 import org.example.paylod.response.TrainerResponseDto;
@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class TraineeController {
     private final TraineeService traineeService;
+    private final TraineeMapper mapper;
 
     @PostMapping (value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> traineeRegistration(@RequestPart(required = false) String dateOfBrith,
@@ -44,16 +45,20 @@ public class TraineeController {
         log.info("Controller: trainee registration");
         TraineeRegistrationRequestDto traineeRegistrationRequestDto = new TraineeRegistrationRequestDto(firsName,
                 lastName, dateOfBrith, address);
-        RegistrationResponseDto traineeProfile = traineeService.createTraineeProfile(traineeRegistrationRequestDto);
-        return new ResponseEntity<>(traineeProfile, HttpStatus.OK);
+        TraineeEntity trainee = mapper.traineeRegistrationMapToEntity(traineeRegistrationRequestDto);
+
+        TraineeEntity traineeEntity = traineeService.createTraineeProfile(trainee);
+
+        RegistrationResponseDto responseDto = mapper.traineeEntityMapToResponseDto(traineeEntity);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<?> getTraineeProfile (@RequestPart String username) {
         log.info("Controller: Get trainee profile.");
-        UsernameRequestDto usernameRequestDto = new UsernameRequestDto(username);
-        GetTraineeProfileResponseDto trainee = traineeService.getTrainee(usernameRequestDto.getUsername());
-        return new ResponseEntity<>(trainee, HttpStatus.OK);
+        TraineeEntity trainee = traineeService.getTrainee(username);
+        GetTraineeProfileResponseDto responseDto = mapper.traineeEntityMapToGetResponseTraineeDto(trainee);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     @PutMapping(value = "/update")
@@ -66,38 +71,37 @@ public class TraineeController {
         log.info("Controller: Update trainee profile");
         UpdateTraineeRequestDto updateTraineeRequestDto = new UpdateTraineeRequestDto(username, firstName, lastName,
                 dateOfBirth, address, isPublic);
-        //...
-        UpdateTraineeResponseDto responseDto = new UpdateTraineeResponseDto();
+        TraineeEntity trainee = mapper.updateDtoMapToTraineeEntity(updateTraineeRequestDto);
+        traineeService.updateTraineeProfile(trainee);
+        UpdateTraineeResponseDto responseDto = mapper.traineeEntityMapToUpdateResponse(trainee);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteTraineeProfile(@RequestPart String username) {
         log.info("Controller: Delete trainee profile.");
-        UsernameRequestDto usernameRequestDto = new UsernameRequestDto(username);
+        traineeService.deleteTraineeByUsername(username);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<?> getNotAssignedOnTraineeActiveTrainers(@RequestPart String traineeUsername) {
         log.info("Controller: Get not assigned on trainee active trainers.");
-        GetNotAssignedOnTraineeActiveTrainersRequestDto assigned =
-                new GetNotAssignedOnTraineeActiveTrainersRequestDto(traineeUsername);
-        //...
-        TrainerResponseDto responseDto = new TrainerResponseDto();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        List<TrainerEntity> unassignedTrainers = traineeService.getUnassignedTrainers(traineeUsername);
+        List<TrainerResponseDto> responseDtos = mapper.mapToTrainerResponse(unassignedTrainers);
+        return new ResponseEntity<>(responseDtos, HttpStatus.OK);
     }
 
     @PutMapping(value = "/update/Trainee/trainerList")
     public ResponseEntity<?> updateTraineeTrainerList(@RequestPart String traineeUsername,
-                                                      @RequestParam(name = "TrainersIdList") List<Long> trainerIdList,
-                                                      @RequestPart String trainerUsername) {
-        log.info("Controller: Updatem Trainee is Trainer list");
-        UpdateTraineeTrainerListRequestDto updateTraineeTrainerListRequestDto = new UpdateTraineeTrainerListRequestDto(traineeUsername,
-                trainerIdList, trainerUsername);
-        //...
-        TrainerResponseDto responseDto = new TrainerResponseDto();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+                                                      @RequestParam List<String> trainerUsername) {
+        log.info("Controller: Update Trainee is Trainer list");
+        UpdateTraineeTrainerListRequestDto updateTraineeTrainerListRequestDto =
+                new UpdateTraineeTrainerListRequestDto(traineeUsername, trainerUsername);
+        TraineeEntity trainee = mapper.updateTraineeTrainerListMapToEntity(updateTraineeTrainerListRequestDto);
+        traineeService.updateTraineeTrainers(trainee);
+        List<TrainerResponseDto> responseDtos = mapper.updateTraineeTrainerListMapToTrainerResponse(trainee);
+        return new ResponseEntity<>(responseDtos, HttpStatus.OK);
     }
 
 
@@ -106,8 +110,7 @@ public class TraineeController {
     public ResponseEntity<?> activateTrainee(@RequestPart String username,
                                              @RequestParam boolean isActive) {
         log.info("Controller: Activate trainee.");
-        IsActiveRequestDto isActiveRequestDto = new IsActiveRequestDto(username, isActive);
-        //sarqel responsedto
+        traineeService.toggleTraineeStatus(username, isActive);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -115,8 +118,7 @@ public class TraineeController {
     public ResponseEntity<?> deActivateTrainee(@RequestPart String username,
                                              @RequestParam boolean isActive) {
         log.info("Controller: DeActivate trainee.");
-        IsActiveRequestDto activeDto = new IsActiveRequestDto(username, isActive);
-        //sarqel responsedto
+        traineeService.toggleTraineeStatus(username, isActive);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

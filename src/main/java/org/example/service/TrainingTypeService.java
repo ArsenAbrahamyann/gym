@@ -1,5 +1,7 @@
 package org.example.service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,18 +55,32 @@ public class TrainingTypeService {
      * @return an {@link Optional} containing the found {@link TrainingTypeEntity}, or an empty {@link Optional} if not found.
      */
     @Transactional
-    public Optional<TrainingTypeEntity> findById(Long trainingTypeId) {
+    public TrainingTypeEntity findById(Long trainingTypeId) {
         try {
             Optional<TrainingTypeEntity> trainingType = trainingTypeRepository.findById(trainingTypeId);
             if (trainingType.isPresent()) {
                 log.info("Found training type with ID {}: {}", trainingTypeId, trainingType.get());
+                return trainingType.get();
             } else {
                 log.warn("No training type found with ID {}", trainingTypeId);
             }
-            return trainingType;
         } catch (Exception e) {
             log.error("Error while fetching training type with ID {}: {}", trainingTypeId, e.getMessage());
-            return Optional.empty();
+        }
+        return null;
+    }
+
+    public List<TrainingTypeEntity> findAll() {
+
+        try {
+            List<TrainingTypeEntity> all = trainingTypeRepository.findAll();
+            if (all == null) {
+                log.info("TrainingType not found");
+            }
+            return all;
+        }catch (Exception e) {
+            log.error("Error while fetching training type.", e.getMessage());
+            return Collections.emptyList();
         }
     }
 }

@@ -110,7 +110,7 @@ public class TrainingServiceTest {
         LocalDateTime toDate = LocalDateTime.now();
         String traineeName = null;
 
-        when(trainerService.findByTrainerFromUsername(trainerUsername)).thenReturn(Optional.of(trainer));
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
         when(trainingRepository.findTrainingsForTrainer(1L, fromDate, toDate, traineeName))
                 .thenReturn(Collections.singletonList(new TrainingEntity()));
 

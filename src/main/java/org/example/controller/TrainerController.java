@@ -2,8 +2,8 @@ package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.paylod.request.UsernameRequestDto;
-import org.example.paylod.request.IsActiveRequestDto;
+import org.example.entity.TrainerEntity;
+import org.example.mapper.TrainerMapper;
 import org.example.paylod.request.TrainerRegistrationRequestDto;
 import org.example.paylod.request.UpdateTrainerRequestDto;
 import org.example.paylod.response.GetTrainerProfileResponseDto;
@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class TrainerController {
     private final TrainerService trainerService;
+    private final TrainerMapper mapper;
 
     @PostMapping(value = "/trainer/registration")
     public ResponseEntity<?> trainerRegistration(@RequestPart String firstName,
@@ -42,8 +43,9 @@ public class TrainerController {
         log.info("Controller: Registration trainer");
         TrainerRegistrationRequestDto registrationDto = new TrainerRegistrationRequestDto(firstName,
                 lastName, trainingTypeId);
-        //...
-        RegistrationResponseDto responseDto = new RegistrationResponseDto();
+        TrainerEntity trainer = mapper.trainerRegistrationMapToEntity(registrationDto);
+        TrainerEntity trainerProfile = trainerService.createTrainerProfile(trainer);
+        RegistrationResponseDto responseDto = mapper.TrainerMapToEntity(trainerProfile);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -51,9 +53,8 @@ public class TrainerController {
     @GetMapping
     public ResponseEntity<?> getTrainerProfile(@RequestPart String username) {
         log.info("Controller: Get trainer profile");
-        UsernameRequestDto usernameRequestDto = new UsernameRequestDto(username);
-        //...
-        GetTrainerProfileResponseDto responseDto = new GetTrainerProfileResponseDto();
+        TrainerEntity trainer = trainerService.getTrainer(username);
+        GetTrainerProfileResponseDto responseDto = mapper.trainerEntityMapToGetResponse(trainer);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -66,8 +67,10 @@ public class TrainerController {
         log.info("Controller: update trainer profile");
         UpdateTrainerRequestDto updateTrainerRequestDto = new UpdateTrainerRequestDto(username, firstName, lastName,
                 trainingTypeId, isActive);
-        //...
-        UpdateTrainerProfileResponseDto responseDto = new UpdateTrainerProfileResponseDto();
+        TrainerEntity trainer = mapper.UpdateRequestDtoMapToTrainerEntity(updateTrainerRequestDto);
+        TrainerEntity updateTrainerProfile = trainerService.updateTrainerProfile(trainer);
+        UpdateTrainerProfileResponseDto responseDto = mapper.updateTrainerProfileMapToResponseDto(
+                updateTrainerProfile);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -75,7 +78,7 @@ public class TrainerController {
     public ResponseEntity<?> activateTrainer(@RequestPart String username,
                                              @RequestParam boolean isActive) {
         log.info("Controller: Activate trainer.");
-        IsActiveRequestDto isActiveRequestDto = new IsActiveRequestDto(username, isActive);
+        trainerService.toggleTrainerStatus(username, isActive);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -83,7 +86,7 @@ public class TrainerController {
     public ResponseEntity<?> deActivateTrainer(@RequestPart String username,
                                                @RequestParam boolean isActive) {
         log.info("Controller: DeActivate trainer.");
-        IsActiveRequestDto isActiveRequestDto = new IsActiveRequestDto(username, isActive);
+        trainerService.toggleTrainerStatus(username, isActive);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

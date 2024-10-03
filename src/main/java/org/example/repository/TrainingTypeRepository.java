@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.example.entity.TrainingTypeEntity;
 
@@ -23,4 +24,6 @@ public interface TrainingTypeRepository {
      * @return an {@link Optional} containing the matching {@link TrainingTypeEntity}, or empty if none found
      */
     Optional<TrainingTypeEntity> findById(Long trainingTypeId);
+
+    List<TrainingTypeEntity> findAll();
 }

@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrainerEntity {
+public class TrainerEntity extends UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +34,6 @@ public class TrainerEntity {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "specialization_id", referencedColumnName = "id")
     private TrainingTypeEntity specialization;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
-    private UserEntity user;
 
     @ManyToMany(mappedBy = "trainers", fetch = FetchType.LAZY)
     private Set<TraineeEntity> trainees = new HashSet<>();

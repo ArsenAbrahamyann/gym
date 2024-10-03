@@ -1,5 +1,6 @@
 package org.example.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -61,30 +62,16 @@ public class TraineeService {
     /**
      * Creates a new trainee profile.
      *
-     * @param registrationRequestDto The data transfer object containing trainee information.
      * @return The created TraineeDto object.
      */
     @Transactional
-    public RegistrationResponseDto createTraineeProfile(TraineeRegistrationRequestDto registrationRequestDto) {
+    public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
         try {
-            TraineeEntity trainee = modelMapper.map(registrationRequestDto, TraineeEntity.class);
-            UserEntity user = trainee.getUser();
-            Optional<UserEntity> existingUserOpt = userService.findByUsername(user.getUsername());
-            if (existingUserOpt.isPresent()) {
-                user = existingUserOpt.get();
-            } else {
-                userService.save(user);
-            }
-            trainee.setUser(user);
-            UserLoginRequestDto loginRequestDto = new UserLoginRequestDto(trainee.getUser().getUsername(),
-                    trainee.getUser().getPassword());
-            userService.authenticateUser(loginRequestDto);
+            userService.authenticateUser(trainee.getUsername(), trainee.getPassword());
             traineeRepository.save(trainee);
-            log.info("Trainee profile created successfully for {}", user.getUsername());
-            RegistrationResponseDto responseDto = new RegistrationResponseDto(loginRequestDto.getUsername(),
-                    loginRequestDto.getPassword());
-            return responseDto;
+            log.info("Trainee profile created successfully for {}", trainee.getUsername());
+            return trainee;
         } catch (RuntimeException e) {
             log.error("Failed to create trainee profile: {}", e.getMessage());
             return null;
@@ -120,14 +107,12 @@ public class TraineeService {
      * @param username The username of the trainee.
      */
     @Transactional
-    public void toggleTraineeStatus(String username) {
+    public void toggleTraineeStatus(String username, boolean isActive) {
         log.info("Toggling trainee status for {}", username);
         try {
-            UserEntity user = userService.findByUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
-
-            user.setIsActive(!user.getIsActive());
-            userService.update(user);
+            TraineeEntity trainee = getTrainee(username);
+            trainee.setIsActive(isActive);
+            traineeRepository.update(trainee);
             log.info("Trainee status toggled successfully for {}", username);
         } catch (Exception e) {
             log.error("Failed to toggle trainee status for {}: {}", username, e.getMessage());
@@ -173,58 +158,34 @@ public class TraineeService {
     /**
      * Updates the list of trainers assigned to a specific trainee.
      *
-     * @param traineeUsername The username of the trainee.
-     * @param trainerIds      The list of trainer IDs to be assigned to the trainee.
      */
     @Transactional
-    public void updateTraineeTrainers(String traineeUsername, List<Long> trainerIds) {
-        log.info("Updating trainers for trainee: {}", traineeUsername);
+    public void updateTraineeTrainers(TraineeEntity trainee) {
+        log.info("Updating trainers for trainee: {}", trainee.getUsername());
+        Set<TrainerEntity> trainers = trainee.getTrainers();
         try {
-            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found"));
-
-            List<TrainerEntity> newTrainers = trainerService.findAllById(trainerIds);
-            if (newTrainers.isEmpty()) {
-                log.info("Trainers not found");
-            }
-
-            validationUtils.validateUpdateTraineeTrainerList(trainee, newTrainers);
-            trainee.setTrainers(new HashSet<>(newTrainers));
-
-            newTrainers.forEach(validationUtils::validateTrainer);
+            validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
+            trainers.forEach(validationUtils::validateTrainer);
             traineeRepository.update(trainee);
-
-            log.info("Successfully updated trainer list for trainee: {}", traineeUsername);
+            log.info("Successfully updated trainer list for trainee: {}", trainee.getUsername());
         } catch (Exception e) {
-            log.error("Failed to update trainers for {}: {}", traineeUsername, e.getMessage());
+            log.error("Failed to update trainers for {}: {}", trainee.getUsername(), e.getMessage());
         }
     }
 
     /**
      * Updates the profile information of a trainee.
      *
-     * @param username   The username of the trainee.
-     * @param traineeDto The updated trainee information.
      */
     @Transactional
-    public void updateTraineeProfile(String username, TraineeDto traineeDto) {
-        log.info("Updating trainee profile for {}", username);
-
+    public void updateTraineeProfile(TraineeEntity traineeEntity) {
+        log.info("Updating trainee profile for {}", traineeEntity.getUsername());
         try {
-            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("Trainee not found with username: " + username));
-            UserEntity existingUser = userService.findByUsername(trainee.getUser().getUsername())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            trainee.setUser(existingUser);
-            trainee.setDateOfBirth(traineeDto.getDateOfBirth());
-            trainee.setAddress(traineeDto.getAddress());
-
-            validationUtils.validateUpdateTrainee(trainee);
-            traineeRepository.update(trainee);
-            log.info("Trainee profile updated successfully for {}", username);
+            validationUtils.validateUpdateTrainee(traineeEntity);
+            traineeRepository.update(traineeEntity);
+            log.info("Trainee profile updated successfully for {}", traineeEntity.getUsername());
         } catch (Exception e) {
-            log.error("Failed to update trainee profile for {}: {}", username, e.getMessage());
+            log.error("Failed to update trainee profile for {}: {}", traineeEntity.getUsername(), e.getMessage());
         }
     }
 
@@ -279,37 +240,25 @@ public class TraineeService {
      * automatically handle checked exceptions that may be thrown during the
      * execution.
      *
-     * @param traineeName the username of the trainee to find.
+     * @param username the username of the trainee to find.
      * @return an {@link Optional} containing the {@link TraineeEntity} if found,
      *         or an empty {@link Optional} if no trainee is found with the given username.
      */
     @Transactional
-    public GetTraineeProfileResponseDto getTrainee(String traineeName) {
+    public TraineeEntity getTrainee(String username) {
         try {
-            Optional<TraineeEntity> byTraineeFromUsername = traineeRepository.findByTraineeFromUsername(traineeName);
-            GetTraineeProfileResponseDto profileResponseDto = new GetTraineeProfileResponseDto();
+            Optional<TraineeEntity> byTraineeFromUsername = traineeRepository.findByTraineeFromUsername(username);
             if (byTraineeFromUsername.isPresent()) {
-                TraineeEntity trainee = byTraineeFromUsername.get();
-                profileResponseDto.setAddress(trainee.getAddress());
-                profileResponseDto.setActive(trainee.getUser().getIsActive());
-                profileResponseDto.setDateOfBride(String.valueOf(trainee.getDateOfBirth()));
-                profileResponseDto.setLastName(trainee.getUser().getLastName());
-                profileResponseDto.setFirstName(trainee.getUser().getLastName());
-                Set<TrainerEntity> trainers = trainee.getTrainers();
-                Set<TrainerListResponseDto> trainerList = profileResponseDto.getTrainerList();
-                for (TrainerEntity entity : trainers) {
-                    TrainerListResponseDto trainerListResponseDto = new TrainerListResponseDto(
-                            entity.getUser().getUsername(), entity.getUser().getFirstName(),
-                            entity.getUser().getLastName());
-                    trainerList.add(trainerListResponseDto);
-                }
-                profileResponseDto.setTrainerList(trainerList);
+                return byTraineeFromUsername.get();
+            } else {
+                log.info("Trainee not found.", username);
             }
-            return profileResponseDto;
+
         } catch (Exception e) {
-            log.error("Error retrieving trainee by username {}: {}", traineeName, e.getMessage());
+            log.error("Error retrieving trainee by username {}: {}", username, e.getMessage());
             return null;
         }
+        return null;
     }
 
 }

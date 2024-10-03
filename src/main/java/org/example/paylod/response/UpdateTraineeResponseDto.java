@@ -1,6 +1,8 @@
 package org.example.paylod.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,7 @@ public class UpdateTraineeResponseDto {
     private String username;
     private String firstName;
     private String lastName;
-    private String dateOfBirth;
+    private LocalDateTime dateOfBirth;
     private String address;
-    private List<TrainerResponseDto> trainerList;
+    private Set<TrainerResponseDto> trainerList;
 }

@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateTraineeTrainerListRequestDto {
     private String traineeUsername;
-    private List<Long> trainerIdList;
-    private String trainerUsername;
+    private List<String> trainerUsername;
 }

@@ -1,11 +1,13 @@
 package org.example.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.paylod.request.GetTraineeTrainingsListRequestDto;
-import org.example.paylod.request.GetTrainerTrainingListRequestDto;
+import org.example.entity.TrainingEntity;
+import org.example.mapper.TrainingMapper;
+import org.example.paylod.request.AddTrainingRequestDto;
 import org.example.paylod.response.TrainingResponseDto;
 import org.example.paylod.response.GetTrainerTrainingListResponseDto;
 import org.example.paylod.response.TrainingTypesResponseDto;
@@ -30,31 +32,32 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class TrainingController {
     private final TrainingService trainingService;
+    private final TrainingMapper mapper;
 
     @GetMapping(value = "/trainee")
     public ResponseEntity<?> getTraineeTrainingsList(@RequestPart String traineeName,
-                                                     @RequestPart(required = false) String periodFrom,
-                                                     @RequestPart(required = false) String periodTo,
+                                                     @RequestPart(required = false) LocalDateTime periodFrom,
+                                                     @RequestPart(required = false) LocalDateTime periodTo,
                                                      @RequestPart(required = false) String trainingName,
                                                      @RequestPart(required = false) String trainingType) {
         log.info("Controller: Get trainee trainings list.");
-        GetTraineeTrainingsListRequestDto listDto = new GetTraineeTrainingsListRequestDto(traineeName, periodFrom,
+
+        List<TrainingEntity> trainingsForTrainee = trainingService.getTrainingsForTrainee(traineeName, periodFrom,
                 periodTo, trainingName, trainingType);
-        //...
-        TrainingResponseDto responseDto = new TrainingResponseDto();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        List<TrainingResponseDto> responseDtos = mapper.mapToDtoTrainingTrainee(trainingsForTrainee);
+        return new ResponseEntity<>(responseDtos, HttpStatus.OK);
     }
 
     @GetMapping(value = "/trainer")
     public ResponseEntity<?> getTrainerTrainingList(@RequestPart String trainerUsername,
-                                                    @RequestPart(required = false) String periodFrom,
-                                                    @RequestPart(required = false) String periodTo,
+                                                    @RequestPart(required = false) LocalDateTime periodFrom,
+                                                    @RequestPart(required = false) LocalDateTime periodTo,
                                                     @RequestPart(required = false) String traineeName) {
         log.info("Controller: Get trainer trainings List.");
-        GetTrainerTrainingListRequestDto listDto = new GetTrainerTrainingListRequestDto(trainerUsername, periodFrom, periodTo,
-                traineeName);
-        //...
-        GetTrainerTrainingListResponseDto responseDto = new GetTrainerTrainingListResponseDto();
+        List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(trainerUsername, periodFrom,
+                periodTo, traineeName);
+        List<GetTrainerTrainingListResponseDto> responseDto = mapper.mapToDtoTrainingTrainer(
+                trainingsForTrainer);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
@@ -74,11 +77,13 @@ public class TrainingController {
     public ResponseEntity<?> addTraining(@RequestPart String traineeUsername,
                                          @RequestPart String trainerUsername,
                                          @RequestPart String trainingName,
-                                         @RequestPart String trainingDate,
-                                         @RequestPart String trainingDuration) {
+                                         @RequestPart LocalDateTime trainingDate,
+                                         @RequestPart Integer trainingDuration) {
         log.info("Controller: Add training.");
-        //sarqel requestdto
-        // respons petq chi
+        AddTrainingRequestDto requestDto = new AddTrainingRequestDto(traineeUsername, trainerUsername, trainingName,
+                trainingDate, trainingDuration);
+        TrainingEntity trainingEntity = mapper.requestDtoMapToTrainingEntity(requestDto);
+        trainingService.addTraining(trainingEntity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

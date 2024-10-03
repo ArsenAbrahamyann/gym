@@ -43,10 +43,6 @@ public class TraineeEntity extends UserEntity {
     @Column(name = "address")
     private String address;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
-
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "trainee_trainer",

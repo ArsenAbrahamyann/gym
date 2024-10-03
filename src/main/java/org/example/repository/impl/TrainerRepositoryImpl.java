@@ -153,4 +153,20 @@ public class TrainerRepositoryImpl implements TrainerRepository {
         sessionFactory.getCurrentSession().saveOrUpdate(trainer);
         log.info("TrainerEntity with ID: {} updated successfully", trainer.getId());
     }
+
+    @Override
+    public List<TrainerEntity> findByUsernames(List<String> trainerUsernames) {
+        log.debug("Finding trainers by usernames: {}", trainerUsernames);
+        List<TrainerEntity> trainers = sessionFactory.getCurrentSession()
+                .createQuery("FROM TrainerEntity t WHERE t.username IN :uns", TrainerEntity.class)
+                .setParameter("uns", trainerUsernames)
+                .getResultList();
+        if (trainers.isEmpty()) {
+            log.info("No trainers found for usernames: {}", trainerUsernames);
+            return Collections.emptyList();
+        } else {
+            log.info("Found {} trainers for usernames: {}", trainers.size(), trainerUsernames);
+        }
+        return trainers;
+    }
 }

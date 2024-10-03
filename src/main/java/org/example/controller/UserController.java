@@ -3,7 +3,6 @@ package org.example.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.paylod.request.ChangeLoginRequestDto;
-import org.example.paylod.request.UserLoginRequestDto;
 import org.example.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<?> login(@RequestPart String username,
                                    @RequestPart String password) {
         log.info("Controller: Login user");
-        UserLoginRequestDto loginDto = new UserLoginRequestDto(username,password);
-        boolean b = userService.authenticateUser(loginDto);
-        if (b) {
+        boolean bool = userService.authenticateUser(username, password);
+        if (bool) {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -42,7 +40,7 @@ public class UserController {
                                           @RequestPart String newPassword) {
         log.info("Controller: change login");
         ChangeLoginRequestDto changeLoginRequestDto = new ChangeLoginRequestDto(username, oldPassword, newPassword);
-//        userService
+        userService.changePassword(changeLoginRequestDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

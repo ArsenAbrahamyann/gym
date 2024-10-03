@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.UserEntity;
+import org.example.paylod.request.ChangeLoginRequestDto;
 import org.example.paylod.request.UserLoginRequestDto;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -32,23 +33,23 @@ public class UserService {
      * @throws EntityNotFoundException If the user with the specified username is not found.
      */
     @Transactional
-    public boolean authenticateUser(UserLoginRequestDto requestDto) {
-        log.info("Authenticating user: {}", requestDto.getUsername());
+    public boolean authenticateUser(String username, String password) {
+        log.info("Authenticating user: {}", username);
         try {
-            UserEntity user = userRepository.findByUsername(requestDto.getUsername())
+            UserEntity user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
-            if (user.getPassword().equals(requestDto.getPassword())) {
-                log.info("User {} authenticated successfully", requestDto.getUsername());
+            if (user.getPassword().equals(password)) {
+                log.info("User {} authenticated successfully", username);
                 return true;
             } else {
-                log.warn("Authentication failed for user {}", requestDto.getUsername());
+                log.warn("Authentication failed for user {}", username);
                 return false;
             }
         } catch (EntityNotFoundException e) {
-            log.error("Authentication error for user {}: {}", requestDto.getUsername(), e.getMessage());
+            log.error("Authentication error for user {}: {}", username, e.getMessage());
             return false;
         } catch (Exception e) {
-            log.error("Unexpected error during authentication for user {}: {}", requestDto.getUsername(), e.getMessage());
+            log.error("Unexpected error during authentication for user {}: {}", username, e.getMessage());
             return false;
         }
     }
@@ -127,6 +128,21 @@ public class UserService {
             userRepository.save(user);
         } catch (Exception e) {
             log.error("Error updating user {}: {}", user.getUsername(), e.getMessage());
+        }
+    }
+
+    public void changePassword(ChangeLoginRequestDto changeLoginRequestDto) {
+        Optional<UserEntity> byUsername = findByUsername(changeLoginRequestDto.getUsername());
+        if (byUsername.isPresent()) {
+            UserEntity user = byUsername.get();
+            if (user.getPassword().equals(changeLoginRequestDto.getOldPassword())) {
+                user.setPassword(changeLoginRequestDto.getNewPassword());
+                log.info("password exchange successful.");
+            }else {
+                log.info("wrong password.");
+            }
+        }else {
+            log.info("User not found");
         }
     }
 }

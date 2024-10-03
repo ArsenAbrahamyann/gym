@@ -173,7 +173,7 @@ public class TrainerServiceTest {
         when(trainerRepository.findByTrainerFromUsername(userEntity.getUsername()))
                 .thenReturn(Optional.of(trainerEntity));
 
-        Optional<TrainerEntity> trainer = trainerService.findByTrainerFromUsername(userEntity.getUsername());
+        Optional<TrainerEntity> trainer = trainerService.getTrainer(userEntity.getUsername());
 
         assertThat(trainer).isPresent();
         assertThat(trainer.get()).isEqualTo(trainerEntity);

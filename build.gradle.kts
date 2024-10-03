@@ -35,6 +35,8 @@ dependencies {
     // OpenAPI (Swagger) for documentation
     implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
 
+    implementation("org.apache.tomee:tomee-embedded:9.0.0-M7")
+
     // Hibernate dependencies
     implementation("org.hibernate:hibernate-core:6.1.7.Final") // Updated to Hibernate 6.x
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0") // Use Jakarta Persistence API
