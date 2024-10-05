@@ -9,8 +9,8 @@ import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.repository.TraineeRepository;
+import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,8 @@ public class TraineeService {
     private final TrainerService trainerService;
     private final UserService userService;
     private final ValidationUtils validationUtils;
-    private final ModelMapper modelMapper;
+
+    private final UserUtils userUtils;
 
     /**
      * Constructs a new {@code TraineeService} instance with dependencies injected for handling trainee-related operations.
@@ -38,15 +39,14 @@ public class TraineeService {
      * @param traineeRepository  the {@link TraineeRepository} used for performing CRUD operations on trainee entities.
      * @param userService        the {@link UserService} responsible for handling user-related operations.
      * @param validationUtils    the {@link ValidationUtils} used for validating trainee data during service operations.
-     * @param modelMapper        the {@link ModelMapper} used for mapping between DTOs and entities.
      */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
-                          UserService userService, ValidationUtils validationUtils, ModelMapper modelMapper) {
+                          UserService userService, ValidationUtils validationUtils, UserUtils userUtils) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
         this.userService = userService;
         this.validationUtils = validationUtils;
-        this.modelMapper = modelMapper;
+        this.userUtils = userUtils;
     }
 
 
@@ -59,6 +59,12 @@ public class TraineeService {
     public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
         try {
+            List<String> allUsernames = userService.findAllUsernames();
+            String generateUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName(), allUsernames);
+            trainee.setUsername(generateUsername);
+            String generatePassword = userUtils.generatePassword();
+            trainee.setPassword(generatePassword);
+            validationUtils.validateTrainee(trainee);
             userService.authenticateUser(trainee.getUsername(), trainee.getPassword());
             traineeRepository.save(trainee);
             log.info("Trainee profile created successfully for {}", trainee.getUsername());
@@ -103,7 +109,7 @@ public class TraineeService {
         try {
             TraineeEntity trainee = getTrainee(username);
             trainee.setIsActive(isActive);
-            traineeRepository.update(trainee);
+            traineeRepository.save(trainee);
             log.info("Trainee status toggled successfully for {}", username);
         } catch (Exception e) {
             log.error("Failed to toggle trainee status for {}: {}", username, e.getMessage());
@@ -121,7 +127,7 @@ public class TraineeService {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
 
         try {
-            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(traineeUsername)
+            TraineeEntity trainee = traineeRepository.findByUsername(traineeUsername)
                     .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
                             + traineeUsername));
 
@@ -157,7 +163,7 @@ public class TraineeService {
         try {
             validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
             trainers.forEach(validationUtils::validateTrainer);
-            traineeRepository.update(trainee);
+            traineeRepository.save(trainee);
             log.info("Successfully updated trainer list for trainee: {}", trainee.getUsername());
         } catch (Exception e) {
             log.error("Failed to update trainers for {}: {}", trainee.getUsername(), e.getMessage());
@@ -173,7 +179,7 @@ public class TraineeService {
         log.info("Updating trainee profile for {}", traineeEntity.getUsername());
         try {
             validationUtils.validateUpdateTrainee(traineeEntity);
-            traineeRepository.update(traineeEntity);
+            traineeRepository.save(traineeEntity);
             log.info("Trainee profile updated successfully for {}", traineeEntity.getUsername());
         } catch (Exception e) {
             log.error("Failed to update trainee profile for {}: {}", traineeEntity.getUsername(), e.getMessage());
@@ -193,7 +199,7 @@ public class TraineeService {
             UserEntity user = userService.findByUsername(username)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            TraineeEntity trainee = traineeRepository.findByTraineeFromUsername(user.getUsername())
+            TraineeEntity trainee = traineeRepository.findByUsername(user.getUsername())
                     .orElseThrow(() -> new ResourceNotFoundException("TraineeEntity not found"));
 
             traineeRepository.delete(trainee);
@@ -238,7 +244,7 @@ public class TraineeService {
     @Transactional
     public TraineeEntity getTrainee(String username) {
         try {
-            Optional<TraineeEntity> byTraineeFromUsername = traineeRepository.findByTraineeFromUsername(username);
+            Optional<TraineeEntity> byTraineeFromUsername = traineeRepository.findByUsername(username);
             if (byTraineeFromUsername.isPresent()) {
                 return byTraineeFromUsername.get();
             } else {

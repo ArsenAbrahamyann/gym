@@ -16,6 +16,7 @@ public class TraineeDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateOfBirth;
     private String address;
+    private Boolean isActive;
     private UserDto user;
     private Set<TrainerDto> trainers;
     private TrainingDto training;

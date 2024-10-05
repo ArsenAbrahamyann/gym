@@ -14,10 +14,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * Configuration class for setting up Hibernate and Spring integration.
@@ -25,12 +34,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Data
 @Configuration
+@EnableWebMvc
 @ComponentScan(basePackages = "org.example.gym")
 @PropertySource("classpath:application.properties")
+@EnableJpaRepositories(basePackages = "org.example.gym.repository")
 @EnableTransactionManagement
 @RequiredArgsConstructor
 @Slf4j
-public class AppConfig {
+public class AppConfig implements WebMvcConfigurer {
 
     @Value("${hibernate.db.driver-class-name}")
     private String driverClassName;
@@ -53,34 +64,14 @@ public class AppConfig {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
-
-
-    /**
-     * Configures the Hibernate session factory bean.
-     * The session factory is responsible for managing Hibernate sessions,
-     * and it integrates Hibernate with Spring's transaction management.
-     *
-     * @return a configured {@link LocalSessionFactoryBean} object
-     */
-
     @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("org.example.entity");
-        sessionFactory.setHibernateProperties(hibernateProperties());
-
-        log.debug("Hibernate properties: {}", hibernateProperties());
-
-        return sessionFactory;
+    public ViewResolver viewResolver() {
+        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+        resolver.setPrefix("/WEB-INF/views/");
+        resolver.setSuffix(".jsp");
+        return resolver;
     }
 
-    /**
-     * Configures the data source to be used by the application.
-     * The data source includes the database connection details such as URL, username, and password.
-     *
-     * @return a configured {@link DataSource} object
-     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -95,27 +86,26 @@ public class AppConfig {
         return dataSource;
     }
 
-    /**
-     * Configures the Hibernate transaction manager to handle transactions for Hibernate sessions.
-     * The transaction manager integrates Hibernate transactions with Spring's transaction management.
-     *
-     * @param sessionFactory the Hibernate {@link SessionFactory} used by the transaction manager
-     * @return a configured {@link HibernateTransactionManager} object
-     */
     @Bean
-    public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
-        HibernateTransactionManager txManager = new HibernateTransactionManager();
-        txManager.setSessionFactory(sessionFactory);
-        return txManager;
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource());
+        em.setPackagesToScan("org.example.gym.entity");  // Adjust the package for entities
+
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+        em.setJpaProperties(hibernateProperties());
+
+        return em;
     }
 
-    /**
-     * Creates and configures Hibernate properties, such as the SQL dialect,
-     * SQL formatting, and other database-related settings.
-     * These properties are loaded from the application.properties file.
-     *
-     * @return a {@link Properties} object containing Hibernate configuration settings
-     */
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+        return transactionManager;
+    }
+
     Properties hibernateProperties() {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", hibernateDialect);
@@ -124,13 +114,6 @@ public class AppConfig {
         return properties;
     }
 
-    /**
-     * Configures and initializes a Flyway bean for database migrations.
-     *
-     * @param dataSource the data source to be used for connecting to the database.
-     * @return a configured and initialized Flyway instance.
-     * @see Flyway#configure()
-     */
     @Bean(initMethod = "migrate")
     public Flyway flyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure()
@@ -141,13 +124,14 @@ public class AppConfig {
         return flyway;
     }
 
-    /**
-     * Defines an {@link ModelMapper} bean that will be managed by the Spring container.
-     *
-     * @return a new instance of {@link ModelMapper}.
-     */
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+
+
+
+
+
 }

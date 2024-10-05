@@ -10,8 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class RegistrationResponseDto {
 
-    @NotBlank
     private String username;
-    @NotBlank
     private String password;
 }

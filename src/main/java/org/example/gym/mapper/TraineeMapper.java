@@ -18,6 +18,7 @@ import org.example.gym.paylod.response.TrainerResponseDto;
 import org.example.gym.paylod.response.UpdateTraineeResponseDto;
 import org.example.gym.service.TraineeService;
 import org.example.gym.service.TrainerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,10 +28,13 @@ public class TraineeMapper {
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 
+
+
     public TraineeEntity traineeRegistrationMapToEntity(TraineeRegistrationRequestDto requestDto) {
         TraineeEntity trainee = new TraineeEntity();
         trainee.setAddress(requestDto.getAddress());
-        trainee.setDateOfBirth(LocalDateTime.parse(requestDto.getDateOfBrith()));
+        trainee.setDateOfBirth(requestDto.getDateOfBrith());
+        trainee.setIsActive(true);
         trainee.setLastName(requestDto.getLastName());
         trainee.setFirstName(requestDto.getFirsName());
         return trainee;

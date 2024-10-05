@@ -123,7 +123,7 @@ public class TrainerService {
             log.info("Toggling trainer status for {}", username);
             TrainerEntity trainer = getTrainer(username);
             trainer.setIsActive(isActive);
-            trainerRepository.update(trainer);
+            trainerRepository.save(trainer);
             log.info("Trainer status toggled successfully for {}", username);
         } catch (Exception e) {
             log.error("Error toggling trainer status for {}: {}", username, e.getMessage());
@@ -143,7 +143,7 @@ public class TrainerService {
             String generateUsername = userUtils.generateUsername(trainer.getFirstName(),
                     trainer.getLastName(), allUsernames);
             trainer.setUsername(generateUsername);
-            trainerRepository.update(trainer);
+            trainerRepository.save(trainer);
             log.info("Trainer profile updated successfully for {}", trainer.getUsername());
             return trainer;
         } catch (Exception e) {
@@ -166,7 +166,7 @@ public class TrainerService {
                                                     LocalDateTime toDate, String traineeName) {
         try {
             log.info("Fetching trainings for trainer: {}", trainerUsername);
-            TrainerEntity trainer = trainerRepository.findByTrainerFromUsername(trainerUsername)
+            TrainerEntity trainer = trainerRepository.findByUsername(trainerUsername)
                     .orElseThrow(() -> new EntityNotFoundException("Trainer not found with username: "
                             + trainerUsername));
             validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
@@ -215,7 +215,7 @@ public class TrainerService {
     @Transactional
     public List<TrainerEntity> findAssignedTrainers(Long id) {
         try {
-            return trainerRepository.findAssignedTrainers(id);
+            return trainerRepository.findByTrainees_Id(id);
         } catch (Exception e) {
             log.error("Error retrieving assigned trainers for ID {}: {}", id, e.getMessage());
             return Collections.emptyList();
@@ -234,7 +234,7 @@ public class TrainerService {
     @Transactional
     public List<TrainerEntity> findAllById(List<Long> trainerIds) {
         try {
-            return trainerRepository.findAllById(trainerIds);
+            return trainerRepository.findAllByIdIn(trainerIds);
         } catch (Exception e) {
             log.error("Error retrieving trainers by IDs {}: {}", trainerIds, e.getMessage());
             return Collections.emptyList();
@@ -272,7 +272,7 @@ public class TrainerService {
     @Transactional
     public TrainerEntity getTrainer(String trainerUsername) {
         try {
-            Optional<TrainerEntity> byTrainerFromUsername = trainerRepository.findByTrainerFromUsername(
+            Optional<TrainerEntity> byTrainerFromUsername = trainerRepository.findByUsername(
                     trainerUsername);
             if (byTrainerFromUsername.isPresent()) {
                 return byTrainerFromUsername.get();
@@ -288,7 +288,7 @@ public class TrainerService {
 
     public List<TrainerEntity> findByUsernames(List<String> trainerUsernames) {
         try {
-            List<TrainerEntity> byUsernames = trainerRepository.findByUsernames(trainerUsernames);
+            List<TrainerEntity> byUsernames = trainerRepository.findAllByUsernameIn(trainerUsernames);
             return byUsernames;
         } catch (Exception e) {
             log.error("Error retrieving trainers by trainerUsernames {}: {}", trainerUsernames, e.getMessage());

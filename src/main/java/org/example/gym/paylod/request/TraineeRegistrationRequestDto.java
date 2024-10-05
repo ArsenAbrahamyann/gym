@@ -1,5 +1,6 @@
 package org.example.gym.paylod.request;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class TraineeRegistrationRequestDto {
     private String firsName;
     @NotBlank
     private String lastName;
-    private String dateOfBrith;
+    private LocalDateTime dateOfBrith;
     private String address;
 
 }

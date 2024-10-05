@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,25 +38,20 @@ public class TraineeController {
     private final TraineeService traineeService;
     private final TraineeMapper mapper;
 
-    @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/registration", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<RegistrationResponseDto> traineeRegistration(
-            @RequestParam(required = false) String dateOfBirth,
-            @RequestParam(required = false) String address,
-            @RequestParam String firstName,
-            @RequestParam String lastName) {
+            @RequestBody TraineeRegistrationRequestDto requestDto) {
         log.info("Controller: trainee registration");
 
-        TraineeRegistrationRequestDto traineeRegistrationRequestDto = new TraineeRegistrationRequestDto(firstName,
-                lastName, dateOfBirth, address);
 
-        TraineeEntity trainee = mapper.traineeRegistrationMapToEntity(traineeRegistrationRequestDto);
+        TraineeEntity trainee = mapper.traineeRegistrationMapToEntity(requestDto);
         TraineeEntity traineeEntity = traineeService.createTraineeProfile(trainee);
 
         RegistrationResponseDto responseDto = mapper.traineeEntityMapToResponseDto(traineeEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @GetMapping("/{username}")
+    @GetMapping
     public ResponseEntity<GetTraineeProfileResponseDto> getTraineeProfile(@PathVariable String username) {
         log.info("Controller: Get trainee profile for username: {}", username);
 

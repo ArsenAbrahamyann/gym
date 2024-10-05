@@ -13,6 +13,7 @@ import lombok.Setter;
 public class TrainerDto {
     private TrainingTypeDto specialization;
     private UserDto user;
+    private Boolean isActive;
     private Set<TraineeDto> trainees;
     private TrainingDto training;
 
