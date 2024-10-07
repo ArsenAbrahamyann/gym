@@ -63,10 +63,10 @@ public class TrainerService {
 
         validationUtils.validateTrainer(trainer);
 
-        TrainingTypeEntity trainingType = trainer.getSpecialization();
-        if (trainingType.getId() == null) {
-            trainingTypeService.save(trainingType);
+        if (trainer.getSpecialization().getId() == null) {
+            trainer.setSpecialization(null);
         }
+
 
         trainerRepository.save(trainer);
         userService.authenticateUser(trainer.getUsername(), trainer.getPassword());
@@ -123,26 +123,7 @@ public class TrainerService {
         return trainerRepository.save(trainer);
     }
 
-    /**
-     * Retrieves the list of trainings for a trainer within a given date range.
-     *
-     * @param trainerUsername The username of the trainer.
-     * @param fromDate        The start date of the date range.
-     * @param toDate          The end date of the date range.
-     * @param traineeName     The name of the trainee (optional).
-     * @return The list of trainings for the trainer.
-     */
-    @Transactional
-    public List<TrainingEntity> getTrainerTrainings(String trainerUsername, LocalDateTime fromDate,
-                                                    LocalDateTime toDate, String traineeName) {
-        log.info("Fetching trainings for trainer: {}", trainerUsername);
-        TrainerEntity trainer = trainerRepository.findByUsername(trainerUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainer not found with username: " + trainerUsername));
 
-        validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
-
-        return trainingService.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName);
-    }
 
     /**
      * Retrieves all {@link TrainerEntity} records from the database.
