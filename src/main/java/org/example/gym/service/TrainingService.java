@@ -70,12 +70,6 @@ public class TrainingService {
 
     /**
      * Retrieves a list of trainings for a specific trainee based on the provided criteria.
-     *
-     * @param traineeName The username of the trainee.
-     * @param fromDate    The start date of the training period.
-     * @param toDate      The end date of the training period.
-     * @param trainerName The name of the trainer (optional).
-     * @param trainingType The type of training (optional).
      * @return A list of training entities that match the criteria.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
@@ -101,12 +95,7 @@ public class TrainingService {
     }
 
     /**
-     * Retrieves a list of trainings conducted by a specific trainer based on the provided criteria.
-     *
-     * @param trainerUsername The username of the trainer.
-     * @param fromDate        The start date of the training period.
-     * @param toDate          The end date of the training period.
-     * @param traineeName     The name of the trainee (optional).
+     * Retrieves a list of trainings conducted by a specific trainer based on the provided criteria
      * @return A list of training entities that match the criteria.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */

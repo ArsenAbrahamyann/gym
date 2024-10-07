@@ -25,7 +25,10 @@ public class TrainerMapper {
 
     public TrainerEntity trainerRegistrationMapToEntity(TrainerRegistrationRequestDto registrationDto) {
       TrainerEntity trainer = new TrainerEntity();
-        TrainingTypeEntity trainingType = trainingTypeService.findById(registrationDto.getTrainingTypeId());
+        TrainingTypeEntity trainingType = null;
+        if (registrationDto.getTrainingTypeId() != null) {
+           trainingType = trainingTypeService.findById(registrationDto.getTrainingTypeId());
+      }
         trainer.setSpecialization(trainingType);
         trainer.setFirstName(registrationDto.getFirstName());
         trainer.setLastName(registrationDto.getLastName());
@@ -61,7 +64,7 @@ public class TrainerMapper {
         trainer.setUsername(updateTrainerRequestDto.getUsername());
         TrainingTypeEntity trainingType = trainingTypeService.findById(updateTrainerRequestDto.getTrainingTypeId());
         trainer.setSpecialization(trainingType);
-        trainer.setIsActive(updateTrainerRequestDto.isActive());
+        trainer.setIsActive(updateTrainerRequestDto.isPublic());
         return trainer;
     }
 
@@ -82,7 +85,7 @@ public class TrainerMapper {
 
     public TrainerEntity updateRequestDtoMapToTrainerEntity(UpdateTrainerRequestDto updateDto) {
         TrainerEntity trainer = trainerService.getTrainer(updateDto.getUsername());
-        trainer.setIsActive(updateDto.isActive());
+        trainer.setIsActive(updateDto.isPublic());
         trainer.setFirstName(updateDto.getFirstName());
         trainer.setLastName(updateDto.getLastName());
         trainer.setUsername(updateDto.getUsername());

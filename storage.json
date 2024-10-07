@@ -1,0 +1,26 @@
+{
+  "traineeStorage" : {
+    "sadas.asfdasd" : {
+      "firstName" : "sadas",
+      "lastName" : "asfdasd",
+      "password" : "EscdACXZj5",
+      "dateOfBirth" : "1111-11-11",
+      "address" : "dsfds",
+      "userId" : "sadas.asfdasd",
+      "active" : true,
+      "userName" : "sadas.asfdasd"
+    },
+    "gsdf.dgf" : {
+      "firstName" : "gsdf",
+      "lastName" : "dgf",
+      "password" : "YwcwxzEopv",
+      "dateOfBirth" : "1111-11-11",
+      "address" : "fgf",
+      "userId" : "gsdf.dgf",
+      "active" : false,
+      "userName" : "gsdf.dgf"
+    }
+  },
+  "trainingStorage" : { },
+  "trainerStorage" : { }
+}
