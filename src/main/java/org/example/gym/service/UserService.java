@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.UserEntity;
+import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.paylod.request.ChangeLoginRequestDto;
 import org.example.gym.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -34,23 +35,16 @@ public class UserService {
     @Transactional
     public boolean authenticateUser(String username, String password) {
         log.info("Authenticating user: {}", username);
-        try {
-            UserEntity user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
-            if (user.getPassword().equals(password)) {
-                log.info("User {} authenticated successfully", username);
-                return true;
-            } else {
-                log.warn("Authentication failed for user {}", username);
-                return false;
-            }
-        } catch (EntityNotFoundException e) {
-            log.error("Authentication error for user {}: {}", username, e.getMessage());
-            return false;
-        } catch (Exception e) {
-            log.error("Unexpected error during authentication for user {}: {}", username, e.getMessage());
-            return false;
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User name not found." + username));
+
+        boolean authenticated = user.getPassword().equals(password);
+        if (authenticated) {
+            log.info("User {} authenticated successfully", username);
+        } else {
+            log.warn("Authentication failed for user {}", username);
         }
+        return authenticated;
     }
 
     /**
@@ -58,90 +52,61 @@ public class UserService {
      *
      * @return a list of usernames. If no usernames are found, an empty list is returned.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<String> findAllUsernames() {
         log.info("Fetching all usernames from the repository.");
-        try {
-            List<String> allUsernames = userRepository.findAllUsername();
-            if (allUsernames.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return allUsernames;
-        } catch (Exception e) {
-            log.error("Error fetching usernames: {}", e.getMessage());
-            return List.of();
-        }
+        List<String> allUsernames = userRepository.findAllUsername();
+        return allUsernames.isEmpty() ? Collections.emptyList() : allUsernames;
     }
 
     /**
      * Retrieves a {@link UserEntity} by its username.
-     * <p>
-     * This method is transactional and queries the database for a user entity that matches the provided username.
-     * </p>
      *
      * @param username the username of the {@link UserEntity} to be retrieved.
-     * @return an {@link Optional} containing the found {@link UserEntity}, or an empty {@link Optional} if no user is found with the specified username.
+     * @return an {@link Optional} containing the found {@link UserEntity}, or an empty {@link Optional} if no user is found.
      */
-    @Transactional
-    public Optional<UserEntity> findByUsername(String username) {
+    @Transactional(readOnly = true)
+    public UserEntity findByUsername(String username) {
         log.info("Retrieving user by username: {}", username);
-        try {
-            return userRepository.findByUsername(username);
-        } catch (Exception e) {
-            log.error("Error retrieving user by username {}: {}", username, e.getMessage());
-            return Optional.empty();
-        }
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User name not found." + username));
     }
 
     /**
      * Saves a {@link UserEntity} to the database.
-     * <p>
-     * This method is transactional and persists the provided {@link UserEntity} in the database.
-     * </p>
      *
      * @param user the {@link UserEntity} to be saved in the database.
      */
     @Transactional
     public void save(UserEntity user) {
         log.info("Saving user: {}", user.getUsername());
-        try {
-            userRepository.save(user);
-        } catch (Exception e) {
-            log.error("Error saving user {}: {}", user.getUsername(), e.getMessage());
-        }
+        userRepository.save(user);
     }
 
     /**
      * Updates an existing {@link UserEntity} in the database.
-     * <p>
-     * This method is transactional and saves the updated version of the provided {@link UserEntity}.
-     * If the entity does not exist, it will create a new one.
-     * </p>
      *
      * @param user the {@link UserEntity} to be updated in the database.
      */
     @Transactional
     public void update(UserEntity user) {
         log.info("Updating user: {}", user.getUsername());
-        try {
-            userRepository.save(user);
-        } catch (Exception e) {
-            log.error("Error updating user {}: {}", user.getUsername(), e.getMessage());
-        }
+        userRepository.save(user);
     }
 
+    /**
+     * Changes the password for the user.
+     *
+     * @param changeLoginRequestDto contains the username and old/new passwords.
+     */
     public void changePassword(ChangeLoginRequestDto changeLoginRequestDto) {
-        Optional<UserEntity> byUsername = findByUsername(changeLoginRequestDto.getUsername());
-        if (byUsername.isPresent()) {
-            UserEntity user = byUsername.get();
+        UserEntity user = findByUsername(changeLoginRequestDto.getUsername());
+
             if (user.getPassword().equals(changeLoginRequestDto.getOldPassword())) {
                 user.setPassword(changeLoginRequestDto.getNewPassword());
-                log.info("password exchange successful.");
-            }else {
-                log.info("wrong password.");
+                log.info("Password exchange successful for user: {}", user.getUsername());
+            } else {
+                log.warn("Wrong password for user: {}", user.getUsername());
             }
-        }else {
-            log.info("User not found");
-        }
     }
 }

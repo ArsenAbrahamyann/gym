@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.repository.TrainingTypeRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +38,8 @@ public class TrainingTypeService {
      */
     @Transactional
     public void save(TrainingTypeEntity trainingType) {
-        try {
-            trainingTypeRepository.save(trainingType);
-            log.info("Successfully saved training type: {}", trainingType);
-        } catch (Exception e) {
-            log.error("Failed to save training type: {}, error: {}", trainingType, e.getMessage());
-        }
+        trainingTypeRepository.save(trainingType);
+        log.info("Successfully saved training type: {}", trainingType);
     }
 
     /**
@@ -52,35 +49,34 @@ public class TrainingTypeService {
      * </p>
      *
      * @param trainingTypeId the unique ID of the {@link TrainingTypeEntity}.
-     * @return an {@link Optional} containing the found {@link TrainingTypeEntity}, or an empty {@link Optional} if not found.
+     * @return the found {@link TrainingTypeEntity}.
+     * @throws ResourceNotFoundException if the training type is not found.
      */
     @Transactional
     public TrainingTypeEntity findById(Long trainingTypeId) {
-        try {
-            Optional<TrainingTypeEntity> trainingType = trainingTypeRepository.findById(trainingTypeId);
-            if (trainingType.isPresent()) {
-                log.info("Found training type with ID {}: {}", trainingTypeId, trainingType.get());
-                return trainingType.get();
-            } else {
-                log.warn("No training type found with ID {}", trainingTypeId);
-            }
-        } catch (Exception e) {
-            log.error("Error while fetching training type with ID {}: {}", trainingTypeId, e.getMessage());
-        }
-        return null;
+        return trainingTypeRepository.findById(trainingTypeId)
+                .orElseThrow(() -> {
+                    log.warn("No training type found with ID {}", trainingTypeId);
+                    return new ResourceNotFoundException("TrainingType not found for ID: " + trainingTypeId);
+                });
     }
 
+    /**
+     * Retrieves all {@link TrainingTypeEntity} from the database.
+     * <p>
+     * This method is transactional and retrieves all training types from the database.
+     * </p>
+     *
+     * @return a list of all {@link TrainingTypeEntity}.
+     */
+    @Transactional(readOnly = true)
     public List<TrainingTypeEntity> findAll() {
-
-        try {
-            List<TrainingTypeEntity> all = trainingTypeRepository.findAll();
-            if (all == null) {
-                log.info("TrainingType not found");
-            }
-            return all;
-        }catch (Exception e) {
-            log.error("Error while fetching training type.", e.getMessage());
-            return Collections.emptyList();
+        List<TrainingTypeEntity> all = trainingTypeRepository.findAll();
+        if (all.isEmpty()) {
+            log.info("No TrainingType found.");
+        } else {
+            log.info("Found {} training types.", all.size());
         }
+        return all;
     }
 }

@@ -3,6 +3,10 @@ plugins {
     id 'war'
     id 'checkstyle'
 }
+plugins {
+    id("org.flywaydb.flyway") version "9.6.0" // Check for the latest version
+    // Other plugins...
+}
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -22,10 +26,14 @@ java {
 repositories {
     mavenCentral()
 }
-
-//tasks.withType(JavaCompile) {
-//    options.encoding = 'UTF-8'
+//tasks.withType<JavaCompile> {
+//    options.compilerArgs.add("-parameters")
 //}
+
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 dependencies {
     // Servlet API for provided runtime (optional)
@@ -54,7 +62,7 @@ dependencies {
     // Hibernate dependencies
     implementation "org.hibernate:hibernate-core:6.1.7.Final"
     implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
-    implementation "org.flywaydb:flyway-core:9.0.0"
+    implementation "org.flywaydb:flyway-core:9.6.0"
 
     // Hibernate Validator
     implementation "org.hibernate.validator:hibernate-validator:8.0.0.Final"
@@ -91,6 +99,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+tasks.named('flywayMigrate') {
+    dependsOn 'clean' // Ensure the database is clean before migration
 }
 
 checkstyle {

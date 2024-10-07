@@ -43,7 +43,7 @@ public class TrainingEntity {
     @JoinColumn(name = "training_type_id", referencedColumnName = "id")
     private TrainingTypeEntity trainingType;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd ")
     @Column(name = "training_date", updatable = false)
     @CreationTimestamp
     private LocalDateTime trainingDate;

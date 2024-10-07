@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.mapper.TrainerMapper;
+import org.example.gym.paylod.request.ActivateRequestDto;
 import org.example.gym.paylod.request.TrainerRegistrationRequestDto;
 import org.example.gym.paylod.request.UpdateTrainerRequestDto;
 import org.example.gym.paylod.response.GetTrainerProfileResponseDto;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,15 +38,12 @@ public class TrainerController {
     private final TrainerService trainerService;
     private final TrainerMapper mapper;
 
-    @PostMapping("/registration/{trainingTypeId}")
+    @PostMapping("/registration")
     public ResponseEntity<RegistrationResponseDto> registerTrainer(
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @PathVariable Long trainingTypeId) {
-        log.info("Registering trainer: {} {}", firstName, lastName);
+            @RequestBody TrainerRegistrationRequestDto requestDto) {
+        log.info("Registering trainer: {} {}", requestDto.getFirstName(), requestDto.getLastName());
 
-        TrainerRegistrationRequestDto registrationDto = new TrainerRegistrationRequestDto(firstName, lastName, trainingTypeId);
-        TrainerEntity trainerEntity = mapper.trainerRegistrationMapToEntity(registrationDto);
+        TrainerEntity trainerEntity = mapper.trainerRegistrationMapToEntity(requestDto);
         TrainerEntity savedTrainer = trainerService.createTrainerProfile(trainerEntity);
 
         RegistrationResponseDto responseDto = mapper.trainerMapToResponse(savedTrainer);
@@ -62,16 +61,10 @@ public class TrainerController {
 
     @PutMapping("/update")
     public ResponseEntity<UpdateTrainerProfileResponseDto> updateTrainerProfile(
-            @RequestParam String username,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam Long trainingTypeId,
-            @RequestParam boolean isActive) {
-        log.info("Updating trainer profile for: {}", username);
+            @RequestBody UpdateTrainerRequestDto requestDto) {
+        log.info("Updating trainer profile for: {}", requestDto.getUsername());
 
-        UpdateTrainerRequestDto updateDto = new UpdateTrainerRequestDto(username, firstName,
-                lastName, trainingTypeId, isActive);
-        TrainerEntity updatedTrainer = mapper.updateRequestDtoMapToTrainerEntity(updateDto);
+        TrainerEntity updatedTrainer = mapper.updateRequestDtoMapToTrainerEntity(requestDto);
         TrainerEntity savedTrainer = trainerService.updateTrainerProfile(updatedTrainer);
 
         UpdateTrainerProfileResponseDto responseDto = mapper.updateTrainerProfileMapToResponseDto(savedTrainer);
@@ -79,16 +72,19 @@ public class TrainerController {
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<Void> activateTrainer(@RequestParam String username, @RequestParam boolean isActive) {
-        log.info("Setting trainer status to active: {}", username);
-        trainerService.toggleTrainerStatus(username, isActive);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> activateTrainer(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Setting trainer status to active: {}", requestDto.getUsername());
+        trainerService.toggleTrainerStatus(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/de-activate")
-    public ResponseEntity<Void> deactivateTrainer(@RequestParam String username, @RequestParam boolean isActive) {
-        log.info("Setting trainer status to inactive: {}", username);
-        trainerService.toggleTrainerStatus(username, isActive);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deactivateTrainer(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Setting trainer status to inactive: {}", requestDto.getUsername());
+        trainerService.toggleTrainerStatus(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
+
+
+

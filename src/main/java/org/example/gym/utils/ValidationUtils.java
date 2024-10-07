@@ -10,6 +10,8 @@ import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ValidationException;
+import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
+import org.example.gym.paylod.request.TrainerTrainingRequestDto;
 import org.springframework.stereotype.Component;
 
 /**
@@ -185,29 +187,28 @@ public class ValidationUtils {
      * @param trainingType Optional training type for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
-    public void validateTraineeTrainingsCriteria(String traineeUsername, LocalDateTime fromDate,
-                                                 LocalDateTime toDate, String trainerName, String trainingType) {
-        if (traineeUsername == null || traineeUsername.isEmpty()) {
+    public void validateTraineeTrainingsCriteria(TraineeTrainingsRequestDto requestDto) {
+        if (requestDto.getTraineeName() == null || requestDto.getTraineeName().isEmpty()) {
             throw new ValidationException("Trainee username is required for fetching training list.");
         }
 
-        if (fromDate != null && fromDate != null) {
-            validateDateFormat(fromDate, "From date");
+        if (requestDto.getPeriodFrom() != null && requestDto.getPeriodFrom() != null) {
+            validateDateFormat(requestDto.getPeriodFrom(), "From date");
         }
 
-        if (toDate != null && toDate != null) {
-            validateDateFormat(toDate, "To date");
+        if (requestDto.getPeriodTo() != null && requestDto.getPeriodTo() != null) {
+            validateDateFormat(requestDto.getPeriodTo(), "To date");
         }
 
-        if (fromDate != null && toDate != null) {
-            validateDateRange(fromDate, toDate);
+        if (requestDto.getPeriodFrom() != null && requestDto.getPeriodTo() != null) {
+            validateDateRange(requestDto.getPeriodFrom(), requestDto.getPeriodTo());
         }
 
-        if (trainerName != null && trainerName.isEmpty()) {
-            throw new ValidationException("Trainer name cannot be empty if provided.");
+        if (requestDto.getTrainingName() != null && requestDto.getTrainingName().isEmpty()) {
+            throw new ValidationException("Training name cannot be empty if provided.");
         }
 
-        if (trainingType != null && trainingType.isEmpty()) {
+        if (requestDto.getTrainingType() != null && requestDto.getTrainingType().isEmpty()) {
             throw new ValidationException("Training type cannot be empty if provided.");
         }
     }
@@ -221,25 +222,24 @@ public class ValidationUtils {
      * @param traineeName Optional trainee name for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
-    public void validateTrainerTrainingsCriteria(String trainerUsername, LocalDateTime fromDate, LocalDateTime toDate,
-                                                 String traineeName) {
-        if (trainerUsername == null || trainerUsername.isEmpty()) {
+    public void validateTrainerTrainingsCriteria(TrainerTrainingRequestDto requestDto) {
+        if (requestDto.getTrainerUsername() == null || requestDto.getTrainerUsername().isEmpty()) {
             throw new ValidationException("Trainer username is required for fetching training list.");
         }
 
-        if (fromDate != null && fromDate != null) {
-            validateDateFormat(fromDate, "From date");
+        if (requestDto.getPeriodFrom() != null && requestDto.getPeriodFrom() != null) {
+            validateDateFormat(requestDto.getPeriodFrom(), "From date");
         }
 
-        if (toDate != null && toDate != null) {
-            validateDateFormat(toDate, "To date");
+        if (requestDto.getPeriodTo() != null && requestDto.getPeriodTo() != null) {
+            validateDateFormat(requestDto.getPeriodTo(), "To date");
         }
 
-        if (fromDate != null && toDate != null) {
-            validateDateRange(fromDate, toDate);
+        if (requestDto.getPeriodFrom() != null && requestDto.getPeriodTo() != null) {
+            validateDateRange(requestDto.getPeriodFrom(), requestDto.getPeriodTo());
         }
 
-        if (traineeName != null && traineeName.isEmpty()) {
+        if (requestDto.getTraineeName() != null && requestDto.getTraineeName().isEmpty()) {
             throw new ValidationException("Trainee name cannot be empty if provided.");
         }
     }

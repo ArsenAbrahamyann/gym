@@ -10,6 +10,8 @@ import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
+import org.example.gym.paylod.request.TrainerTrainingRequestDto;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
@@ -34,8 +36,6 @@ public class TrainingService {
 
     /**
      * Constructs a new {@code TrainingService} instance with dependencies injected for handling training-related operations.
-     * Several services are injected lazily to avoid circular dependency issues during initialization. This constructor
-     * initializes the required repositories, services, and validation utilities for managing training sessions.
      *
      * @param trainingRepository   the {@link TrainingRepository} used for performing CRUD operations on training entities.
      * @param traineeService       the {@link TraineeService} used for managing trainees. This service is injected lazily
@@ -60,18 +60,12 @@ public class TrainingService {
      * Adds a new training record.
      *
      * @param training The details of the training to be added.
-     * @throws EntityNotFoundException If the specified trainee or trainer is not found.
+     * @throws ResourceNotFoundException If the specified trainee or trainer is not found.
      */
     @Transactional
     public void addTraining(TrainingEntity training) {
-        try {
-            trainingRepository.save(training);
-            log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
-        } catch (EntityNotFoundException e) {
-            log.error("Error adding training: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("An unexpected error occurred while adding training: {}", e.getMessage());
-        }
+        trainingRepository.save(training);
+        log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
     }
 
     /**
@@ -83,32 +77,26 @@ public class TrainingService {
      * @param trainerName The name of the trainer (optional).
      * @param trainingType The type of training (optional).
      * @return A list of training entities that match the criteria.
-     * @throws EntityNotFoundException If the specified trainee is not found.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
     @Transactional
-    public List<TrainingEntity> getTrainingsForTrainee(String traineeName, LocalDateTime fromDate, LocalDateTime toDate,
-                                                       String trainerName, String trainingType) {
+    public List<TrainingEntity> getTrainingsForTrainee(TraineeTrainingsRequestDto requestDto) {
 
-        log.info("Fetching trainings for trainee: {}", traineeName);
+        log.info("Fetching trainings for trainee: {}", requestDto.getTraineeName());
 
-        List<TrainingEntity> trainings = new ArrayList<>();
-        try {
-            validationUtils.validateTraineeTrainingsCriteria(traineeName, fromDate, toDate, trainerName, trainingType);
+        validationUtils.validateTraineeTrainingsCriteria(requestDto);
+        TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeName());
 
-            TraineeEntity trainee = traineeService.getTrainee(traineeName);
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
+                requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTrainingName(),
+                requestDto.getTrainingType());
 
-            trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
-                            fromDate, toDate, trainerName, trainingType);
-            if (trainings == null) {
-                trainings = Collections.emptyList();
-            }
-        } catch (Exception e) {
-            log.error("Error fetching trainings: {}", e.getMessage());
-            return new ArrayList<>();
+        if (trainings.isEmpty()) {
+            log.warn("No trainings found for trainee: {}", requestDto.getTraineeName());
+            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
         }
 
-        log.info("Found {} trainings for trainee: {}", trainings.size(), traineeName);
+        log.info("Found {} trainings for trainee: {}", trainings.size(), requestDto.getTraineeName());
         return trainings;
     }
 
@@ -120,53 +108,48 @@ public class TrainingService {
      * @param toDate          The end date of the training period.
      * @param traineeName     The name of the trainee (optional).
      * @return A list of training entities that match the criteria.
-     * @throws EntityNotFoundException If the specified trainer is not found.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
     @Transactional
-    public List<TrainingEntity> getTrainingsForTrainer(String trainerUsername, LocalDateTime fromDate,
-                                                       LocalDateTime toDate, String traineeName) {
+    public List<TrainingEntity> getTrainingsForTrainer(TrainerTrainingRequestDto requestDto) {
 
-        log.info("Fetching trainings for trainer: {}", trainerUsername);
-        List<TrainingEntity> trainings = new ArrayList<>();
-        try {
-            validationUtils.validateTrainerTrainingsCriteria(trainerUsername, fromDate, toDate, traineeName);
-            TrainerEntity trainer = trainerService.getTrainer(trainerUsername);
-            trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(), fromDate, toDate, traineeName);
-            if (trainings == null) {
-                log.info("No trainings found for the specified criteria");
-            }
-        } catch (EntityNotFoundException e) {
-            log.error("Error fetching trainings: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("An unexpected error occurred while fetching trainings: {}", e.getMessage());
+        log.info("Fetching trainings for trainer: {}", requestDto.getTrainerUsername());
+
+        validationUtils.validateTrainerTrainingsCriteria(requestDto);
+        TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
+
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(),
+                requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTraineeName());
+
+        if (trainings.isEmpty()) {
+            log.warn("No trainings found for trainer: {}", requestDto.getTrainerUsername());
+            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
         }
+
+        log.info("Found {} trainings for trainer: {}", trainings.size(), requestDto.getTrainerUsername());
         return trainings;
     }
 
     /**
      * Retrieves a list of {@link TrainingEntity} records for a specific trainer within a given date range and trainee name.
-     * This method is transactional, ensuring that the database operations are
-     * executed within a single transaction.
      *
      * @param id          the unique ID of the trainer for whom the trainings are to be found.
      * @param fromDate    the start of the date range for retrieving the trainings.
      * @param toDate      the end of the date range for retrieving the trainings.
      * @param traineeName the name of the trainee to filter the trainings.
-     * @return an {@link Optional} containing a list of {@link TrainingEntity} records that match
-     *         the criteria (trainer ID, date range, and trainee name), or an empty {@link Optional}
-     *         if no trainings are found.
+     * @return a list of {@link TrainingEntity} records that match the criteria (trainer ID, date range, and trainee name),
+     *         or an empty list if no trainings are found.
      */
     @Transactional
     public List<TrainingEntity> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
-                                                    String traineeName) {
-        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id,
-                fromDate, toDate, traineeName);
-        try {
-            return trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
-        } catch (Exception e) {
-            log.error("Error fetching trainings for trainer ID {}: {}", id, e.getMessage());
-            return Collections.emptyList();
+                                                        String traineeName) {
+        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id, fromDate, toDate, traineeName);
+
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
+        if (trainings.isEmpty()) {
+            log.warn("No trainings found for trainer ID: {}", id);
+            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
         }
+        return trainings;
     }
 }

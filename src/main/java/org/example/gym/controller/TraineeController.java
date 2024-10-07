@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.mapper.TraineeMapper;
+import org.example.gym.paylod.request.ActivateRequestDto;
 import org.example.gym.paylod.request.TraineeRegistrationRequestDto;
 import org.example.gym.paylod.request.UpdateTraineeRequestDto;
 import org.example.gym.paylod.request.UpdateTraineeTrainerListRequestDto;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -51,7 +51,7 @@ public class TraineeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @GetMapping
+    @GetMapping("/{username}")
     public ResponseEntity<GetTraineeProfileResponseDto> getTraineeProfile(@PathVariable String username) {
         log.info("Controller: Get trainee profile for username: {}", username);
 
@@ -63,21 +63,13 @@ public class TraineeController {
 
     @PutMapping("/update")
     public ResponseEntity<UpdateTraineeResponseDto> updateTraineeProfile(
-            @RequestParam String username,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam(required = false) String dateOfBirth,
-            @RequestParam(required = false) String address,
-            @RequestParam boolean isPublic) {
-        log.info("Controller: Update trainee profile for username: {}", username);
+            @RequestBody UpdateTraineeRequestDto requestDto) {
+        log.info("Controller: Update trainee profile for username: {}", requestDto.getUsername());
 
-        UpdateTraineeRequestDto updateTraineeRequestDto = new UpdateTraineeRequestDto(username, firstName, lastName,
-                dateOfBirth, address, isPublic);
+        TraineeEntity trainee = mapper.updateDtoMapToTraineeEntity(requestDto);
+        TraineeEntity traineeEntityUpdated = traineeService.updateTraineeProfile(trainee);
 
-        TraineeEntity trainee = mapper.updateDtoMapToTraineeEntity(updateTraineeRequestDto);
-        traineeService.updateTraineeProfile(trainee);
-
-        UpdateTraineeResponseDto responseDto = mapper.traineeEntityMapToUpdateResponse(trainee);
+        UpdateTraineeResponseDto responseDto = mapper.traineeEntityMapToUpdateResponse(traineeEntityUpdated);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -86,11 +78,12 @@ public class TraineeController {
         log.info("Controller: Delete trainee profile for username: {}", username);
 
         traineeService.deleteTraineeByUsername(username);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/unassigned-trainers/{traineeUsername}")
-    public ResponseEntity<List<TrainerResponseDto>> getNotAssignedOnTraineeActiveTrainers(@PathVariable String traineeUsername) {
+    public ResponseEntity<List<TrainerResponseDto>> getNotAssignedOnTraineeActiveTrainers(
+            @PathVariable String traineeUsername) {
         log.info("Controller: Get not assigned on trainee active trainers for username: {}", traineeUsername);
 
         List<TrainerEntity> unassignedTrainers = traineeService.getUnassignedTrainers(traineeUsername);
@@ -101,33 +94,29 @@ public class TraineeController {
 
     @PutMapping("/update/trainerList")
     public ResponseEntity<List<TrainerResponseDto>> updateTraineeTrainerList(
-            @RequestParam String traineeUsername,
-            @RequestParam List<String> trainerUsernames) {
-        log.info("Controller: Update Trainee's Trainer list for username: {}", traineeUsername);
+    @RequestBody UpdateTraineeTrainerListRequestDto requestDto) {
+        log.info("Controller: Update Trainee's Trainer list for username: {}", requestDto.getTraineeUsername());
 
-        UpdateTraineeTrainerListRequestDto updateTraineeTrainerListRequestDto =
-                new UpdateTraineeTrainerListRequestDto(traineeUsername, trainerUsernames);
+        TraineeEntity trainee = mapper.updateTraineeTrainerListMapToEntity(requestDto);
+        TraineeEntity traineeEntity = traineeService.updateTraineeTrainers(trainee);
 
-        TraineeEntity trainee = mapper.updateTraineeTrainerListMapToEntity(updateTraineeTrainerListRequestDto);
-        traineeService.updateTraineeTrainers(trainee);
-
-        List<TrainerResponseDto> responseDtos = mapper.updateTraineeTrainerListMapToTrainerResponse(trainee);
+        List<TrainerResponseDto> responseDtos = mapper.updateTraineeTrainerListMapToTrainerResponse(traineeEntity);
         return ResponseEntity.ok(responseDtos);
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<Void> activateTrainee(@RequestParam String username, @RequestParam boolean isActive) {
-        log.info("Controller: Activate trainee with username: {}", username);
+    public ResponseEntity<Void> activateTrainee(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Controller: Activate trainee with username: {}", requestDto.getUsername());
 
-        traineeService.toggleTraineeStatus(username, isActive);
-        return ResponseEntity.noContent().build();
+        traineeService.toggleTraineeStatus(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/de-activate")
-    public ResponseEntity<Void> deActivateTrainee(@RequestParam String username, @RequestParam boolean isActive) {
-        log.info("Controller: DeActivate trainee with username: {}", username);
+    public ResponseEntity<Void> deActivateTrainee(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Controller: DeActivate trainee with username: {}", requestDto.getUsername());
 
-        traineeService.toggleTraineeStatus(username, isActive);
-        return ResponseEntity.noContent().build();
+        traineeService.toggleTraineeStatus(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

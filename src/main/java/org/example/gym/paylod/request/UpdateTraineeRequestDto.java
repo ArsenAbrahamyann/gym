@@ -1,5 +1,6 @@
 package org.example.gym.paylod.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,6 @@ public class UpdateTraineeRequestDto {
     private String dateOfBirth;
     private String address;
     @NotBlank
+    @JsonProperty(value = "isPublic")
     private boolean isPublic;
 }

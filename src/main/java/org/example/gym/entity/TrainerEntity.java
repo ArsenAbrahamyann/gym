@@ -34,7 +34,7 @@ public class TrainerEntity extends UserEntity {
     @JoinColumn(name = "specialization_id", referencedColumnName = "id")
     private TrainingTypeEntity specialization;
 
-    @ManyToMany(mappedBy = "trainers", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "trainers", fetch = FetchType.EAGER)
     private Set<TraineeEntity> trainees = new HashSet<>();
 
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)

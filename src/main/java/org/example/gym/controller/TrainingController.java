@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.paylod.request.AddTrainingRequestDto;
+import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
+import org.example.gym.paylod.request.TrainerTrainingRequestDto;
 import org.example.gym.paylod.response.GetTrainerTrainingListResponseDto;
 import org.example.gym.paylod.response.TrainingResponseDto;
 import org.example.gym.service.TrainingService;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,16 +38,13 @@ public class TrainingController {
 
     @GetMapping("/trainee")
     public ResponseEntity<List<TrainingResponseDto>> getTraineeTrainingsList(
-            @RequestParam String traineeName,
-            @RequestParam(required = false) LocalDateTime periodFrom,
-            @RequestParam(required = false) LocalDateTime periodTo,
-            @RequestParam(required = false) String trainingName,
-            @RequestParam(required = false) String trainingType) {
+            @RequestBody TraineeTrainingsRequestDto requestDto) {
 
-        log.info("Fetching training list for trainee: {}", traineeName);
+        log.info("Fetching training list for trainee: {}", requestDto.getTraineeName());
+
 
         List<TrainingEntity> trainingsForTrainee = trainingService.getTrainingsForTrainee(
-                traineeName, periodFrom, periodTo, trainingName, trainingType);
+                requestDto);
 
         List<TrainingResponseDto> responseDtos = mapper.mapToDtoTrainingTrainee(trainingsForTrainee);
         return ResponseEntity.ok(responseDtos);
@@ -52,15 +52,11 @@ public class TrainingController {
 
     @GetMapping("/trainer")
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
-            @RequestParam String trainerUsername,
-            @RequestParam(required = false) LocalDateTime periodFrom,
-            @RequestParam(required = false) LocalDateTime periodTo,
-            @RequestParam(required = false) String traineeName) {
+           @RequestBody TrainerTrainingRequestDto requestDto) {
 
-        log.info("Fetching training list for trainer: {}", trainerUsername);
+        log.info("Fetching training list for trainer: {}", requestDto.getTrainerUsername());
 
-        List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(
-                trainerUsername, periodFrom, periodTo, traineeName);
+        List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(requestDto);
 
         List<GetTrainerTrainingListResponseDto> responseDto = mapper.mapToDtoTrainingTrainer(trainingsForTrainer);
         return ResponseEntity.ok(responseDto);
@@ -68,16 +64,10 @@ public class TrainingController {
 
     @PostMapping("/add")
     public ResponseEntity<Void> addTraining(
-            @RequestParam String traineeUsername,
-            @RequestParam String trainerUsername,
-            @RequestParam String trainingName,
-            @RequestParam LocalDateTime trainingDate,
-            @RequestParam Integer trainingDuration) {
+            @RequestBody AddTrainingRequestDto requestDto) {
 
-        log.info("Adding training for trainee: {} with trainer: {}", traineeUsername, trainerUsername);
-
-        AddTrainingRequestDto requestDto = new AddTrainingRequestDto(
-                traineeUsername, trainerUsername, trainingName, trainingDate, trainingDuration);
+        log.info("Adding training for trainee: {} with trainer: {}", requestDto.getTraineeUsername(),
+                requestDto.getTrainerUsername());
 
         TrainingEntity trainingEntity = mapper.requestDtoMapToTrainingEntity(requestDto);
         trainingService.addTraining(trainingEntity);

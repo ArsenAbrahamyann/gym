@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -34,7 +35,7 @@ public class TraineeEntity extends UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "date_of_birth", updatable = false)
     @CreationTimestamp
     private LocalDateTime dateOfBirth;
@@ -42,7 +43,7 @@ public class TraineeEntity extends UserEntity {
     @Column(name = "address")
     private String address;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "trainee_trainer",
             joinColumns = @JoinColumn(name = "trainee_id"),

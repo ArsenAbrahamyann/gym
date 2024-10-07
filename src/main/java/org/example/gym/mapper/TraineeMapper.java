@@ -52,7 +52,7 @@ public class TraineeMapper {
         profileResponseDto.setActive(trainee.getIsActive());
         profileResponseDto.setDateOfBride(String.valueOf(trainee.getDateOfBirth()));
         profileResponseDto.setLastName(trainee.getLastName());
-        profileResponseDto.setFirstName(trainee.getLastName());
+        profileResponseDto.setFirstName(trainee.getFirstName());
         Set<TrainerEntity> trainers = trainee.getTrainers();
         Set<TrainerListResponseDto> trainerList = profileResponseDto.getTrainerList();
         for (TrainerEntity entity : trainers) {
