@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.example.gym.entity.TrainingEntity;
+import org.example.gym.entity.TrainingTypeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,7 +41,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
                                                  @Param("fromDate") LocalDateTime fromDate,
                                                  @Param("toDate") LocalDateTime toDate,
                                                  @Param("trainerName") String trainerName,
-                                                 @Param("trainingType") String trainingType);
+                                                 @Param("trainingType") TrainingTypeEntity trainingType);
 
     /**
      * Finds trainings for a specific trainer based on optional criteria such as date range and trainee name.

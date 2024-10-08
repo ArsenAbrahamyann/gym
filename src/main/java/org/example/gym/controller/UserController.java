@@ -3,7 +3,6 @@ package org.example.gym.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.paylod.request.ChangeLoginRequestDto;
-import org.example.gym.paylod.request.LoginRequest;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +24,15 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
-        log.info("Controller: User login attempt for username: {}", request.getUsername());
-        boolean isAuthenticated = userService.authenticateUser(request.getUsername(), request.getPassword());
+    public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password) {
+        log.info("Controller: User login attempt for username: {}", username);
+        boolean isAuthenticated = userService.authenticateUser(username, password);
 
         if (isAuthenticated) {
-            log.info("Controller: User {} logged in successfully", request.getUsername());
+            log.info("Controller: User {} logged in successfully", password);
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
-            log.warn("Controller: User {} failed to log in", request.getUsername());
+            log.warn("Controller: User {} failed to log in", password);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

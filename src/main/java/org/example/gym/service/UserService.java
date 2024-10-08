@@ -3,12 +3,14 @@ package org.example.gym.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.paylod.request.ChangeLoginRequestDto;
 import org.example.gym.repository.UserRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,10 +21,17 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TrainerService trainerService;
+    private final TraineeService traineeService;
+
+    public UserService(UserRepository userRepository, @Lazy TrainerService trainerService,@Lazy TraineeService traineeService) {
+        this.userRepository = userRepository;
+        this.trainerService = trainerService;
+        this.traineeService = traineeService;
+    }
 
     /**
      * Authenticates a user by checking their username and password.
@@ -100,13 +109,18 @@ public class UserService {
      * @param changeLoginRequestDto contains the username and old/new passwords.
      */
     public void changePassword(ChangeLoginRequestDto changeLoginRequestDto) {
-        UserEntity user = findByUsername(changeLoginRequestDto.getUsername());
 
-            if (user.getPassword().equals(changeLoginRequestDto.getOldPassword())) {
-                user.setPassword(changeLoginRequestDto.getNewPassword());
-                log.info("Password exchange successful for user: {}", user.getUsername());
-            } else {
-                log.warn("Wrong password for user: {}", user.getUsername());
+        TraineeEntity trainee = traineeService.getTrainee(changeLoginRequestDto.getUsername());
+        if (trainee != null) {
+                trainee.setPassword(changeLoginRequestDto.getNewPassword());
+                traineeService.updateTraineeProfile(trainee);
+                log.info("Trainee Password exchange successful for username {}", trainee.getUsername());
+        }else {
+            TrainerEntity trainer = trainerService.getTrainer(changeLoginRequestDto.getUsername());
+                    trainer.setPassword(changeLoginRequestDto.getNewPassword());
+                    trainerService.updateTrainerProfile(trainer);
+                    log.info("trainer Password exchange successful for username {}", trainer.getUsername());
             }
-    }
+        }
+
 }

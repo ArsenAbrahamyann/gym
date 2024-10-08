@@ -25,11 +25,9 @@ public class TrainerMapper {
 
     public TrainerEntity trainerRegistrationMapToEntity(TrainerRegistrationRequestDto registrationDto) {
       TrainerEntity trainer = new TrainerEntity();
-        TrainingTypeEntity trainingType = null;
-        if (registrationDto.getTrainingTypeId() != null) {
-           trainingType = trainingTypeService.findById(registrationDto.getTrainingTypeId());
-      }
+        TrainingTypeEntity trainingType = trainingTypeService.findById(registrationDto.getTrainingTypeId());
         trainer.setSpecialization(trainingType);
+        trainer.setIsActive(true);
         trainer.setFirstName(registrationDto.getFirstName());
         trainer.setLastName(registrationDto.getLastName());
         return trainer;
