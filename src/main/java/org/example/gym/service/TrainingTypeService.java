@@ -41,9 +41,18 @@ public class TrainingTypeService {
         log.info("Successfully saved training type: {}", trainingType);
     }
 
-    @Transactional
+    /**
+     * Finds a {@link TrainingTypeEntity} by its name.
+     * <p>
+     * This method retrieves the training type from the database based on its name.
+     * </p>
+     *
+     * @param name the name of the training type to search for.
+     * @return an {@link Optional} containing the found {@link TrainingTypeEntity}, or empty if not found.
+     */
+    @Transactional(readOnly = true)
     public Optional<TrainingTypeEntity> findByTrainingTypeName(String name) {
-       return trainingTypeRepository.findByTrainingTypeName(name);
+        return trainingTypeRepository.findByTrainingTypeName(name);
     }
 
     /**
@@ -61,7 +70,8 @@ public class TrainingTypeService {
         return trainingTypeRepository.findById(trainingTypeId)
                 .orElseThrow(() -> {
                     log.warn("No training type found with ID {}", trainingTypeId);
-                    return new ResourceNotFoundException("TrainingType not found for ID: " + trainingTypeId);
+                    return new ResourceNotFoundException("TrainingType not found for ID: "
+                            + trainingTypeId);
                 });
     }
 

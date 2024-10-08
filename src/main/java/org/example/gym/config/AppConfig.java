@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -61,6 +60,12 @@ public class AppConfig implements WebMvcConfigurer {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
+
+    /**
+     * Configures the ViewResolver for JSP views.
+     *
+     * @return the configured InternalResourceViewResolver
+     */
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -69,6 +74,11 @@ public class AppConfig implements WebMvcConfigurer {
         return resolver;
     }
 
+    /**
+     * Configures the DataSource for database connections.
+     *
+     * @return the configured DataSource
+     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -76,13 +86,19 @@ public class AppConfig implements WebMvcConfigurer {
         log.debug("DataSource URL: {}", url);
         log.debug("DataSource username: {}", username);
 
-        dataSource.setDriverClassName(Objects.requireNonNull(driverClassName));
-        dataSource.setUrl(url);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
+        dataSource.setDriverClassName(Objects.requireNonNull(driverClassName, "Driver class name must not be null"));
+        dataSource.setUrl(Objects.requireNonNull(url, "Database URL must not be null"));
+        dataSource.setUsername(Objects.requireNonNull(username, "Username must not be null"));
+        dataSource.setPassword(Objects.requireNonNull(password, "Password must not be null"));
+        log.info("DataSource configured successfully");
         return dataSource;
     }
 
+    /**
+     * Creates the EntityManagerFactory for JPA.
+     *
+     * @return the configured LocalContainerEntityManagerFactoryBean
+     */
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -93,9 +109,16 @@ public class AppConfig implements WebMvcConfigurer {
         em.setJpaVendorAdapter(vendorAdapter);
         em.setJpaProperties(hibernateProperties());
 
+        log.info("EntityManagerFactory created successfully");
         return em;
     }
 
+
+    /**
+     * Configures the PlatformTransactionManager.
+     *
+     * @return the configured JpaTransactionManager
+     */
     @Bean
     public PlatformTransactionManager transactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
@@ -103,14 +126,26 @@ public class AppConfig implements WebMvcConfigurer {
         return transactionManager;
     }
 
+    /**
+     * Sets Hibernate properties.
+     *
+     * @return the configured Properties for Hibernate
+     */
     Properties hibernateProperties() {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", hibernateDialect);
         properties.put("hibernate.show_sql", showSql);
         properties.put("spring.jpa.hibernate.ddl-auto", ddlAuto);
+        log.debug("Hibernate properties set: {}", properties);
         return properties;
     }
 
+    /**
+     * Configures Flyway for database migrations.
+     *
+     * @param dataSource the DataSource to be used by Flyway
+     * @return the configured Flyway instance
+     */
     @Bean(initMethod = "migrate")
     public Flyway flyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure()
@@ -120,12 +155,7 @@ public class AppConfig implements WebMvcConfigurer {
                 .load();
         flyway.repair();
         flyway.migrate();
+        log.info("Flyway migration completed successfully");
         return flyway;
     }
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
-
 }

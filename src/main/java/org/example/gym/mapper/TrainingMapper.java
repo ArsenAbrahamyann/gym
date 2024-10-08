@@ -3,27 +3,40 @@ package org.example.gym.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.AddTrainingRequestDto;
+import org.example.gym.dto.response.GetTrainerTrainingListResponseDto;
+import org.example.gym.dto.response.TrainingResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
-import org.example.gym.paylod.request.AddTrainingRequestDto;
-import org.example.gym.paylod.response.GetTrainerTrainingListResponseDto;
-import org.example.gym.paylod.response.TrainingResponseDto;
 import org.example.gym.service.TraineeService;
 import org.example.gym.service.TrainerService;
 import org.example.gym.service.TrainingService;
 import org.example.gym.service.TrainingTypeService;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * Mapper class for converting TrainingEntity objects to their corresponding DTOs
+ * and vice versa.
+ */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TrainingMapper {
+
     private final TrainingService trainingService;
     private final TrainingTypeService trainingTypeService;
-    private final TrainingTypeService typeService;
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 
+    /**
+     * Maps a list of TrainingEntity objects to a list of TrainingResponseDto.
+     *
+     * @param trainingsForTrainee the list of TrainingEntity objects to map
+     * @return a list of TrainingResponseDto objects
+     */
     public List<TrainingResponseDto> mapToDtoTrainingTrainee(List<TrainingEntity> trainingsForTrainee) {
         List<TrainingResponseDto> responseDtos = new ArrayList<>();
         for (TrainingEntity entity : trainingsForTrainee) {
@@ -34,21 +47,35 @@ public class TrainingMapper {
                     entity.getTrainer().getUsername());
             responseDtos.add(responseDto);
         }
+        log.info("Mapped {} trainings for trainee to DTOs.", responseDtos.size());
         return responseDtos;
     }
 
+    /**
+     * Maps a list of TrainingEntity objects to a list of GetTrainerTrainingListResponseDto.
+     *
+     * @param trainingsForTrainer the list of TrainingEntity objects to map
+     * @return a list of GetTrainerTrainingListResponseDto objects
+     */
     public List<GetTrainerTrainingListResponseDto> mapToDtoTrainingTrainer(List<TrainingEntity> trainingsForTrainer) {
         List<GetTrainerTrainingListResponseDto> responseDtos = new ArrayList<>();
         for (TrainingEntity entity : trainingsForTrainer) {
             GetTrainerTrainingListResponseDto responseDto =
                     new GetTrainerTrainingListResponseDto(entity.getTrainingName(),
-                    entity.getTrainingDate(), entity.getTrainingType(), entity.getTrainingDuration(),
-                    entity.getTrainee().getUsername());
+                            entity.getTrainingDate(), entity.getTrainingType(), entity.getTrainingDuration(),
+                            entity.getTrainee().getUsername());
             responseDtos.add(responseDto);
         }
+        log.info("Mapped {} trainings for trainer to DTOs.", responseDtos.size());
         return responseDtos;
     }
 
+    /**
+     * Maps an AddTrainingRequestDto to a TrainingEntity.
+     *
+     * @param requestDto the AddTrainingRequestDto to map
+     * @return a TrainingEntity object
+     */
     public TrainingEntity requestDtoMapToTrainingEntity(AddTrainingRequestDto requestDto) {
         TrainingEntity trainingEntity = new TrainingEntity();
         trainingEntity.setTrainingDuration(requestDto.getTrainingDuration());

@@ -1,160 +1,193 @@
-//package org.example.service;
-//
-//import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import java.time.LocalDateTime;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Optional;
-//import org.example.dto.TrainingDto;
-//import org.example.entity.TraineeEntity;
-//import org.example.entity.TrainerEntity;
-//import org.example.entity.TrainingEntity;
-//import org.example.entity.TrainingTypeEntity;
-//import org.example.entity.UserEntity;
-//import org.example.repository.TrainingRepository;
-//import org.example.utils.ValidationUtils;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class TrainingServiceTest {
-//    @InjectMocks
-//    private TrainingService trainingService;
-//
-//    @Mock
-//    private TrainingRepository trainingRepository;
-//
-//    @Mock
-//    private TraineeService traineeService;
-//
-//    @Mock
-//    private TrainerService trainerService;
-//
-//    @Mock
-//    private TrainingTypeService trainingTypeService;
-//
-//    @Mock
-//    private ValidationUtils validationUtils;
-//
-//    private TraineeEntity trainee;
-//    private TrainerEntity trainer;
-//    private TrainingTypeEntity trainingType;
-//
-//    @BeforeEach
-//    void setUp() {
-//        trainee = new TraineeEntity();
-//        trainee.setId(1L);
-//        trainee.setUser(new UserEntity(1L, "firstName", "lastName",
-//                "traineeUser", "password", true));
-//
-//        trainer = new TrainerEntity();
-//        trainer.setId(1L);
-//        trainer.setUser(new UserEntity(1L, "firstName", "lastName",
-//                "trainerUser", "password", true));
-//
-//        trainingType = new TrainingTypeEntity();
-//        trainingType.setId(1L);
-//    }
-//
-//    @Test
-//    void testAddTraining_Success() {
-//        TrainingDto trainingDto = new TrainingDto();
-//        trainingDto.setTraineeId(1L);
-//        trainingDto.setTrainerId(1L);
-//        trainingDto.setTrainingTypeId(1L);
-//        trainingDto.setTrainingName("Yoga");
-//        trainingDto.setTrainingDuration(60);
-//
-//        when(traineeService.findById(1L)).thenReturn(Optional.of(trainee));
-//        when(trainerService.findById(1L)).thenReturn(Optional.of(trainer));
-//        when(trainingTypeService.findById(1L)).thenReturn(Optional.of(trainingType));
-//
-//        trainingService.addTraining(trainingDto);
-//
-//        verify(trainingRepository, times(1)).save(any(TrainingEntity.class));
-//    }
-//
-//    @Test
-//    void testGetTrainingsForTrainee_Success() {
-//        String traineeName = "traineeUser";
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String trainerName = null;
-//        String trainingType = null;
-//
-//        when(traineeService.findByTraineeFromUsername(traineeName)).thenReturn(Optional.of(trainee));
-//        when(trainingRepository.findTrainingsForTrainee(1L, fromDate, toDate, trainerName, trainingType))
-//                .thenReturn(Collections.singletonList(new TrainingEntity()));
-//
-//        List<TrainingEntity> result = trainingService.getTrainingsForTrainee(traineeName, fromDate, toDate,
-//                trainerName, trainingType);
-//
-//        assertThat(result).isNotEmpty();
-//        verify(trainingRepository, times(1)).findTrainingsForTrainee(1L, fromDate,
-//                toDate, trainerName, trainingType);
-//    }
-//
-//    @Test
-//    void testGetTrainingsForTrainer_Success() {
-//        String trainerUsername = "trainerUser";
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String traineeName = null;
-//
-//        when(trainerService.findByTrainerFromUsername(trainerUsername)).thenReturn(Optional.of(trainer));
-//        when(trainingRepository.findTrainingsForTrainer(1L, fromDate, toDate, traineeName))
-//                .thenReturn(Collections.singletonList(new TrainingEntity()));
-//
-//        List<TrainingEntity> result = trainingService.getTrainingsForTrainer(trainerUsername,
-//                fromDate, toDate, traineeName);
-//
-//        assertThat(result).isNotEmpty();
-//        verify(trainingRepository, times(1)).findTrainingsForTrainer(1L, fromDate,
-//                toDate, traineeName);
-//    }
-//
-//    @Test
-//    void testFindTrainingsForTrainer_Success() {
-//        Long trainerId = 1L;
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String traineeName = null;
-//
-//        when(trainingRepository.findTrainingsForTrainer(trainerId, fromDate, toDate, traineeName))
-//                .thenReturn(Collections.singletonList(new TrainingEntity()));
-//
-//        List<TrainingEntity> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
-//                toDate, traineeName);
-//
-//        assertThat(result).isNotEmpty();
-//        verify(trainingRepository, times(1)).findTrainingsForTrainer(trainerId, fromDate,
-//                toDate, traineeName);
-//    }
-//
-//    @Test
-//    void testFindTrainingsForTrainer_NoTrainingsFound() {
-//        Long trainerId = 1L;
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String traineeName = null;
-//
-//        when(trainingRepository.findTrainingsForTrainer(trainerId, fromDate, toDate, traineeName))
-//                .thenReturn(Collections.EMPTY_LIST);
-//
-//        List<TrainingEntity> result = trainingService.findTrainingsForTrainer(trainerId, fromDate,
-//                toDate, traineeName);
-//
-//        assertThat(result).isEmpty();
-//        verify(trainingRepository, times(1)).findTrainingsForTrainer(trainerId, fromDate,
-//                toDate, traineeName);
-//    }
-//}
+package org.example.gym.service;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
+import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.TrainingEntity;
+import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.repository.TrainingRepository;
+import org.example.gym.utils.ValidationUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class TrainingServiceTest {
+    @Mock
+    private TrainingRepository trainingRepository;
+
+    @Mock
+    private TraineeService traineeService;
+
+    @Mock
+    private TrainingTypeService trainingTypeService;
+
+    @Mock
+    private TrainerService trainerService;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
+    @InjectMocks
+    private TrainingService trainingService;
+
+    private TrainingEntity trainingEntity;
+    private TraineeEntity traineeEntity;
+    private TrainerEntity trainerEntity;
+    private TrainingTypeEntity trainingTypeEntity;
+
+    /**
+     * Sets up the test environment by initializing test data and mocking responses.
+     */
+    @BeforeEach
+    public void setUp() {
+        trainingEntity = new TrainingEntity();
+        traineeEntity = new TraineeEntity();
+        trainerEntity = new TrainerEntity();
+        trainingTypeEntity = new TrainingTypeEntity();
+
+        traineeEntity.setUsername("traineeUsername");
+        trainerEntity.setId(1L);
+        trainingTypeEntity.setTrainingTypeName("Yoga");
+
+        trainingEntity.setTrainee(traineeEntity);
+        trainingEntity.setTrainer(trainerEntity);
+        trainingEntity.setTrainingType(trainingTypeEntity);
+    }
+
+
+    @Test
+    public void testAddTraining() {
+        trainingService.addTraining(trainingEntity);
+        verify(trainingRepository, times(1)).save(trainingEntity);
+    }
+
+
+    @Test
+    public void testGetTrainingsForTrainee_ValidData() {
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
+        requestDto.setTraineeName("traineeUsername");
+        requestDto.setTrainingType("Yoga");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
+        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+
+        // Get the expected trainee ID from the traineeEntity mock.
+        Long traineeId = traineeEntity.getId(); // Assuming getId() returns the ID.
+
+        when(trainingRepository.findTrainingsForTrainee(eq(traineeId), any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
+        assertEquals(1, trainings.size());
+        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUsername());
+    }
+
+
+    @Test
+    public void testGetTrainingsForTrainee_NoTrainingsFound() {
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
+        requestDto.setTraineeName("traineeUsername");
+        requestDto.setTrainingType("Yoga");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
+        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+
+        // Get the expected trainee ID from the traineeEntity mock.
+        Long traineeId = traineeEntity.getId(); // Assuming getId() returns the ID.
+
+        when(trainingRepository.findTrainingsForTrainee(eq(traineeId), any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+            trainingService.getTrainingsForTrainee(requestDto);
+        });
+
+        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+    }
+
+
+    @Test
+    public void testGetTrainingsForTrainer_ValidData() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("trainerUsername");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainer(requestDto);
+        assertEquals(1, trainings.size());
+        assertEquals(trainerEntity.getId(), trainings.get(0).getTrainer().getId());
+    }
+
+    @Test
+    public void testGetTrainingsForTrainer_NoTrainingsFound() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("trainerUsername");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+            trainingService.getTrainingsForTrainer(requestDto);
+        });
+
+        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+    }
+
+
+    @Test
+    public void testFindTrainingsForTrainer_ValidData() {
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime toDate = LocalDateTime.now();
+
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
+        assertEquals(1, trainings.size());
+    }
+
+
+    @Test
+    public void testFindTrainingsForTrainer_NoTrainingsFound() {
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime toDate = LocalDateTime.now();
+
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+            trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
+        });
+
+        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+    }
+}

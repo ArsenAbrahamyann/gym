@@ -22,7 +22,7 @@ public interface TrainerRepository extends JpaRepository<TrainerEntity, Long> {
      * @param username the username of the trainer's user
      * @return an {@link Optional} containing the found {@link TrainerEntity}, or empty if not found
      */
-    Optional<TrainerEntity> findByUsername(String username);
+    Optional<TrainerEntity> findTrainerByUsername(String username);
 
 
 
@@ -30,7 +30,7 @@ public interface TrainerRepository extends JpaRepository<TrainerEntity, Long> {
      * Finds all assigned trainers for a specific trainee.
      *
      * @param traineeId the ID of the trainee
-     * @return an {@link Optional} containing a list of assigned {@link TrainerEntity}, or empty if none found
+     * @return a {@link List} of assigned {@link TrainerEntity}, or an empty list if none found
      */
     @Query("SELECT t FROM TrainerEntity t JOIN t.trainees tr WHERE tr.id = :traineeId")
     List<TrainerEntity> findByTrainees_Id(@Param("traineeId") Long traineeId);
@@ -39,10 +39,15 @@ public interface TrainerRepository extends JpaRepository<TrainerEntity, Long> {
      * Finds all {@link TrainerEntity} records by a list of trainer IDs.
      *
      * @param trainerIds the list of trainer IDs
-     * @return an {@link Optional} containing a list of {@link TrainerEntity}, or empty if none found
+     * @return a {@link List} of {@link TrainerEntity}, or an empty list if none found
      */
     List<TrainerEntity> findAllByIdIn(List<Long> trainerIds);
 
-
+    /**
+     * Finds all {@link TrainerEntity} records by a list of trainer usernames.
+     *
+     * @param trainerUsernames the list of trainer usernames
+     * @return a {@link List} of {@link TrainerEntity}, or an empty list if none found
+     */
     List<TrainerEntity> findAllByUsernameIn(List<String> trainerUsernames);
 }
