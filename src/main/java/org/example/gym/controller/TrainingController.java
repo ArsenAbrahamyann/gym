@@ -1,7 +1,6 @@
 package org.example.gym.controller;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +37,15 @@ public class TrainingController {
 
     @GetMapping("/trainee")
     public ResponseEntity<List<TrainingResponseDto>> getTraineeTrainingsList(
-            @RequestBody TraineeTrainingsRequestDto requestDto) {
+            @RequestParam String traineeName,
+            @RequestParam(required = false) LocalDateTime periodFrom,
+            @RequestParam(required = false) LocalDateTime periodTo,
+            @RequestParam(required = false) String trainerName,
+            @RequestParam(required = false) String trainingType) {
 
-        log.info("Fetching training list for trainee: {}", requestDto.getTraineeName());
+        log.info("Fetching training list for trainee: {}", traineeName);
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto(traineeName, periodFrom,
+                periodTo, trainerName, trainingType);
 
 
         List<TrainingEntity> trainingsForTrainee = trainingService.getTrainingsForTrainee(
@@ -52,10 +57,15 @@ public class TrainingController {
 
     @GetMapping("/trainer")
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
-           @RequestBody TrainerTrainingRequestDto requestDto) {
+            @RequestParam String trainerName,
+            @RequestParam(required = false) String periodFrom,
+            @RequestParam(required = false) String periodTo,
+            @RequestParam(required = false) String traineeName) {
 
-        log.info("Fetching training list for trainer: {}", requestDto.getTrainerUsername());
+        log.info("Fetching training list for trainer: {}", trainerName);
 
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto(trainerName,
+                LocalDateTime.parse(periodFrom),LocalDateTime.parse(periodTo),traineeName);
         List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(requestDto);
 
         List<GetTrainerTrainingListResponseDto> responseDto = mapper.mapToDtoTrainingTrainer(trainingsForTrainer);

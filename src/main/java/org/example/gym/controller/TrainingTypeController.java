@@ -7,7 +7,6 @@ import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.mapper.TrainingTypeMapper;
 import org.example.gym.paylod.response.TrainingTypesResponseDto;
 import org.example.gym.service.TrainingTypeService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

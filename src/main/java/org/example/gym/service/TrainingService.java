@@ -1,14 +1,12 @@
 package org.example.gym.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
+import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
 import org.example.gym.paylod.request.TrainerTrainingRequestDto;
@@ -17,7 +15,6 @@ import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing training records.
@@ -70,6 +67,7 @@ public class TrainingService {
 
     /**
      * Retrieves a list of trainings for a specific trainee based on the provided criteria.
+     *
      * @return A list of training entities that match the criteria.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
@@ -81,9 +79,13 @@ public class TrainingService {
         validationUtils.validateTraineeTrainingsCriteria(requestDto);
         TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeName());
 
+        TrainingTypeEntity byTrainingTypeName = trainingTypeService.findByTrainingTypeName(
+                requestDto.getTrainingType())
+                .orElseThrow(() -> new ResourceNotFoundException("TrainingTypeEntity not found."));
+
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
-                requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTrainingName(),
-                requestDto.getTrainingType());
+                requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTrainerName(),
+                byTrainingTypeName);
 
         if (trainings.isEmpty()) {
             log.warn("No trainings found for trainee: {}", requestDto.getTraineeName());
@@ -95,7 +97,8 @@ public class TrainingService {
     }
 
     /**
-     * Retrieves a list of trainings conducted by a specific trainer based on the provided criteria
+     * Retrieves a list of trainings conducted by a specific trainer based on the provided criteria.
+     *
      * @return A list of training entities that match the criteria.
      * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
