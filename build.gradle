@@ -4,8 +4,7 @@ plugins {
     id 'checkstyle'
 }
 plugins {
-    id("org.flywaydb.flyway") version "9.6.0" // Check for the latest version
-    // Other plugins...
+    id("org.flywaydb.flyway") version "9.6.0"
 }
 
 group 'org.example'
@@ -26,10 +25,6 @@ java {
 repositories {
     mavenCentral()
 }
-//tasks.withType<JavaCompile> {
-//    options.compilerArgs.add("-parameters")
-//}
-
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

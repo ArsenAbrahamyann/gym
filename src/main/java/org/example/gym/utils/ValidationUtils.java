@@ -5,13 +5,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.TrainingEntity;
-import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ValidationException;
-import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
-import org.example.gym.paylod.request.TrainerTrainingRequestDto;
 import org.springframework.stereotype.Component;
 
 /**
@@ -74,22 +72,6 @@ public class ValidationUtils {
         }
     }
 
-    /**
-     * Validates that the password provided matches the password stored for the user.
-     *
-     * @param user The UserEntity containing the stored password.
-     * @param enteredPassword The password entered for authentication.
-     * @throws ValidationException if the user does not exist or the passwords do not match.
-     */
-    public void validatePasswordMatch(UserEntity user, String enteredPassword) {
-        if (user == null) {
-            throw new ValidationException("User does not exist.");
-        }
-
-        if (user.getPassword().equals(enteredPassword)) {
-            log.info("it is to same password");
-        }
-    }
 
     /**
      * Validates the fields of a TraineeEntity for update operations.
@@ -120,71 +102,9 @@ public class ValidationUtils {
     }
 
     /**
-     * Validates the fields of a TraineeEntity for activation or deactivation.
-     * @ throws ValidationException if the TraineeEntity ID or active state is missing.
-     */
-    public void validateActivateDeactivateTrainee(TraineeEntity trainee) {
-        if (trainee.getId() == null) {
-            throw new ValidationException("Trainee ID is required for activation/deactivation.");
-        }
-
-        if (trainee.getIsActive() == null) {
-            throw new ValidationException("Trainee active state must be provided.");
-        }
-    }
-
-    /**
-     * Validates the fields of a TrainerEntity for activation or deactivation.
-     * @ throws ValidationException if the TrainerEntity ID or active state is missing.
-     */
-    public void validateActivateDeactivateTrainer(TrainerEntity trainer) {
-        if (trainer.getId() == null) {
-            throw new ValidationException("Trainer ID is required for activation/deactivation.");
-        }
-
-        if (trainer.getIsActive() == null) {
-            throw new ValidationException("Trainer active state must be provided.");
-        }
-    }
-
-    /**
-     * Validates the fields of a TrainerEntity for activation or deactivation.
-     * @ throws ValidationException if the TrainerEntity ID or active state is missing.
-     */
-    public void validateTraining(TrainingEntity training) {
-        if (training.getTrainee() == null || training.getTrainee().getId() == null) {
-            throw new ValidationException("Trainee must be selected for the training.");
-        }
-
-        if (training.getTrainer() == null || training.getTrainer().getId() == null) {
-            throw new ValidationException("Trainer must be selected for the training.");
-        }
-
-        if (training.getTrainingType() == null || training.getTrainingType().getId() == null) {
-            throw new ValidationException("Training type is required.");
-        }
-
-        if (training.getTrainingName() == null || training.getTrainingName().isEmpty()) {
-            throw new ValidationException("Training name is required.");
-        }
-
-        if (training.getTrainingDate() == null) {
-            throw new ValidationException("Training date is required.");
-        }
-
-        if (training.getTrainingDuration() == null || training.getTrainingDuration() <= 0) {
-            throw new ValidationException("Training duration must be a positive number.");
-        }
-    }
-
-    /**
      * Validates the criteria for fetching trainings for a trainee.
      *
-     * @param traineeUsername The username of the trainee.
-     * @param fromDate The start date for fetching trainings.
-     * @param toDate The end date for fetching trainings.
-     * @param trainerName Optional trainer name for filtering.
-     * @param trainingType Optional training type for filtering.
+     * @param requestDto The request DTO containing criteria for fetching trainings.
      * @throws ValidationException if any criteria are invalid.
      */
     public void validateTraineeTrainingsCriteria(TraineeTrainingsRequestDto requestDto) {

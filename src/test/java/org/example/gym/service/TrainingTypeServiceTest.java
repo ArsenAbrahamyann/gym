@@ -1,94 +1,197 @@
-//package org.example.service;
-//
-//import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertFalse;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.doNothing;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import java.util.Optional;
-//import org.example.entity.TrainingTypeEntity;
-//import org.example.repository.TrainingTypeRepository;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class TrainingTypeServiceTest {
-//
-//    @Mock
-//    private TrainingTypeRepository trainingTypeRepository;
-//
-//    @InjectMocks
-//    private TrainingTypeService trainingTypeService;
-//
-//    private TrainingTypeEntity trainingTypeEntity;
-//
-//    /**
-//     * Sets up the test environment before each test method is executed.
-//     * <p>
-//     * This method initializes a {@link TrainingTypeEntity} object with sample data, such as an ID and training type name.
-//     * The {@code @BeforeEach} annotation ensures that this setup is executed before each individual test,
-//     * providing a consistent starting state for the tests.
-//     * </p>
-//     * <p>
-//     * The {@link TrainingTypeEntity} object is used in the test cases to verify the behavior of the
-//     * {@link TrainingTypeService} methods.
-//     * </p>
-//     */
-//    @BeforeEach
-//    void setUp() {
-//        trainingTypeEntity = new TrainingTypeEntity();
-//        trainingTypeEntity.setId(1L);
-//        trainingTypeEntity.setTrainingTypeName("Strength Training");
-//    }
-//
-//    @Test
-//    void testSave_Success() {
-//        doNothing().when(trainingTypeRepository).save(any(TrainingTypeEntity.class));
-//
-//        trainingTypeService.save(trainingTypeEntity);
-//
-//        verify(trainingTypeRepository, times(1)).save(trainingTypeEntity);
-//    }
-//
-//    @Test
-//    void testFindById_Success() {
-//        when(trainingTypeRepository.findById(1L)).thenReturn(Optional.of(trainingTypeEntity));
-//
-//        Optional<TrainingTypeEntity> result = trainingTypeService.findById(1L);
-//
-//        assertTrue(result.isPresent());
-//        assertEquals(trainingTypeEntity, result.get());
-//        verify(trainingTypeRepository, times(1)).findById(1L);
-//    }
-//
-//    @Test
-//    void testFindById_NotFound() {
-//        when(trainingTypeRepository.findById(2L)).thenReturn(Optional.empty());
-//
-//        Optional<TrainingTypeEntity> result = trainingTypeService.findById(2L);
-//
-//        assertFalse(result.isPresent());
-//        verify(trainingTypeRepository, times(1)).findById(2L);
-//    }
-//
-//    @Test
-//    void testSave_Exception() {
-//        doThrow(new RuntimeException("Database Error")).when(trainingTypeRepository)
-//                .save(any(TrainingTypeEntity.class));
-//
-//        assertDoesNotThrow(() -> trainingTypeService.save(trainingTypeEntity));
-//
-//        verify(trainingTypeRepository, times(1)).save(trainingTypeEntity);
-//    }
-//
-//}
+package org.example.gym.service;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
+import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.TrainingEntity;
+import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.repository.TrainingRepository;
+import org.example.gym.utils.ValidationUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class TrainingTypeServiceTest {
+
+    @Mock
+    private TrainingRepository trainingRepository;
+
+    @Mock
+    private TraineeService traineeService;
+
+    @Mock
+    private TrainingTypeService trainingTypeService;
+
+    @Mock
+    private TrainerService trainerService;
+
+    @Mock
+    private ValidationUtils validationUtils;
+
+    @InjectMocks
+    private TrainingService trainingService;
+
+    private TrainingEntity trainingEntity;
+    private TraineeEntity traineeEntity;
+    private TrainerEntity trainerEntity;
+    private TrainingTypeEntity trainingTypeEntity;
+
+    /**
+     * Sets up the test environment by initializing test data and mocking responses.
+     */
+    @BeforeEach
+    public void setUp() {
+        trainingEntity = new TrainingEntity();
+        traineeEntity = new TraineeEntity();
+        trainerEntity = new TrainerEntity();
+        trainingTypeEntity = new TrainingTypeEntity();
+
+        traineeEntity.setUsername("traineeUsername");
+        trainerEntity.setId(1L);
+        trainingTypeEntity.setTrainingTypeName("Yoga");
+
+        trainingEntity.setTrainee(traineeEntity);
+        trainingEntity.setTrainer(trainerEntity);
+        trainingEntity.setTrainingType(trainingTypeEntity);
+    }
+
+    @Test
+    public void testAddTraining() {
+        trainingService.addTraining(trainingEntity);
+        verify(trainingRepository, times(1)).save(trainingEntity);
+    }
+
+    @Test
+    public void testGetTrainingsForTrainee_ValidData() {
+        // Prepare the request DTO
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
+        requestDto.setTraineeName("traineeUsername");
+        requestDto.setTrainingType("Yoga");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        // Mock the services
+        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
+        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+
+        // Ensure that the types match the method signature
+        when(trainingRepository.findTrainingsForTrainee(
+                eq(traineeEntity.getId()),
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                any(),
+                eq(trainingTypeEntity)
+        )).thenReturn(Collections.singletonList(trainingEntity));
+
+        // Call the service method
+        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
+
+        // Assertions
+        assertEquals(1, trainings.size());
+        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUsername());
+    }
+
+    @Test
+    public void testGetTrainingsForTrainee_NoTrainingsFound() {
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
+        requestDto.setTraineeName("traineeUsername");
+        requestDto.setTrainingType("Yoga");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        // Assuming traineeEntity has a method getId() that returns a Long
+        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
+        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+
+        // Correctly using eq() to match the traineeEntity.getId() type
+        when(trainingRepository.findTrainingsForTrainee(eq(traineeEntity.getId()),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(),
+                eq(trainingTypeEntity)))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
+        assertEquals(1, trainings.size());
+        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUsername());
+    }
+
+    @Test
+    public void testGetTrainingsForTrainer_ValidData() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("trainerUsername");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainer(requestDto);
+        assertEquals(1, trainings.size());
+        assertEquals(trainerEntity.getId(), trainings.get(0).getTrainer().getId());
+    }
+
+    @Test
+    public void testGetTrainingsForTrainer_NoTrainingsFound() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("trainerUsername");
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+            trainingService.getTrainingsForTrainer(requestDto);
+        });
+
+        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+    }
+
+
+    @Test
+    public void testFindTrainingsForTrainer_ValidData() {
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime toDate = LocalDateTime.now();
+
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
+
+        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
+        assertEquals(1, trainings.size());
+    }
+
+
+    @Test
+    public void testFindTrainingsForTrainer_NoTrainingsFound() {
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime toDate = LocalDateTime.now();
+
+        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+            trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
+        });
+
+        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+    }
+}

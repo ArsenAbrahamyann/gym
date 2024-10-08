@@ -1,86 +1,114 @@
-//package org.example.controller;
-//
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import java.time.LocalDateTime;
-//import java.util.ArrayList;
-//import java.util.List;
-//import org.example.dto.TrainingDto;
-//import org.example.entity.TrainingEntity;
-//import org.example.service.TrainingService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class TrainingControllerTest {
-//
-//    @Mock
-//    private TrainingService trainingService;
-//
-//    @InjectMocks
-//    private TrainingController trainingController;
-//
-//    private TrainingDto trainingDto;
-//    private List<TrainingEntity> trainingEntities;
-//
-//    /**
-//     * Initializes the necessary objects before each test case is run.
-//     * This method is annotated with {@code @BeforeEach}, which ensures that
-//     * it runs before each individual test in the class. The method sets up
-//     * the mock data used in the test cases, including a new {@link TrainingDto}
-//     * object and an empty {@link ArrayList} of {@link TrainingEntity}.
-//     * This setup provides a clean state for each test case, ensuring no shared
-//     * state between tests.
-//     */
-//    @BeforeEach
-//    void setUp() {
-//        trainingDto = new TrainingDto();
-//        trainingEntities = new ArrayList<>();
-//    }
-//
-//    @Test
-//    public void addTraining_ShouldInvokeTrainingService() {
-//        trainingController.addTraining(trainingDto);
-//
-//        verify(trainingService).addTraining(trainingDto);
-//    }
-//
-//    @Test
-//    public void getTrainingsForTrainee_ShouldReturnTrainings() {
-//        String traineeName = "John Doe";
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String trainerName = "Jane Doe";
-//        String trainingType = "Strength";
-//
-//        when(trainingService.getTrainingsForTrainee(traineeName, fromDate, toDate, trainerName, trainingType))
-//                .thenReturn(trainingEntities);
-//
-//        List<TrainingEntity> result = trainingController.getTrainingsForTrainee(traineeName, fromDate,
-//                toDate, trainerName, trainingType);
-//
-//        verify(trainingService).getTrainingsForTrainee(traineeName, fromDate, toDate, trainerName, trainingType);
-//    }
-//
-//    @Test
-//    public void getTrainingsForTrainer_ShouldReturnTrainings() {
-//        String trainerUsername = "JaneDoe123";
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        String traineeName = "John Doe";
-//
-//        when(trainingService.getTrainingsForTrainer(trainerUsername, fromDate, toDate, traineeName))
-//                .thenReturn(trainingEntities);
-//
-//        List<TrainingEntity> result = trainingController.getTrainingsForTrainer(trainerUsername, fromDate,
-//                toDate, traineeName);
-//
-//        verify(trainingService).getTrainingsForTrainer(trainerUsername, fromDate, toDate, traineeName);
-//    }
-//
-//}
+package org.example.gym.controller;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import org.example.gym.dto.request.AddTrainingRequestDto;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
+import org.example.gym.dto.response.GetTrainerTrainingListResponseDto;
+import org.example.gym.dto.response.TrainingResponseDto;
+import org.example.gym.entity.TrainingEntity;
+import org.example.gym.mapper.TrainingMapper;
+import org.example.gym.service.TrainingService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("deprecation")
+public class TrainingControllerTest {
+
+    @Mock
+    private TrainingService trainingService;
+
+    @Mock
+    private TrainingMapper mapper;
+
+    @InjectMocks
+    private TrainingController trainingController;
+
+    /**
+     * Set up method to initialize mocks before each test.
+     * This method is called before each test method in this class.
+     */
+    @BeforeEach
+    public void setUp() {
+    }
+
+    @Test
+    public void testGetTraineeTrainingsList() {
+        // Arrange
+        String traineeName = "JohnDoe";
+        LocalDateTime periodFrom = LocalDateTime.now().minusDays(7);
+        LocalDateTime periodTo = LocalDateTime.now();
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto(traineeName, periodFrom, periodTo, null, null);
+        TrainingEntity trainingEntity = new TrainingEntity(); // Create a sample TrainingEntity
+        List<TrainingEntity> trainingEntities = Collections.singletonList(trainingEntity);
+        TrainingResponseDto responseDto = new TrainingResponseDto(); // Create a sample TrainingResponseDto
+
+        when(trainingService.getTrainingsForTrainee(requestDto)).thenReturn(trainingEntities);
+        when(mapper.mapToDtoTrainingTrainee(trainingEntities)).thenReturn(Collections.singletonList(responseDto));
+
+        // Act
+        ResponseEntity<List<TrainingResponseDto>> response = trainingController.getTraineeTrainingsList(traineeName, periodFrom, periodTo, null, null);
+
+        // Assert
+        verify(trainingService).getTrainingsForTrainee(any());
+        verify(mapper).mapToDtoTrainingTrainee(trainingEntities);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    public void testGetTrainerTrainingList() {
+        // Arrange
+        String trainerName = "JaneDoe";
+        String periodFrom = LocalDateTime.now().minusDays(7).toString();
+        String periodTo = LocalDateTime.now().toString();
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto(trainerName, LocalDateTime.parse(periodFrom), LocalDateTime.parse(periodTo), null);
+        TrainingEntity trainingEntity = new TrainingEntity(); // Create a sample TrainingEntity
+        List<TrainingEntity> trainingEntities = Collections.singletonList(trainingEntity);
+        GetTrainerTrainingListResponseDto responseDto = new GetTrainerTrainingListResponseDto(); // Create a sample GetTrainerTrainingListResponseDto
+
+        when(trainingService.getTrainingsForTrainer(requestDto)).thenReturn(trainingEntities);
+        when(mapper.mapToDtoTrainingTrainer(trainingEntities)).thenReturn(Collections.singletonList(responseDto));
+
+        // Act
+        ResponseEntity<List<GetTrainerTrainingListResponseDto>> response = trainingController.getTrainerTrainingList(trainerName, periodFrom, periodTo, null);
+
+        // Assert
+        verify(trainingService).getTrainingsForTrainer(any());
+        verify(mapper).mapToDtoTrainingTrainer(trainingEntities);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    public void testAddTraining() {
+        // Arrange
+        AddTrainingRequestDto requestDto = new AddTrainingRequestDto(); // Create a sample AddTrainingRequestDto
+        requestDto.setTraineeUsername("JohnDoe");
+        requestDto.setTrainerUsername("JaneDoe");
+
+        TrainingEntity trainingEntity = new TrainingEntity(); // Create a sample TrainingEntity
+
+        when(mapper.requestDtoMapToTrainingEntity(requestDto)).thenReturn(trainingEntity);
+
+        // Act
+        ResponseEntity<Void> response = trainingController.addTraining(requestDto);
+
+        // Assert
+        verify(trainingService).addTraining(trainingEntity);
+        assertEquals(201, response.getStatusCodeValue());
+    }
+
+}

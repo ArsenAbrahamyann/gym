@@ -1,19 +1,19 @@
 package org.example.gym.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
-import org.example.gym.paylod.request.ChangeLoginRequestDto;
 import org.example.gym.repository.UserRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing user-related operations.
@@ -27,7 +27,15 @@ public class UserService {
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 
-    public UserService(UserRepository userRepository, @Lazy TrainerService trainerService,@Lazy TraineeService traineeService) {
+    /**
+     * Constructs a {@link UserService} with the specified user repository and services.
+     *
+     * @param userRepository the repository for managing user entities.
+     * @param trainerService the service for managing trainer entities.
+     * @param traineeService the service for managing trainee entities.
+     */
+    public UserService(UserRepository userRepository, @Lazy TrainerService trainerService,
+                       @Lazy TraineeService traineeService) {
         this.userRepository = userRepository;
         this.trainerService = trainerService;
         this.traineeService = traineeService;
@@ -45,7 +53,8 @@ public class UserService {
     public boolean authenticateUser(String username, String password) {
         log.info("Authenticating user: {}", username);
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User name not found." + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User name not found."
+                        + username));
 
         boolean authenticated = user.getPassword().equals(password);
         if (authenticated) {
@@ -78,7 +87,8 @@ public class UserService {
     public UserEntity findByUsername(String username) {
         log.info("Retrieving user by username: {}", username);
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User name not found." + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User name not found."
+                        + username));
     }
 
     /**
@@ -111,16 +121,17 @@ public class UserService {
     public void changePassword(ChangeLoginRequestDto changeLoginRequestDto) {
 
         TraineeEntity trainee = traineeService.getTrainee(changeLoginRequestDto.getUsername());
-        if (trainee != null) {
-                trainee.setPassword(changeLoginRequestDto.getNewPassword());
-                traineeService.updateTraineeProfile(trainee);
-                log.info("Trainee Password exchange successful for username {}", trainee.getUsername());
-        }else {
+        if (trainee
+                != null) {
+            trainee.setPassword(changeLoginRequestDto.getNewPassword());
+            traineeService.updateTraineeProfile(trainee);
+            log.info("Trainee Password exchange successful for username {}", trainee.getUsername());
+        } else {
             TrainerEntity trainer = trainerService.getTrainer(changeLoginRequestDto.getUsername());
-                    trainer.setPassword(changeLoginRequestDto.getNewPassword());
-                    trainerService.updateTrainerProfile(trainer);
-                    log.info("trainer Password exchange successful for username {}", trainer.getUsername());
-            }
+            trainer.setPassword(changeLoginRequestDto.getNewPassword());
+            trainerService.updateTrainerProfile(trainer);
+            log.info("trainer Password exchange successful for username {}", trainer.getUsername());
         }
+    }
 
 }
