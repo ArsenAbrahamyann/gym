@@ -3,13 +3,13 @@ package org.example.gym.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
-import org.example.gym.paylod.request.TraineeTrainingsRequestDto;
-import org.example.gym.paylod.request.TrainerTrainingRequestDto;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
@@ -34,14 +34,14 @@ public class TrainingService {
     /**
      * Constructs a new {@code TrainingService} instance with dependencies injected for handling training-related operations.
      *
-     * @param trainingRepository   the {@link TrainingRepository} used for performing CRUD operations on training entities.
-     * @param traineeService       the {@link TraineeService} used for managing trainees. This service is injected lazily
-     *                             to prevent circular dependency.
-     * @param trainingTypeService  the {@link TrainingTypeService} used for managing training type entities. Injected lazily to avoid
-     *                             circular dependency.
-     * @param trainerService       the {@link TrainerService} used for managing trainers. Injected lazily to prevent circular
-     *                             dependency.
-     * @param validationUtils      the {@link ValidationUtils} used for performing validation tasks on training data.
+     * @param trainingRepository  the {@link TrainingRepository} used for performing CRUD operations on training entities.
+     * @param traineeService      the {@link TraineeService} used for managing trainees. This service is injected lazily
+     *                            to prevent circular dependency.
+     * @param trainingTypeService the {@link TrainingTypeService} used for managing training type entities. Injected lazily to avoid
+     *                            circular dependency.
+     * @param trainerService      the {@link TrainerService} used for managing trainers. Injected lazily to prevent circular
+     *                            dependency.
+     * @param validationUtils     the {@link ValidationUtils} used for performing validation tasks on training data.
      */
     public TrainingService(TrainingRepository trainingRepository, @Lazy TraineeService traineeService,
                            @Lazy TrainingTypeService trainingTypeService, @Lazy TrainerService trainerService,
@@ -80,7 +80,7 @@ public class TrainingService {
         TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeName());
 
         TrainingTypeEntity byTrainingTypeName = trainingTypeService.findByTrainingTypeName(
-                requestDto.getTrainingType())
+                        requestDto.getTrainingType())
                 .orElseThrow(() -> new ResourceNotFoundException("TrainingTypeEntity not found."));
 
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
@@ -123,19 +123,20 @@ public class TrainingService {
     }
 
     /**
-     * Retrieves a list of {@link TrainingEntity} records for a specific trainer within a given date range and trainee name.
+     * Retrieves a list of {@link TrainingEntity} records for a specific trainer within a
+     * given date range and trainee name.
      *
      * @param id          the unique ID of the trainer for whom the trainings are to be found.
      * @param fromDate    the start of the date range for retrieving the trainings.
      * @param toDate      the end of the date range for retrieving the trainings.
      * @param traineeName the name of the trainee to filter the trainings.
-     * @return a list of {@link TrainingEntity} records that match the criteria (trainer ID, date range, and trainee name),
-     *         or an empty list if no trainings are found.
+     * @return a list of {@link TrainingEntity} records that match the criteria.
      */
     @Transactional
     public List<TrainingEntity> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
                                                         String traineeName) {
-        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id, fromDate, toDate, traineeName);
+        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id, fromDate, toDate,
+                traineeName);
 
         List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
         if (trainings.isEmpty()) {

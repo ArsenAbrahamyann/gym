@@ -1,116 +1,181 @@
-//package org.example.controller;
-//
-//import static org.mockito.Mockito.doNothing;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import java.util.Collections;
-//import java.util.List;
-//import org.example.dto.TraineeDto;
-//import org.example.entity.TrainerEntity;
-//import org.example.service.TraineeService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class TraineeControllerTest {
-//
-//
-//    @Mock
-//    private TraineeService traineeService;
-//
-//    @InjectMocks
-//    private TraineeController traineeController;
-//
-//    private TraineeDto mockTraineeDto;
-//    private String mockUsername;
-//    private String mockPassword;
-//
-//    /**
-//     * Initializes mock objects and test data before each test case is executed.
-//     * This method is annotated with {@code @BeforeEach}, ensuring that it runs
-//     * before each individual test in the class. The method creates a new instance
-//     * of {@link TraineeDto} and sets up mock values for the username and password
-//     * fields. These objects and values will be used as test data in the test cases.
-//     * This setup provides fresh and isolated instances of {@code mockTraineeDto},
-//     * {@code mockUsername}, and {@code mockPassword}, ensuring that each test
-//     * starts with a clean state.
-//     */
-//    @BeforeEach
-//    void setUp() {
-//        mockTraineeDto = new TraineeDto();
-//        mockUsername = "johnDoe";
-//        mockPassword = "newPassword";
-//    }
-//
-//    @Test
-//    void createTrainee() {
-//        when(traineeService.createTraineeProfile(mockTraineeDto)).thenReturn(mockTraineeDto);
-//
-//        TraineeDto result = traineeController.createTrainee(mockTraineeDto);
-//
-//        verify(traineeService).createTraineeProfile(mockTraineeDto);
-//        assert (result.equals(mockTraineeDto));
-//    }
-//
-//    @Test
-//    void updateTraineeProfile() {
-//        doNothing().when(traineeService).updateTraineeProfile(mockUsername, mockTraineeDto);
-//
-//        traineeController.updateTraineeProfile(mockUsername, mockTraineeDto);
-//
-//        verify(traineeService).updateTraineeProfile(mockUsername, mockTraineeDto);
-//    }
-//
-//    @Test
-//    void changeTraineePassword() {
-//        doNothing().when(traineeService).changeTraineePassword(mockUsername, mockPassword);
-//
-//        traineeController.changeTraineePassword(mockUsername, mockPassword);
-//
-//        verify(traineeService).changeTraineePassword(mockUsername, mockPassword);
-//    }
-//
-//    @Test
-//    void toggleTraineeStatus() {
-//        doNothing().when(traineeService).toggleTraineeStatus(mockUsername);
-//
-//        traineeController.toggleTraineeStatus(mockUsername);
-//
-//        verify(traineeService).toggleTraineeStatus(mockUsername);
-//    }
-//
-//    @Test
-//    void deleteTrainee() {
-//        doNothing().when(traineeService).deleteTraineeByUsername(mockUsername);
-//
-//        traineeController.deleteTrainee(mockUsername);
-//
-//        verify(traineeService).deleteTraineeByUsername(mockUsername);
-//    }
-//
-//    @Test
-//    void getUnassignedTrainers() {
-//        List<TrainerEntity> unassignedTrainers = Collections.emptyList();
-//        when(traineeService.getUnassignedTrainers(mockUsername)).thenReturn(unassignedTrainers);
-//
-//        List<TrainerEntity> result = traineeController.getUnassignedTrainers(mockUsername);
-//
-//        verify(traineeService).getUnassignedTrainers(mockUsername);
-//        assert (result.equals(unassignedTrainers));
-//    }
-//
-//    @Test
-//    void assignTrainersToTrainee() {
-//        List<Long> trainerIds = List.of(1L, 2L);
-//        doNothing().when(traineeService).updateTraineeTrainers(mockUsername, trainerIds);
-//
-//        traineeController.assignTrainersToTrainee(mockUsername, trainerIds);
-//
-//        verify(traineeService).updateTraineeTrainers(mockUsername, trainerIds);
-//    }
-//}
+package org.example.gym.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.example.gym.dto.request.ActivateRequestDto;
+import org.example.gym.dto.request.TraineeRegistrationRequestDto;
+import org.example.gym.dto.request.UpdateTraineeRequestDto;
+import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
+import org.example.gym.dto.response.GetTraineeProfileResponseDto;
+import org.example.gym.dto.response.RegistrationResponseDto;
+import org.example.gym.dto.response.TrainerResponseDto;
+import org.example.gym.dto.response.UpdateTraineeResponseDto;
+import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.TrainerEntity;
+import org.example.gym.mapper.TraineeMapper;
+import org.example.gym.service.TraineeService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class TraineeControllerTest {
+
+    @Mock
+    private TraineeService traineeService;
+
+    @Mock
+    private TraineeMapper mapper;
+
+    @InjectMocks
+    private TraineeController traineeController;
+
+    /**
+     * Sets up the test environment before each test.
+     * This method initializes the necessary mocks and prepares the environment
+     * for the controller tests.
+     */
+    @BeforeEach
+    public void setUp() {
+    }
+
+    @Test
+    public void testTraineeRegistration() {
+        // Arrange
+        TraineeRegistrationRequestDto requestDto = new TraineeRegistrationRequestDto();
+        TraineeEntity traineeEntity = new TraineeEntity(); // Assume a valid entity is created
+        RegistrationResponseDto responseDto = new RegistrationResponseDto();
+
+        when(mapper.traineeRegistrationMapToEntity(requestDto)).thenReturn(traineeEntity);
+        when(traineeService.createTraineeProfile(traineeEntity)).thenReturn(traineeEntity);
+        when(mapper.traineeEntityMapToResponseDto(traineeEntity)).thenReturn(responseDto);
+
+        // Act
+        ResponseEntity<RegistrationResponseDto> response = traineeController.traineeRegistration(requestDto);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(responseDto);
+    }
+
+    @Test
+    public void testGetTraineeProfile() {
+        // Arrange
+        String username = "testUser";
+        TraineeEntity traineeEntity = new TraineeEntity(); // Assume a valid entity is created
+        GetTraineeProfileResponseDto responseDto = new GetTraineeProfileResponseDto();
+
+        when(traineeService.getTrainee(username)).thenReturn(traineeEntity);
+        when(mapper.traineeEntityMapToGetResponseTraineeDto(traineeEntity)).thenReturn(responseDto);
+
+        // Act
+        ResponseEntity<GetTraineeProfileResponseDto> response = traineeController.getTraineeProfile(username);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(responseDto);
+    }
+
+    @Test
+    public void testUpdateTraineeProfile() {
+        // Arrange
+        UpdateTraineeRequestDto requestDto = new UpdateTraineeRequestDto();
+        TraineeEntity traineeEntity = new TraineeEntity(); // Assume a valid entity is created
+        UpdateTraineeResponseDto responseDto = new UpdateTraineeResponseDto();
+
+        when(mapper.updateDtoMapToTraineeEntity(requestDto)).thenReturn(traineeEntity);
+        when(traineeService.updateTraineeProfile(traineeEntity)).thenReturn(traineeEntity);
+        when(mapper.traineeEntityMapToUpdateResponse(traineeEntity)).thenReturn(responseDto);
+
+        // Act
+        ResponseEntity<UpdateTraineeResponseDto> response = traineeController.updateTraineeProfile(requestDto);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(responseDto);
+    }
+
+    @Test
+    public void testDeleteTraineeProfile() {
+        // Arrange
+        String username = "testUser";
+
+        // Act
+        ResponseEntity<Void> response = traineeController.deleteTraineeProfile(username);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(traineeService).deleteTraineeByUsername(username);
+    }
+
+    @Test
+    public void testGetNotAssignedOnTraineeActiveTrainers() {
+        // Arrange
+        String traineeUsername = "testUser";
+        List<TrainerEntity> unassignedTrainers = new ArrayList<>();
+        List<TrainerResponseDto> responseDtos = new ArrayList<>();
+
+        when(traineeService.getUnassignedTrainers(traineeUsername)).thenReturn(unassignedTrainers);
+        when(mapper.mapToTrainerResponse(unassignedTrainers)).thenReturn(responseDtos);
+
+        // Act
+        ResponseEntity<List<TrainerResponseDto>> response = traineeController.getNotAssignedOnTraineeActiveTrainers(traineeUsername);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(responseDtos);
+    }
+
+    @Test
+    public void testUpdateTraineeTrainerList() {
+        // Arrange
+        UpdateTraineeTrainerListRequestDto requestDto = new UpdateTraineeTrainerListRequestDto();
+        TraineeEntity traineeEntity = new TraineeEntity(); // Assume a valid entity is created
+        List<TrainerResponseDto> responseDtos = new ArrayList<>();
+
+        when(mapper.updateTraineeTrainerListMapToEntity(requestDto)).thenReturn(traineeEntity);
+        when(traineeService.updateTraineeTrainers(traineeEntity)).thenReturn(traineeEntity);
+        when(mapper.updateTraineeTrainerListMapToTrainerResponse(traineeEntity)).thenReturn(responseDtos);
+
+        // Act
+        ResponseEntity<List<TrainerResponseDto>> response = traineeController.updateTraineeTrainerList(requestDto);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(responseDtos);
+    }
+
+    @Test
+    public void testActivateTrainee() {
+        // Arrange
+        ActivateRequestDto requestDto = new ActivateRequestDto();
+
+        // Act
+        ResponseEntity<Void> response = traineeController.activateTrainee(requestDto);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(traineeService).toggleTraineeStatus(requestDto);
+    }
+
+    @Test
+    public void testDeActivateTrainee() {
+        // Arrange
+        ActivateRequestDto requestDto = new ActivateRequestDto();
+
+        // Act
+        ResponseEntity<Void> response = traineeController.deActivateTrainee(requestDto);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(traineeService).toggleTraineeStatus(requestDto);
+    }
+}

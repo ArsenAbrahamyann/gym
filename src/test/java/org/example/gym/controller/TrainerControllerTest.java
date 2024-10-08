@@ -1,115 +1,143 @@
-//package org.example.controller;
-//
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.Mockito.doNothing;
-//import static org.mockito.Mockito.eq;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//import org.example.dto.TrainerDto;
-//import org.example.entity.TrainingEntity;
-//import org.example.service.TrainerService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-///**
-// * Unit test class for TrainerController.
-// */
-//@ExtendWith(MockitoExtension.class)
-//public class TrainerControllerTest {
-//
-//    @Mock
-//    private TrainerService trainerService;
-//
-//    @InjectMocks
-//    private TrainerController trainerController;
-//
-//    private TrainerDto trainerDto;
-//    private TrainingEntity trainingEntity;
-//
-//    /**
-//     * Initializes the necessary objects before each test case is executed.
-//     * This method is annotated with {@code @BeforeEach}, which ensures that
-//     * it runs before each individual test in the class. The method sets up
-//     * a new {@link TrainerDto} and a {@link TrainingEntity} to be used in
-//     * the test cases. This ensures that each test has fresh instances of
-//     * these objects and prevents shared state between tests.
-//     * This setup is essential for maintaining test isolation and ensuring
-//     * that changes made in one test do not affect the others.
-//     */
-//    @BeforeEach
-//    void setUp() {
-//        trainerDto = new TrainerDto();
-//        trainingEntity = new TrainingEntity();
-//    }
-//
-//    @Test
-//    void testCreateTrainer() {
-//        when(trainerService.createTrainerProfile(any(TrainerDto.class)))
-//                .thenReturn(trainerDto);
-//
-//        TrainerDto createdTrainer = trainerController.createTrainer(trainerDto);
-//
-//        assertNotNull(createdTrainer);
-//        verify(trainerService, times(1)).createTrainerProfile(trainerDto);
-//    }
-//
-//    @Test
-//    void testUpdateTrainerProfile() {
-//        doNothing().when(trainerService).updateTrainerProfile(anyString(), any(TrainerDto.class));
-//
-//        trainerController.updateTrainerProfile("username", trainerDto);
-//
-//        verify(trainerService, times(1)).updateTrainerProfile(eq("username"),
-//                eq(trainerDto));
-//    }
-//
-//    @Test
-//    void testChangeTrainerPassword() {
-//        doNothing().when(trainerService).changeTrainerPassword(anyString(), anyString());
-//
-//        trainerController.changeTrainerPassword("username", "newPassword");
-//
-//        verify(trainerService, times(1)).changeTrainerPassword(eq("username"),
-//                eq("newPassword"));
-//    }
-//
-//    @Test
-//    void testToggleTrainerStatus() {
-//        doNothing().when(trainerService).toggleTrainerStatus(anyString());
-//
-//        trainerController.toggleTrainerStatus("username");
-//
-//        verify(trainerService, times(1)).toggleTrainerStatus(eq("username"));
-//    }
-//
-//    @Test
-//    void testGetTrainerTrainings() {
-//        LocalDateTime fromDate = LocalDateTime.now().minusDays(1);
-//        LocalDateTime toDate = LocalDateTime.now();
-//        List<TrainingEntity> trainingEntities = List.of(trainingEntity);
-//
-//        when(trainerService.getTrainerTrainings(anyString(), any(LocalDateTime.class),
-//                any(LocalDateTime.class), anyString()))
-//                .thenReturn(trainingEntities);
-//
-//        List<TrainingEntity> result = trainerController.getTrainerTrainings("trainerUsername",
-//                fromDate, toDate, "traineeName");
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(trainerService, times(1)).getTrainerTrainings(eq("trainerUsername"),
-//                eq(fromDate), eq(toDate), eq("traineeName"));
-//    }
-//}
+package org.example.gym.controller;
+
+import org.example.gym.dto.request.ActivateRequestDto;
+import org.example.gym.dto.request.TrainerRegistrationRequestDto;
+import org.example.gym.dto.request.UpdateTrainerRequestDto;
+import org.example.gym.dto.response.GetTrainerProfileResponseDto;
+import org.example.gym.dto.response.RegistrationResponseDto;
+import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
+import org.example.gym.entity.TrainerEntity;
+import org.example.gym.mapper.TrainerMapper;
+import org.example.gym.service.TrainerService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class TrainerControllerTest {
+
+    @Mock
+    private TrainerService trainerService;
+
+    @Mock
+    private TrainerMapper mapper;
+
+    @InjectMocks
+    private TrainerController trainerController;
+
+    private TrainerRegistrationRequestDto registrationRequestDto;
+    private TrainerEntity trainerEntity;
+    private RegistrationResponseDto registrationResponseDto;
+    private GetTrainerProfileResponseDto getTrainerProfileResponseDto;
+    private UpdateTrainerRequestDto updateTrainerRequestDto;
+    private UpdateTrainerProfileResponseDto updateTrainerProfileResponseDto;
+    private ActivateRequestDto activateRequestDto;
+
+    /**
+     * Sets up the test environment by initializing the test data used in the tests.
+     */
+    @BeforeEach
+    public void setUp() {
+        registrationRequestDto = new TrainerRegistrationRequestDto();
+        registrationRequestDto.setFirstName("John");
+        registrationRequestDto.setLastName("Doe");
+
+        trainerEntity = new TrainerEntity();
+        trainerEntity.setUsername("johndoe");
+
+        registrationResponseDto = new RegistrationResponseDto();
+        registrationResponseDto.setUsername("johndoe");
+
+        getTrainerProfileResponseDto = new GetTrainerProfileResponseDto();
+        getTrainerProfileResponseDto.setFirstName("johndoe");
+
+        updateTrainerRequestDto = new UpdateTrainerRequestDto();
+        updateTrainerRequestDto.setUsername("johndoe");
+
+        updateTrainerProfileResponseDto = new UpdateTrainerProfileResponseDto();
+        updateTrainerProfileResponseDto.setUsername("johndoe");
+
+        activateRequestDto = new ActivateRequestDto();
+        activateRequestDto.setUsername("johndoe");
+    }
+
+    /**
+     * Tests the registration of a trainer.
+     */
+    @Test
+    public void registerTrainer_ShouldReturnCreatedResponse() {
+        when(mapper.trainerRegistrationMapToEntity(registrationRequestDto)).thenReturn(trainerEntity);
+        when(trainerService.createTrainerProfile(trainerEntity)).thenReturn(trainerEntity);
+        when(mapper.trainerMapToResponse(trainerEntity)).thenReturn(registrationResponseDto);
+
+        ResponseEntity<RegistrationResponseDto> response = trainerController.registerTrainer(registrationRequestDto);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(registrationResponseDto, response.getBody());
+    }
+
+    /**
+     * Tests retrieval of a trainer's profile by username.
+     */
+    @Test
+    public void getTrainerProfile_ShouldReturnOkResponse() {
+        when(trainerService.getTrainer("johndoe")).thenReturn(trainerEntity);
+        when(mapper.trainerEntityMapToGetResponse(trainerEntity)).thenReturn(getTrainerProfileResponseDto);
+
+        ResponseEntity<GetTrainerProfileResponseDto> response = trainerController.getTrainerProfile("johndoe");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(getTrainerProfileResponseDto, response.getBody());
+    }
+
+    /**
+     * Tests updating a trainer's profile.
+     */
+    @Test
+    public void updateTrainerProfile_ShouldReturnOkResponse() {
+        when(mapper.updateRequestDtoMapToTrainerEntity(updateTrainerRequestDto)).thenReturn(trainerEntity);
+        when(trainerService.updateTrainerProfile(trainerEntity)).thenReturn(trainerEntity);
+        when(mapper.updateTrainerProfileMapToResponseDto(trainerEntity)).thenReturn(updateTrainerProfileResponseDto);
+
+        ResponseEntity<UpdateTrainerProfileResponseDto> response = trainerController.updateTrainerProfile(updateTrainerRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updateTrainerProfileResponseDto, response.getBody());
+    }
+
+    /**
+     * Tests activation of a trainer's account.
+     */
+    @Test
+    public void activateTrainer_ShouldReturnOkResponse() {
+        doNothing().when(trainerService).toggleTrainerStatus(activateRequestDto);
+
+        ResponseEntity<Void> response = trainerController.activateTrainer(activateRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(trainerService, times(1)).toggleTrainerStatus(activateRequestDto);
+    }
+
+    /**
+     * Tests deactivation of a trainer's account.
+     */
+    @Test
+    public void deactivateTrainer_ShouldReturnOkResponse() {
+        doNothing().when(trainerService).toggleTrainerStatus(activateRequestDto);
+
+        ResponseEntity<Void> response = trainerController.deactivateTrainer(activateRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(trainerService, times(1)).toggleTrainerStatus(activateRequestDto);
+    }
+}
