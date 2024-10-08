@@ -3,10 +3,9 @@ package org.example.gym.service;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.entity.UserEntity;
-import org.example.gym.paylod.request.ActivateRequestDto;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
@@ -30,6 +29,17 @@ public class TrainerService {
     private final UserUtils userUtils;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new {@link TrainerService} instance, injecting the necessary dependencies for managing trainer operations.
+     * This constructor uses Spring's `@Lazy` annotation for injecting some dependencies to avoid circular dependencies.
+     *
+     * @param trainerRepository   the {@link TrainerRepository} used for CRUD operations on {@link TrainerEntity} objects
+     * @param trainingService     the {@link TrainingService} instance, injected lazily to manage training sessions and avoid circular dependencies
+     * @param trainingTypeService the {@link TrainingTypeService} instance, injected lazily to manage training types and avoid circular dependencies
+     * @param userService         the {@link UserService} instance, injected lazily to handle user-related operations such as user registration and authentication
+     * @param validationUtils     a utility class {@link ValidationUtils} used for performing validation checks on trainer data
+     * @param userUtils           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
+     */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingService trainingService,
                           @Lazy TrainingTypeService trainingTypeService, @Lazy UserService userService,
                           ValidationUtils validationUtils, UserUtils userUtils) {
@@ -44,6 +54,7 @@ public class TrainerService {
     /**
      * Creates a new trainer profile.
      *
+     * @param trainer The TrainerEntity object to be created.
      * @return The created TrainerEntity object.
      */
     @Transactional
@@ -51,7 +62,8 @@ public class TrainerService {
         log.info("Creating trainer profile ");
 
         List<String> allUsernames = userService.findAllUsernames();
-        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName(), allUsernames);
+        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName(),
+                allUsernames);
         trainer.setUsername(generateUsername);
 
         String generatePassword = userUtils.generatePassword();
@@ -59,16 +71,14 @@ public class TrainerService {
 
         validationUtils.validateTrainer(trainer);
 
-        // Ensure the TrainingTypeEntity is managed (attached to the current persistence context)
         TrainingTypeEntity trainingType = trainer.getSpecialization();
         if (trainingType != null) {
-            // Find and attach it, or persist it if it's new
             trainingType = trainingTypeService.findById(trainingType.getId());
 
-            trainer.setSpecialization(trainingType); // Re-attach the managed training type
+            trainer.setSpecialization(trainingType);
         }
 
-        trainerRepository.save(trainer); // Save the trainer with the attached TrainingTypeEntity
+        trainerRepository.save(trainer);
 
         userService.authenticateUser(trainer.getUsername(), trainer.getPassword());
         log.debug("Trainer profile created: {}", trainer);
@@ -76,26 +86,9 @@ public class TrainerService {
     }
 
     /**
-     * Changes the password of the trainer.
-     *
-     * @param username    The username of the trainer.
-     * @param newPassword The new password to set.
-     */
-    @Transactional
-    public void changeTrainerPassword(String username, String newPassword) {
-        log.info("Changing password for trainer {}", username);
-        UserEntity user = userService.findByUsername(username);
-
-        validationUtils.validatePasswordMatch(user, newPassword);
-        user.setPassword(newPassword);
-        userService.update(user);
-        log.info("Password updated successfully for trainer {}", username);
-    }
-
-    /**
      * Toggles the active status of a trainer.
      *
-     * @param requestDto The username of the trainer.
+     * @param requestDto The request DTO containing the username of the trainer.
      */
     @Transactional
     public void toggleTrainerStatus(ActivateRequestDto requestDto) {
@@ -122,7 +115,6 @@ public class TrainerService {
         return save;
     }
 
-
     /**
      * Retrieves all {@link TrainerEntity} records from the database.
      *
@@ -130,6 +122,7 @@ public class TrainerService {
      */
     @Transactional
     public List<TrainerEntity> findAll() {
+        log.info("Retrieving all trainers");
         return trainerRepository.findAll();
     }
 
@@ -141,6 +134,7 @@ public class TrainerService {
      */
     @Transactional
     public List<TrainerEntity> findAssignedTrainers(Long id) {
+        log.info("Retrieving assigned trainers for trainee ID {}", id);
         return trainerRepository.findByTrainees_Id(id);
     }
 
@@ -152,6 +146,7 @@ public class TrainerService {
      */
     @Transactional
     public List<TrainerEntity> findAllById(List<Long> trainerIds) {
+        log.info("Finding trainers by IDs: {}", trainerIds);
         return trainerRepository.findAllByIdIn(trainerIds);
     }
 
@@ -163,6 +158,7 @@ public class TrainerService {
      */
     @Transactional
     public Optional<TrainerEntity> findById(Long trainerId) {
+        log.info("Finding trainer by ID {}", trainerId);
         return trainerRepository.findById(trainerId);
     }
 
@@ -174,11 +170,22 @@ public class TrainerService {
      */
     @Transactional
     public TrainerEntity getTrainer(String trainerUsername) {
-        return trainerRepository.findByUsername(trainerUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainer not found with username: " + trainerUsername));
+        log.info("Retrieving trainer by username {}", trainerUsername);
+        return trainerRepository.findTrainerByUsername(trainerUsername)
+                .orElseThrow(() -> {
+                    log.error("Trainer not found with username: {}", trainerUsername);
+                    return new ResourceNotFoundException("Trainer not found with username: " + trainerUsername);
+                });
     }
 
+    /**
+     * Finds trainers by a list of usernames.
+     *
+     * @param trainerUsernames the list of usernames of trainers to find.
+     * @return a list of {@link TrainerEntity} records corresponding to the provided usernames.
+     */
     public List<TrainerEntity> findByUsernames(List<String> trainerUsernames) {
+        log.info("Finding trainers by usernames: {}", trainerUsernames);
         return trainerRepository.findAllByUsernameIn(trainerUsernames);
     }
 }
