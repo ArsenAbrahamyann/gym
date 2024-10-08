@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for managing {@link org.example.entity.TrainingTypeEntity} operations.
  */
 @Repository
 public interface TrainingTypeRepository extends JpaRepository<TrainingTypeEntity, Long> {
@@ -18,4 +17,12 @@ public interface TrainingTypeRepository extends JpaRepository<TrainingTypeEntity
      * @return an {@link Optional} containing the matching {@link TrainingTypeEntity}, or empty if none found
      */
     Optional<TrainingTypeEntity> findById(Long trainingTypeId);
+
+    /**
+     * Finds a {@link TrainingTypeEntity} by its training name.
+     *
+     * @param trainingTypeName the name of the training
+     * @return an {@link Optional} containing the found {@link TrainingTypeEntity}, or empty if not found
+     */
+    Optional<TrainingTypeEntity> findByTrainingTypeName(String trainingTypeName);
 }

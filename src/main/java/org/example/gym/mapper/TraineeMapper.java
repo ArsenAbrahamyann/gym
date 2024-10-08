@@ -18,7 +18,6 @@ import org.example.gym.paylod.response.TrainerResponseDto;
 import org.example.gym.paylod.response.UpdateTraineeResponseDto;
 import org.example.gym.service.TraineeService;
 import org.example.gym.service.TrainerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component

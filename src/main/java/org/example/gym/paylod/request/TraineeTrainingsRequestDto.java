@@ -13,6 +13,6 @@ public class TraineeTrainingsRequestDto {
     private String traineeName;
     private LocalDateTime periodFrom;
     private LocalDateTime periodTo;
-    private String trainingName;
+    private String trainerName;
     private String trainingType;
 }

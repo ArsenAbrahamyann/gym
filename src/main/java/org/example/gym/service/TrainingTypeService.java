@@ -1,6 +1,5 @@
 package org.example.gym.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,11 @@ public class TrainingTypeService {
         log.info("Successfully saved training type: {}", trainingType);
     }
 
+    @Transactional
+    public Optional<TrainingTypeEntity> findByTrainingTypeName(String name) {
+       return trainingTypeRepository.findByTrainingTypeName(name);
+    }
+
     /**
      * Finds a {@link TrainingTypeEntity} by its ID.
      * <p>
@@ -55,11 +59,10 @@ public class TrainingTypeService {
     @Transactional
     public TrainingTypeEntity findById(Long trainingTypeId) {
         return trainingTypeRepository.findById(trainingTypeId)
-                .orElse(null);
-//                .orElseThrow(() -> {
-//                    log.warn("No training type found with ID {}", trainingTypeId);
-////                    return new ResourceNotFoundException("TrainingType not found for ID: " + trainingTypeId);
-//                });
+                .orElseThrow(() -> {
+                    log.warn("No training type found with ID {}", trainingTypeId);
+                    return new ResourceNotFoundException("TrainingType not found for ID: " + trainingTypeId);
+                });
     }
 
     /**

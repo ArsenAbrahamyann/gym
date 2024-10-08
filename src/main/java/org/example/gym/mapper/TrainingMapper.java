@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TrainingMapper {
     private final TrainingService trainingService;
+    private final TrainingTypeService trainingTypeService;
     private final TrainingTypeService typeService;
     private final TrainerService trainerService;
     private final TraineeService traineeService;
@@ -26,8 +27,10 @@ public class TrainingMapper {
     public List<TrainingResponseDto> mapToDtoTrainingTrainee(List<TrainingEntity> trainingsForTrainee) {
         List<TrainingResponseDto> responseDtos = new ArrayList<>();
         for (TrainingEntity entity : trainingsForTrainee) {
+
             TrainingResponseDto responseDto = new TrainingResponseDto(entity.getTrainingName(),
-                    entity.getTrainingDate(), entity.getTrainingType(), entity.getTrainingDuration(),
+                    entity.getTrainingDate(), entity.getTrainingType().getTrainingTypeName(),
+                    entity.getTrainingDuration(),
                     entity.getTrainer().getUsername());
             responseDtos.add(responseDto);
         }

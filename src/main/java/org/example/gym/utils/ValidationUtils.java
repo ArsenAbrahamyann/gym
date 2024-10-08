@@ -204,22 +204,14 @@ public class ValidationUtils {
             validateDateRange(requestDto.getPeriodFrom(), requestDto.getPeriodTo());
         }
 
-        if (requestDto.getTrainingName() != null && requestDto.getTrainingName().isEmpty()) {
+        if (requestDto.getTrainerName() != null && requestDto.getTrainerName().isEmpty()) {
             throw new ValidationException("Training name cannot be empty if provided.");
-        }
-
-        if (requestDto.getTrainingType() != null && requestDto.getTrainingType().isEmpty()) {
-            throw new ValidationException("Training type cannot be empty if provided.");
         }
     }
 
     /**
      * Validates the criteria for fetching trainings for a trainer.
      *
-     * @param trainerUsername The username of the trainer.
-     * @param fromDate The start date for fetching trainings.
-     * @param toDate The end date for fetching trainings.
-     * @param traineeName Optional trainee name for filtering.
      * @throws ValidationException if any criteria are invalid.
      */
     public void validateTrainerTrainingsCriteria(TrainerTrainingRequestDto requestDto) {
