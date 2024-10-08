@@ -1,12 +1,9 @@
 package org.example.gym.service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.paylod.request.ActivateRequestDto;
@@ -17,7 +14,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Service class for managing Trainer profiles and related operations.
@@ -63,12 +59,17 @@ public class TrainerService {
 
         validationUtils.validateTrainer(trainer);
 
-        if (trainer.getSpecialization().getId() == null) {
-            trainer.setSpecialization(null);
+        // Ensure the TrainingTypeEntity is managed (attached to the current persistence context)
+        TrainingTypeEntity trainingType = trainer.getSpecialization();
+        if (trainingType != null) {
+            // Find and attach it, or persist it if it's new
+            trainingType = trainingTypeService.findById(trainingType.getId());
+
+            trainer.setSpecialization(trainingType); // Re-attach the managed training type
         }
 
+        trainerRepository.save(trainer); // Save the trainer with the attached TrainingTypeEntity
 
-        trainerRepository.save(trainer);
         userService.authenticateUser(trainer.getUsername(), trainer.getPassword());
         log.debug("Trainer profile created: {}", trainer);
         return trainer;
@@ -116,13 +117,10 @@ public class TrainerService {
         log.info("Updating trainer profile for {}", trainer.getUsername());
         validationUtils.validateUpdateTrainer(trainer);
 
-        List<String> allUsernames = userService.findAllUsernames();
-        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName(), allUsernames);
-        trainer.setUsername(generateUsername);
-
-        return trainerRepository.save(trainer);
+        TrainerEntity save = trainerRepository.save(trainer);
+        log.info("Trainee profile updated successfully for {}", save.getUsername());
+        return save;
     }
-
 
 
     /**

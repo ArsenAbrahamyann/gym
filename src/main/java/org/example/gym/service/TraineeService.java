@@ -1,7 +1,6 @@
 package org.example.gym.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TraineeEntity;

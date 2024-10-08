@@ -1,5 +1,6 @@
 package org.example.gym.paylod.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class UpdateTrainerProfileResponseDto {
     private String firstName;
     private String lastName;
     private Long trainingTypeId;
-    private boolean isActive;
+    @JsonProperty(value = "isPublic")
+    private boolean isPublic;
     private List<TraineeListResponseDto> trainerResponseDtos;
 }

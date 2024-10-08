@@ -1,7 +1,6 @@
 package org.example.gym.config;
 
 import java.util.Set;
-import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import jakarta.servlet.ServletContainerInitializer;
