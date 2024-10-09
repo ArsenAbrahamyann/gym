@@ -91,27 +91,6 @@ public class UserService {
                         + username));
     }
 
-    /**
-     * Saves a {@link UserEntity} to the database.
-     *
-     * @param user the {@link UserEntity} to be saved in the database.
-     */
-    @Transactional
-    public void save(UserEntity user) {
-        log.info("Saving user: {}", user.getUsername());
-        userRepository.save(user);
-    }
-
-    /**
-     * Updates an existing {@link UserEntity} in the database.
-     *
-     * @param user the {@link UserEntity} to be updated in the database.
-     */
-    @Transactional
-    public void update(UserEntity user) {
-        log.info("Updating user: {}", user.getUsername());
-        userRepository.save(user);
-    }
 
     /**
      * Changes the password for the user.

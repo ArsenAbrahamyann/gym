@@ -33,8 +33,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainee username is required.");
         }
 
-        if (trainee == null || trainee.getPassword() == null
-                || trainee.getPassword().isEmpty()) {
+        if (trainee == null || trainee.getPassword() == null || trainee.getPassword().isEmpty()) {
             throw new ValidationException("Trainee password is required.");
         }
 
@@ -58,8 +57,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainer username is required.");
         }
 
-        if (trainer == null || trainer.getPassword() == null
-                || trainer.getPassword().isEmpty()) {
+        if (trainer == null || trainer.getPassword() == null || trainer.getPassword().isEmpty()) {
             throw new ValidationException("Trainer password is required.");
         }
 
