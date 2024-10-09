@@ -1,5 +1,9 @@
 package org.example.gym.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.example.gym.dto.request.ActivateRequestDto;
@@ -22,9 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeControllerTest {
@@ -127,7 +128,8 @@ public class TraineeControllerTest {
         when(mapper.mapToTrainerResponse(unassignedTrainers)).thenReturn(responseDtos);
 
         // Act
-        ResponseEntity<List<TrainerResponseDto>> response = traineeController.getNotAssignedOnTraineeActiveTrainers(traineeUsername);
+        ResponseEntity<List<TrainerResponseDto>> response =
+                traineeController.getNotAssignedOnTraineeActiveTrainers(traineeUsername);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
