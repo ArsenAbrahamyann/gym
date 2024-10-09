@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
                 now.getHour(),
                 now.getMinute(),
                 now.getSecond(),
-                now.getNano() // nanoseconds for precision
+                now.getNano()
         });
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -74,7 +74,6 @@ public class GlobalExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
 
-        // Timestamp as an array of integers
         LocalDateTime now = LocalDateTime.now();
         errorResponse.put("timestamp", new int[]{
                 now.getYear(),

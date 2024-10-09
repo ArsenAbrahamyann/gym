@@ -1,13 +1,21 @@
 package org.example.gym.exeption;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
 /**
  * Custom exception class to handle validation errors in the application.
  */
+@Getter
 @Slf4j
 public class ValidationException extends RuntimeException {
+    /**
+     * -- GETTER --
+     *  Getter for the HTTP status.
+     *
+     * @return The HTTP status associated with this exception.
+     */
     private final HttpStatus httpStatus;
 
     /**
@@ -32,12 +40,4 @@ public class ValidationException extends RuntimeException {
         log.error("ValidationException: {} - HTTP Status: {}", message, httpStatus);
     }
 
-    /**
-     * Getter for the HTTP status.
-     *
-     * @return The HTTP status associated with this exception.
-     */
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
 }

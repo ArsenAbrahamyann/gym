@@ -12,8 +12,6 @@ import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.service.TraineeService;
 import org.example.gym.service.TrainerService;
-import org.example.gym.service.TrainingService;
-import org.example.gym.service.TrainingTypeService;
 import org.springframework.stereotype.Component;
 
 
@@ -26,8 +24,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TrainingMapper {
 
-    private final TrainingService trainingService;
-    private final TrainingTypeService trainingTypeService;
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 

@@ -48,20 +48,6 @@ public class TrainerMapper {
     }
 
     /**
-     * Maps a TrainerEntity to a RegistrationResponseDto.
-     *
-     * @param trainerProfile the TrainerEntity to map
-     * @return the mapped RegistrationResponseDto
-     */
-    public RegistrationResponseDto trainerMapToEntity(TrainerEntity trainerProfile) {
-        log.debug("Mapping TrainerEntity to RegistrationResponseDto: {}", trainerProfile);
-        RegistrationResponseDto responseDto = new RegistrationResponseDto(trainerProfile.getUsername(),
-                trainerProfile.getPassword());
-        log.info("Mapped RegistrationResponseDto: {}", responseDto);
-        return responseDto;
-    }
-
-    /**
      * Maps a TrainerEntity to a GetTrainerProfileResponseDto.
      *
      * @param trainer the TrainerEntity to map

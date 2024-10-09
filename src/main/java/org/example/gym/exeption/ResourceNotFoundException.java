@@ -1,14 +1,22 @@
 package org.example.gym.exeption;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
 /**
  * Custom exception class to represent a resource not found scenario.
  */
+@Getter
 @Slf4j
 public class ResourceNotFoundException extends RuntimeException {
 
+    /**
+     * -- GETTER --
+     *  Getter for the HTTP status.
+     *
+     * @return the HTTP status associated with the exception
+     */
     private final HttpStatus httpStatus;
 
     /**
@@ -30,15 +38,6 @@ public class ResourceNotFoundException extends RuntimeException {
      */
     public ResourceNotFoundException(String message) {
         this(message, HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Getter for the HTTP status.
-     *
-     * @return the HTTP status associated with the exception
-     */
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 
     /**

@@ -27,19 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TrainingTypeService {
     private final TrainingTypeRepository trainingTypeRepository;
 
-    /**
-     * Saves a {@link TrainingTypeEntity} to the database.
-     * <p>
-     * This method is transactional, ensuring that the save operation is executed within a single transaction.
-     * </p>
-     *
-     * @param trainingType the {@link TrainingTypeEntity} to be saved in the database.
-     */
-    @Transactional
-    public void save(TrainingTypeEntity trainingType) {
-        trainingTypeRepository.save(trainingType);
-        log.info("Successfully saved training type: {}", trainingType);
-    }
 
     /**
      * Finds a {@link TrainingTypeEntity} by its name.
