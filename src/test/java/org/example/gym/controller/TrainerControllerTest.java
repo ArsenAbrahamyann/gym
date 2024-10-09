@@ -1,5 +1,11 @@
 package org.example.gym.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.TrainerRegistrationRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
@@ -17,11 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerControllerTest {
@@ -109,7 +110,8 @@ public class TrainerControllerTest {
         when(trainerService.updateTrainerProfile(trainerEntity)).thenReturn(trainerEntity);
         when(mapper.updateTrainerProfileMapToResponseDto(trainerEntity)).thenReturn(updateTrainerProfileResponseDto);
 
-        ResponseEntity<UpdateTrainerProfileResponseDto> response = trainerController.updateTrainerProfile(updateTrainerRequestDto);
+        ResponseEntity<UpdateTrainerProfileResponseDto> response =
+                trainerController.updateTrainerProfile(updateTrainerRequestDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateTrainerProfileResponseDto, response.getBody());
