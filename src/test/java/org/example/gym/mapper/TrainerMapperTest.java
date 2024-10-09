@@ -1,5 +1,10 @@
 package org.example.gym.mapper;
 
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import org.example.gym.dto.request.TrainerRegistrationRequestDto;
@@ -19,9 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import jakarta.persistence.EntityNotFoundException;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerMapperTest {
