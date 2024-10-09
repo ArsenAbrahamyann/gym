@@ -1,5 +1,14 @@
 package org.example.gym.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -19,14 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
@@ -171,7 +172,8 @@ public class TrainingServiceTest {
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(trainingEntity));
 
-        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
+        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate,
+                toDate, "traineeUsername");
         assertEquals(1, trainings.size());
     }
 

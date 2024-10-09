@@ -1,5 +1,7 @@
 package org.example.gym.config;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 public class AppConfigTest {
@@ -44,8 +45,10 @@ public class AppConfigTest {
     void testEntityManagerFactoryBean() {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = appConfig.entityManagerFactory();
         assertNotNull(entityManagerFactory, "EntityManagerFactory should not be null");
-        assertNotNull(entityManagerFactory.getDataSource(), "EntityManagerFactory's DataSource should not be null");
-        assertNotNull(entityManagerFactory.getJpaPropertyMap(), "EntityManagerFactory's JPA Properties should not be null");
+        assertNotNull(entityManagerFactory.getDataSource(),
+                "EntityManagerFactory's DataSource should not be null");
+        assertNotNull(entityManagerFactory.getJpaPropertyMap(),
+                "EntityManagerFactory's JPA Properties should not be null");
     }
 
     @Test
