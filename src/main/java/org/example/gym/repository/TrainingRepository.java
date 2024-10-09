@@ -2,7 +2,6 @@ package org.example.gym.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,14 +14,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> {
-
-    /**
-     * Finds a {@link TrainingEntity} by its training name.
-     *
-     * @param trainingName the name of the training
-     * @return an {@link Optional} containing the found {@link TrainingEntity}, or empty if not found
-     */
-    Optional<TrainingEntity> findByTrainingName(String trainingName);
 
     /**
      * Finds trainings for a specific trainee based on optional criteria such as date range, trainer name, and training type.

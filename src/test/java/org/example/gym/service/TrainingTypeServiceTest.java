@@ -1,29 +1,19 @@
 package org.example.gym.service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.example.gym.dto.request.TraineeTrainingsRequestDto;
-import org.example.gym.dto.request.TrainerTrainingRequestDto;
-import org.example.gym.entity.TraineeEntity;
-import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
-import org.example.gym.repository.TrainingRepository;
-import org.example.gym.utils.ValidationUtils;
+import org.example.gym.repository.TrainingTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,166 +22,120 @@ import static org.mockito.Mockito.when;
 public class TrainingTypeServiceTest {
 
     @Mock
-    private TrainingRepository trainingRepository;
-
-    @Mock
-    private TraineeService traineeService;
-
-    @Mock
-    private TrainingTypeService trainingTypeService;
-
-    @Mock
-    private TrainerService trainerService;
-
-    @Mock
-    private ValidationUtils validationUtils;
+    private TrainingTypeRepository trainingTypeRepository;
 
     @InjectMocks
-    private TrainingService trainingService;
-
-    private TrainingEntity trainingEntity;
-    private TraineeEntity traineeEntity;
-    private TrainerEntity trainerEntity;
-    private TrainingTypeEntity trainingTypeEntity;
+    private TrainingTypeService trainingTypeService;
 
     /**
-     * Sets up the test environment by initializing test data and mocking responses.
+     * Initializes the mock environment before each test.
+     * <p>
+     * This method sets up the necessary mocking behavior for the repository and
+     * injects them into the service class being tested.
+     * </p>
      */
     @BeforeEach
     public void setUp() {
-        trainingEntity = new TrainingEntity();
-        traineeEntity = new TraineeEntity();
-        trainerEntity = new TrainerEntity();
-        trainingTypeEntity = new TrainingTypeEntity();
-
-        traineeEntity.setUsername("traineeUsername");
-        trainerEntity.setId(1L);
-        trainingTypeEntity.setTrainingTypeName("Yoga");
-
-        trainingEntity.setTrainee(traineeEntity);
-        trainingEntity.setTrainer(trainerEntity);
-        trainingEntity.setTrainingType(trainingTypeEntity);
     }
 
+    /**
+     * Tests the {@link TrainingTypeService#findByTrainingTypeName(String)} method
+     * when the training type exists.
+     */
     @Test
-    public void testAddTraining() {
-        trainingService.addTraining(trainingEntity);
-        verify(trainingRepository, times(1)).save(trainingEntity);
+    void testFindByTrainingTypeNameWhenExists() {
+        String trainingTypeName = "Yoga";
+        TrainingTypeEntity mockTrainingType = new TrainingTypeEntity(1L, trainingTypeName);
+
+        when(trainingTypeRepository.findByTrainingTypeName(trainingTypeName))
+                .thenReturn(Optional.of(mockTrainingType));
+
+        Optional<TrainingTypeEntity> result = trainingTypeService.findByTrainingTypeName(trainingTypeName);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getTrainingTypeName()).isEqualTo(trainingTypeName);
+        verify(trainingTypeRepository, times(1)).findByTrainingTypeName(trainingTypeName);
     }
 
+    /**
+     * Tests the {@link TrainingTypeService#findByTrainingTypeName(String)} method
+     * when the training type does not exist.
+     */
     @Test
-    public void testGetTrainingsForTrainee_ValidData() {
-        // Prepare the request DTO
-        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
-        requestDto.setTraineeName("traineeUsername");
-        requestDto.setTrainingType("Yoga");
-        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
-        requestDto.setPeriodTo(LocalDateTime.now());
+    void testFindByTrainingTypeNameWhenNotExists() {
+        String trainingTypeName = "Unknown";
 
-        // Mock the services
-        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
-        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+        when(trainingTypeRepository.findByTrainingTypeName(trainingTypeName))
+                .thenReturn(Optional.empty());
 
-        // Ensure that the types match the method signature
-        when(trainingRepository.findTrainingsForTrainee(
-                eq(traineeEntity.getId()),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class),
-                any(),
-                eq(trainingTypeEntity)
-        )).thenReturn(Collections.singletonList(trainingEntity));
+        Optional<TrainingTypeEntity> result = trainingTypeService.findByTrainingTypeName(trainingTypeName);
 
-        // Call the service method
-        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
-
-        // Assertions
-        assertEquals(1, trainings.size());
-        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUsername());
+        assertThat(result).isEmpty();
+        verify(trainingTypeRepository, times(1)).findByTrainingTypeName(trainingTypeName);
     }
 
+    /**
+     * Tests the {@link TrainingTypeService#findById(Long)} method when the training
+     * type exists.
+     */
     @Test
-    public void testGetTrainingsForTrainee_NoTrainingsFound() {
-        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
-        requestDto.setTraineeName("traineeUsername");
-        requestDto.setTrainingType("Yoga");
-        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
-        requestDto.setPeriodTo(LocalDateTime.now());
+    void testFindByIdWhenExists() {
+        Long trainingTypeId = 1L;
+        TrainingTypeEntity mockTrainingType = new TrainingTypeEntity(trainingTypeId, "Cardio");
 
-        // Assuming traineeEntity has a method getId() that returns a Long
-        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
-        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
+        when(trainingTypeRepository.findById(trainingTypeId)).thenReturn(Optional.of(mockTrainingType));
 
-        // Correctly using eq() to match the traineeEntity.getId() type
-        when(trainingRepository.findTrainingsForTrainee(eq(traineeEntity.getId()),
-                any(LocalDateTime.class), any(LocalDateTime.class), any(),
-                eq(trainingTypeEntity)))
-                .thenReturn(Collections.singletonList(trainingEntity));
+        TrainingTypeEntity result = trainingTypeService.findById(trainingTypeId);
 
-        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
-        assertEquals(1, trainings.size());
-        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUsername());
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(trainingTypeId);
+        verify(trainingTypeRepository, times(1)).findById(trainingTypeId);
     }
 
+    /**
+     * Tests the {@link TrainingTypeService#findById(Long)} method when the training
+     * type does not exist, and an exception is thrown.
+     */
     @Test
-    public void testGetTrainingsForTrainer_ValidData() {
-        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
-        requestDto.setTrainerUsername("trainerUsername");
-        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
-        requestDto.setPeriodTo(LocalDateTime.now());
+    void testFindByIdWhenNotExists() {
+        Long trainingTypeId = 99L;
 
-        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(trainingEntity));
+        when(trainingTypeRepository.findById(trainingTypeId)).thenReturn(Optional.empty());
 
-        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainer(requestDto);
-        assertEquals(1, trainings.size());
-        assertEquals(trainerEntity.getId(), trainings.get(0).getTrainer().getId());
+        assertThatThrownBy(() -> trainingTypeService.findById(trainingTypeId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("TrainingType not found for ID");
+
+        verify(trainingTypeRepository, times(1)).findById(trainingTypeId);
     }
 
+    /**
+     * Tests the {@link TrainingTypeService#findAll()} method when training types exist.
+     */
     @Test
-    public void testGetTrainingsForTrainer_NoTrainingsFound() {
-        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
-        requestDto.setTrainerUsername("trainerUsername");
-        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
-        requestDto.setPeriodTo(LocalDateTime.now());
+    void testFindAllWhenExists() {
+        TrainingTypeEntity type1 = new TrainingTypeEntity(1L, "Cardio");
+        TrainingTypeEntity type2 = new TrainingTypeEntity(2L, "Strength");
 
-        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        when(trainingTypeRepository.findAll()).thenReturn(Arrays.asList(type1, type2));
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.getTrainingsForTrainer(requestDto);
-        });
+        List<TrainingTypeEntity> result = trainingTypeService.findAll();
 
-        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+        assertThat(result).isNotEmpty();
+        assertThat(result.size()).isEqualTo(2);
+        verify(trainingTypeRepository, times(1)).findAll();
     }
 
-
+    /**
+     * Tests the {@link TrainingTypeService#findAll()} method when no training types exist.
+     */
     @Test
-    public void testFindTrainingsForTrainer_ValidData() {
-        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
-        LocalDateTime toDate = LocalDateTime.now();
+    void testFindAllWhenNotExists() {
+        when(trainingTypeRepository.findAll()).thenReturn(Arrays.asList());
 
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(trainingEntity));
+        List<TrainingTypeEntity> result = trainingTypeService.findAll();
 
-        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
-        assertEquals(1, trainings.size());
-    }
-
-
-    @Test
-    public void testFindTrainingsForTrainer_NoTrainingsFound() {
-        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
-        LocalDateTime toDate = LocalDateTime.now();
-
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.emptyList());
-
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
-        });
-
-        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
+        assertThat(result).isEmpty();
+        verify(trainingTypeRepository, times(1)).findAll();
     }
 }
