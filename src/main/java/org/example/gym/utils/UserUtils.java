@@ -30,15 +30,12 @@ public class UserUtils {
      * @return a unique username
      */
     public  String generateUsername(String firstName, String lastName, List<String> existingUsernames) {
-        String baseUsername = firstName
-                + "."
-                + lastName;
+        String baseUsername = firstName + "." + lastName;
         String username = baseUsername;
         int serialNumber = 1;
 
         while (existingUsernames.contains(username)) {
-            username = baseUsername
-                    + serialNumber;
+            username = baseUsername + serialNumber;
             serialNumber++;
         }
 

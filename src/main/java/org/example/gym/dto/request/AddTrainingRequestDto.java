@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddTrainingRequestDto {
-    String traineeUsername;
-    String trainerUsername;
-    String trainingName;
-    LocalDateTime trainingDate;
-    Integer trainingDuration;
+    private String traineeUsername;
+    private String trainerUsername;
+    private String trainingName;
+    private LocalDateTime trainingDate;
+    private Integer trainingDuration;
 }
