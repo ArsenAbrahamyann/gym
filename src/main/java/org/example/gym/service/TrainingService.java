@@ -61,6 +61,7 @@ public class TrainingService {
      */
     @Transactional
     public void addTraining(TrainingEntity training) {
+
         trainingRepository.save(training);
         log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
     }
