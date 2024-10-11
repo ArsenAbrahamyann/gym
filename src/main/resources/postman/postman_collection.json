@@ -46,7 +46,13 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "username",
+								"value": "John.Doe",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "\r\n",
@@ -57,7 +63,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/trainee/John.Doe",
+							"raw": "http://localhost:8080/api/trainee",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -65,8 +71,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"trainee",
-								"John.Doe"
+								"trainee"
 							]
 						}
 					},
@@ -140,7 +145,13 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "traineeName",
+								"value": "John.Doe",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "",
@@ -151,7 +162,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/trainee/unassigned-trainers/John.Doe",
+							"raw": "http://localhost:8080/api/trainee/unassigned-trainers",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -160,8 +171,7 @@
 							"path": [
 								"api",
 								"trainee",
-								"unassigned-trainers",
-								"John.Doe"
+								"unassigned-trainers"
 							]
 						}
 					},
@@ -300,7 +310,13 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "username",
+								"value": "John.Doe1",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "",
@@ -311,7 +327,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/trainer/John.Doe2",
+							"raw": "http://localhost:8080/api/trainer",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -319,8 +335,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"trainer",
-								"John.Doe2"
+								"trainer"
 							]
 						}
 					},
@@ -428,7 +443,33 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "traineeName",
+								"value": "John.Doe",
+								"type": "text"
+							},
+							{
+								"key": "periodFrom",
+								"value": "2024-10-01T00:00:00",
+								"type": "text"
+							},
+							{
+								"key": "periodTo",
+								"value": "2024-10-11T16:18:00",
+								"type": "text"
+							},
+							{
+								"key": "trainerName",
+								"value": "John.Doe6",
+								"type": "text"
+							},
+							{
+								"key": "trainingType",
+								"value": "Cardio Workout",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "\r\n",
@@ -439,7 +480,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/training/trainee?traineeName=John.Doe&periodFrom=2023-09-01T00:00:00&periodTo=2024-10-08T10:59:59&trainingName=Strength Training&trainingType=Cardio Workout",
+							"raw": "http://localhost:8080/api/training/trainee",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -449,28 +490,6 @@
 								"api",
 								"training",
 								"trainee"
-							],
-							"query": [
-								{
-									"key": "traineeName",
-									"value": "John.Doe"
-								},
-								{
-									"key": "periodFrom",
-									"value": "2023-09-01T00:00:00"
-								},
-								{
-									"key": "periodTo",
-									"value": "2024-10-08T10:59:59"
-								},
-								{
-									"key": "trainingName",
-									"value": "Strength Training"
-								},
-								{
-									"key": "trainingType",
-									"value": "Cardio Workout"
-								}
 							]
 						}
 					},
@@ -483,7 +502,28 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "trainerName",
+								"value": "John.Doe5",
+								"type": "text"
+							},
+							{
+								"key": "periodFrom",
+								"value": "2023-09-01T00:00:00",
+								"type": "text"
+							},
+							{
+								"key": "periodTo",
+								"value": "2024-10-11T16:10:00",
+								"type": "text"
+							},
+							{
+								"key": "traineeName",
+								"value": "John.Doe",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "",
@@ -494,7 +534,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/training/trainer?trainerName=John.Doe4&periodFrom=2023-09-01T00:00:00&periodTo=2023-09-30T23:59:59&traineeName=John.Doe",
+							"raw": "http://localhost:8080/api/training/trainer",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -504,24 +544,6 @@
 								"api",
 								"training",
 								"trainer"
-							],
-							"query": [
-								{
-									"key": "trainerName",
-									"value": "John.Doe4"
-								},
-								{
-									"key": "periodFrom",
-									"value": "2023-09-01T00:00:00"
-								},
-								{
-									"key": "periodTo",
-									"value": "2023-09-30T23:59:59"
-								},
-								{
-									"key": "traineeName",
-									"value": "John.Doe"
-								}
 							]
 						}
 					},
@@ -606,7 +628,18 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "username",
+								"value": "John.Doe",
+								"type": "text"
+							},
+							{
+								"key": "password",
+								"value": "testPassword",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "\r\n",
@@ -617,7 +650,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/user/login?username=John.Doe&password=testPassword",
+							"raw": "http://localhost:8080/api/user/login",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -627,16 +660,6 @@
 								"api",
 								"user",
 								"login"
-							],
-							"query": [
-								{
-									"key": "username",
-									"value": "John.Doe"
-								},
-								{
-									"key": "password",
-									"value": "testPassword"
-								}
 							]
 						}
 					},
