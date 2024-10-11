@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,8 +66,8 @@ public class TraineeController {
      * @param username the username of the trainee
      * @return a response entity containing the trainee's profile details
      */
-    @GetMapping("/{username}")
-    public ResponseEntity<GetTraineeProfileResponseDto> getTraineeProfile(@PathVariable String username) {
+    @GetMapping
+    public ResponseEntity<GetTraineeProfileResponseDto> getTraineeProfile(@RequestHeader String username) {
         log.info("Controller: Get trainee profile for username: {}", username);
 
         TraineeEntity trainee = traineeService.getTrainee(username);
@@ -110,15 +111,15 @@ public class TraineeController {
     /**
      * Retrieves a list of unassigned active trainers for a trainee.
      *
-     * @param traineeUsername the username of the trainee
+     * @param traineeName the username of the trainee
      * @return a response entity containing the list of unassigned trainers
      */
-    @GetMapping("/unassigned-trainers/{traineeUsername}")
+    @GetMapping("/unassigned-trainers")
     public ResponseEntity<List<TrainerResponseDto>> getNotAssignedOnTraineeActiveTrainers(
-            @PathVariable String traineeUsername) {
-        log.info("Controller: Get not assigned on trainee active trainers for username: {}", traineeUsername);
+            @RequestHeader String traineeName) {
+        log.info("Controller: Get not assigned on trainee active trainers for username: {}", traineeName);
 
-        List<TrainerEntity> unassignedTrainers = traineeService.getUnassignedTrainers(traineeUsername);
+        List<TrainerEntity> unassignedTrainers = traineeService.getUnassignedTrainers(traineeName);
         List<TrainerResponseDto> responseDtos = mapper.mapToTrainerResponse(unassignedTrainers);
 
         return ResponseEntity.ok(responseDtos);
