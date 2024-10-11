@@ -80,6 +80,7 @@ public class TrainingMapper {
         TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeUsername());
         trainingEntity.setTrainee(trainee);
         TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
+        trainingEntity.setTrainingType(trainer.getSpecialization());
         trainingEntity.setTrainer(trainer);
         return trainingEntity;
     }
