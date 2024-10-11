@@ -103,7 +103,7 @@ public class AppConfig implements WebMvcConfigurer {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan("org.example.gym.entity");  // Adjust the package for entities
+        em.setPackagesToScan("org.example.gym.entity");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
@@ -111,6 +111,8 @@ public class AppConfig implements WebMvcConfigurer {
 
         log.info("EntityManagerFactory created successfully");
         return em;
+
+
     }
 
 

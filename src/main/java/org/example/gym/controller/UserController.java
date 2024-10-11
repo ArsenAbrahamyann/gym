@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -33,7 +32,7 @@ public class UserController {
      * @return a ResponseEntity indicating the success or failure of the login attempt
      */
     @GetMapping("/login")
-    public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Void> login(@RequestBody String username, @RequestBody String password) {
         log.info("Controller: User login attempt for username: {}", username);
         boolean isAuthenticated = userService.authenticateUser(username, password);
 

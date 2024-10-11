@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -47,11 +47,11 @@ public class TrainingController {
      */
     @GetMapping("/trainee")
     public ResponseEntity<List<TrainingResponseDto>> getTraineeTrainingsList(
-            @RequestParam String traineeName,
-            @RequestParam(required = false) LocalDateTime periodFrom,
-            @RequestParam(required = false) LocalDateTime periodTo,
-            @RequestParam(required = false) String trainerName,
-            @RequestParam(required = false) String trainingType) {
+            @RequestHeader String traineeName,
+            @RequestHeader(required = false) LocalDateTime periodFrom,
+            @RequestHeader(required = false) LocalDateTime periodTo,
+            @RequestHeader(required = false) String trainerName,
+            @RequestHeader(required = false) String trainingType) {
 
         log.info("Fetching training list for trainee: {}", traineeName);
         TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto(traineeName, periodFrom,
@@ -76,10 +76,10 @@ public class TrainingController {
      */
     @GetMapping("/trainer")
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
-            @RequestParam String trainerName,
-            @RequestParam(required = false) String periodFrom,
-            @RequestParam(required = false) String periodTo,
-            @RequestParam(required = false) String traineeName) {
+            @RequestHeader String trainerName,
+            @RequestHeader(required = false) String periodFrom,
+            @RequestHeader(required = false) String periodTo,
+            @RequestHeader(required = false) String traineeName) {
 
         log.info("Fetching training list for trainer: {}", trainerName);
 
