@@ -1,5 +1,8 @@
 package org.example.gym.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +33,13 @@ public class TrainingTypeController {
      * @return ResponseEntity containing a list of TrainingTypesResponseDto objects.
      */
     @GetMapping
+    @Operation(summary = "Fetch all training types", description = "Retrieves a list of all available training types.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully fetched the list of training types"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<TrainingTypesResponseDto>> getTrainingTypes() {
-        log.info("Fetching all training types");
+        log.info("Controller: Fetching all training types");
 
         List<TrainingTypeEntity> trainingTypes = trainingTypeService.findAll();
         List<TrainingTypesResponseDto> responseDtos = mapper.entityMapToResponse(trainingTypes);
