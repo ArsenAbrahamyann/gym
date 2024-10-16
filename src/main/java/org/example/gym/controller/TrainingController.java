@@ -1,5 +1,10 @@
 package org.example.gym.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +51,15 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainee
      */
     @GetMapping("/trainee")
+    @Operation(summary = "Get trainings for a trainee", description = "Fetches the list of trainings"
+            + " for a specific trainee with optional filters.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainings retrieved successfully",
+                content = @Content(schema = @Schema(implementation = TrainingResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
+        @ApiResponse(responseCode = "404", description = "Trainee not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<TrainingResponseDto>> getTraineeTrainingsList(
             @RequestHeader String traineeName,
             @RequestHeader(required = false) LocalDateTime periodFrom,
@@ -62,6 +76,7 @@ public class TrainingController {
                 requestDto);
 
         List<TrainingResponseDto> responseDtos = mapper.mapToDtoTrainingTrainee(trainingsForTrainee);
+        log.info("Response: {} trainings retrieved", responseDtos.size());
         return ResponseEntity.ok(responseDtos);
     }
 
@@ -75,6 +90,15 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainer
      */
     @GetMapping("/trainer")
+    @Operation(summary = "Get trainings for a trainer", description = "Fetches the list of trainings for "
+            + "a specific trainer with optional filters.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainings retrieved successfully",
+                content = @Content(schema = @Schema(implementation = GetTrainerTrainingListResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
+        @ApiResponse(responseCode = "404", description = "Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
             @RequestHeader String trainerName,
             @RequestHeader(required = false) String periodFrom,
@@ -88,6 +112,7 @@ public class TrainingController {
         List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(requestDto);
 
         List<GetTrainerTrainingListResponseDto> responseDto = mapper.mapToDtoTrainingTrainer(trainingsForTrainer);
+        log.info("Response: {} trainings retrieved", responseDto.size());
         return ResponseEntity.ok(responseDto);
     }
 
@@ -98,6 +123,13 @@ public class TrainingController {
      * @return a response entity indicating the result of the operation
      */
     @PostMapping("/add")
+    @Operation(summary = "Add a new training", description = "Adds a new training session to the system.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Training added successfully", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid training details"),
+        @ApiResponse(responseCode = "404", description = "Trainee or Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Void> addTraining(
             @RequestBody AddTrainingRequestDto requestDto) {
 
@@ -106,7 +138,7 @@ public class TrainingController {
 
         TrainingEntity trainingEntity = mapper.requestDtoMapToTrainingEntity(requestDto);
         trainingService.addTraining(trainingEntity);
-
+        log.info("Training added successfully");
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

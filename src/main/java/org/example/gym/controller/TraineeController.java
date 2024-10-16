@@ -29,10 +29,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Controller for managing trainee-related operations.
  */
+@Tag(name = "AAA")
 @RestController
 @RequestMapping("api/trainee")
 @RequiredArgsConstructor
@@ -42,21 +48,30 @@ public class TraineeController {
     private final TraineeService traineeService;
     private final TraineeMapper mapper;
 
+
+
     /**
      * Registers a new trainee.
      *
-     * @param requestDto the registration details of the trainee
-     * @return a response entity containing the registration response
+     * @param requestDto The request DTO containing trainee registration details.
+     * @return ResponseEntity with the registration response DTO.
      */
     @PostMapping(value = "/registration", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @Operation(summary = "Register a new trainee", description = "Registers a new trainee in the system.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Trainee registration successful", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<RegistrationResponseDto> traineeRegistration(
             @RequestBody TraineeRegistrationRequestDto requestDto) {
-        log.info("Controller: trainee registration");
+        log.info(" Controller: Trainee registration request received");
 
         TraineeEntity trainee = mapper.traineeRegistrationMapToEntity(requestDto);
         TraineeEntity traineeEntity = traineeService.createTraineeProfile(trainee);
 
         RegistrationResponseDto responseDto = mapper.traineeEntityMapToResponseDto(traineeEntity);
+        log.info("Controller: Trainee registration successful, Response: {}", responseDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -67,12 +82,19 @@ public class TraineeController {
      * @return a response entity containing the trainee's profile details
      */
     @GetMapping
+    @Operation(summary = "Get trainee profile", description = "Retrieves the profile of a trainee by their username.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profile retrieved successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Trainee not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<GetTraineeProfileResponseDto> getTraineeProfile(@RequestHeader String username) {
-        log.info("Controller: Get trainee profile for username: {}", username);
+        log.info(" Controller: Get trainee profile request for username: {}", username);
 
         TraineeEntity trainee = traineeService.getTrainee(username);
         GetTraineeProfileResponseDto responseDto = mapper.traineeEntityMapToGetResponseTraineeDto(trainee);
 
+        log.info("Controller: Trainee profile retrieved successfully, Response: {}",  responseDto);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -83,14 +105,22 @@ public class TraineeController {
      * @return a response entity containing the updated trainee's response
      */
     @PutMapping("/update")
+    @Operation(summary = "Update trainee profile", description = "Updates a trainee's profile information.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profile updated successfully", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid update request"),
+        @ApiResponse(responseCode = "404", description = "Trainee not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<UpdateTraineeResponseDto> updateTraineeProfile(
             @RequestBody UpdateTraineeRequestDto requestDto) {
-        log.info("Controller: Update trainee profile for username: {}", requestDto.getUsername());
+        log.info("Controller: Update trainee profile request for username: {}", requestDto.getUsername());
 
         TraineeEntity trainee = mapper.updateDtoMapToTraineeEntity(requestDto);
         TraineeEntity traineeEntityUpdated = traineeService.updateTraineeProfile(trainee);
 
         UpdateTraineeResponseDto responseDto = mapper.traineeEntityMapToUpdateResponse(traineeEntityUpdated);
+        log.info("Controller: Trainee profile updated successfully, Response: {}", responseDto);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -101,10 +131,17 @@ public class TraineeController {
      * @return a response entity with no content
      */
     @DeleteMapping("/delete/{username}")
+    @Operation(summary = "Delete trainee profile", description = "Deletes a trainee's profile by username.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profile deleted successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Trainee not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Void> deleteTraineeProfile(@PathVariable String username) {
-        log.info("Controller: Delete trainee profile for username: {}", username);
+        log.info(" Controller: Delete trainee profile request for username: {}", username);
 
         traineeService.deleteTraineeByUsername(username);
+        log.info(" Controller: Trainee profile deleted successfully");
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -115,13 +152,21 @@ public class TraineeController {
      * @return a response entity containing the list of unassigned trainers
      */
     @GetMapping("/unassigned-trainers")
+    @Operation(summary = "Get unassigned trainers", description = "Retrieves a list of active trainers who"
+            + " are not assigned to a trainee.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List retrieved successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "No trainers found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<TrainerResponseDto>> getNotAssignedOnTraineeActiveTrainers(
             @RequestHeader String traineeName) {
-        log.info("Controller: Get not assigned on trainee active trainers for username: {}", traineeName);
+        log.info("Controller: Get not assigned on trainee active trainers request for username: {}", traineeName);
 
         List<TrainerEntity> unassignedTrainers = traineeService.getUnassignedTrainers(traineeName);
         List<TrainerResponseDto> responseDtos = mapper.mapToTrainerResponse(unassignedTrainers);
 
+        log.info(" Controller: Unassigned trainers retrieved successfully, Response size: {}", responseDtos.size());
         return ResponseEntity.ok(responseDtos);
     }
 
@@ -132,14 +177,23 @@ public class TraineeController {
      * @return a response entity containing the updated list of trainers
      */
     @PutMapping("/update/trainerList")
+    @Operation(summary = "Update trainee's trainer list", description = "Updates the list of trainers "
+            + "assigned to a trainee.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainer list updated successfully", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid update request"),
+        @ApiResponse(responseCode = "404", description = "Trainee or trainers not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<TrainerResponseDto>> updateTraineeTrainerList(
             @RequestBody UpdateTraineeTrainerListRequestDto requestDto) {
-        log.info("Controller: Update Trainee's Trainer list for username: {}", requestDto.getTraineeUsername());
+        log.info("Controller: Update trainee trainer list request for username: {}", requestDto.getTraineeUsername());
 
         TraineeEntity trainee = mapper.updateTraineeTrainerListMapToEntity(requestDto);
         TraineeEntity traineeEntity = traineeService.updateTraineeTrainers(trainee);
 
         List<TrainerResponseDto> responseDtos = mapper.updateTraineeTrainerListMapToTrainerResponse(traineeEntity);
+        log.info("Controller: Trainee trainer list updated successfully, Response size: {}", responseDtos.size());
         return ResponseEntity.ok(responseDtos);
     }
 
@@ -149,25 +203,21 @@ public class TraineeController {
      * @param requestDto the details of the trainee to activate
      * @return a response entity with no content
      */
-    @PatchMapping("/activate")
-    public ResponseEntity<Void> activateTrainee(@RequestBody ActivateRequestDto requestDto) {
-        log.info("Controller: Activate trainee with username: {}", requestDto.getUsername());
+    @PatchMapping("/toggle-activate")
+    @Operation(summary = "Activate trainee account", description = "Activates a trainee's account.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainee account activated successfully", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid activation request"),
+        @ApiResponse(responseCode = "404", description = "Trainee not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> toggleTraineeStatus(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Controller: toggle trainee profile request for username: {}", requestDto.getUsername());
 
         traineeService.toggleTraineeStatus(requestDto);
+        log.info("Controller: Trainee profile toggle successfully");
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    /**
-     * Deactivates a trainee's account.
-     *
-     * @param requestDto the details of the trainee to deactivate
-     * @return a response entity with no content
-     */
-    @PatchMapping("/de-activate")
-    public ResponseEntity<Void> deActivateTrainee(@RequestBody ActivateRequestDto requestDto) {
-        log.info("Controller: DeActivate trainee with username: {}", requestDto.getUsername());
-
-        traineeService.toggleTraineeStatus(requestDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }

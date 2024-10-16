@@ -1,5 +1,9 @@
 package org.example.gym.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
@@ -43,6 +47,12 @@ public class TrainerController {
      * @return ResponseEntity with the registration response DTO.
      */
     @PostMapping("/registration")
+    @Operation(summary = "Register a new trainer")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Trainer registration successful", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid registration details"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<RegistrationResponseDto> registerTrainer(
             @RequestBody TrainerRegistrationRequestDto requestDto) {
         log.info("Registering trainer: {} {}", requestDto.getFirstName(), requestDto.getLastName());
@@ -51,6 +61,8 @@ public class TrainerController {
         TrainerEntity savedTrainer = trainerService.createTrainerProfile(trainerEntity);
 
         RegistrationResponseDto responseDto = mapper.trainerMapToResponse(savedTrainer);
+        log.info("Controller: Trainer registration successful, Response: {}", responseDto);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -61,11 +73,18 @@ public class TrainerController {
      * @return ResponseEntity with the trainer's profile response DTO.
      */
     @GetMapping
+    @Operation(summary = "Get a trainer's profile by username")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainer profile retrieved successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<GetTrainerProfileResponseDto> getTrainerProfile(@RequestHeader String username) {
         log.info("Fetching profile for trainer: {}", username);
 
         TrainerEntity trainer = trainerService.getTrainer(username);
         GetTrainerProfileResponseDto responseDto = mapper.trainerEntityMapToGetResponse(trainer);
+        log.info("Controller: Trainer profile retrieved successfully, Response: {}", responseDto);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -76,6 +95,13 @@ public class TrainerController {
      * @return ResponseEntity with the updated trainer profile response DTO.
      */
     @PutMapping("/update")
+    @Operation(summary = "Update trainer profile")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainer profile updated successfully", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Invalid update details"),
+        @ApiResponse(responseCode = "404", description = "Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<UpdateTrainerProfileResponseDto> updateTrainerProfile(
             @RequestBody UpdateTrainerRequestDto requestDto) {
         log.info("Updating trainer profile for: {}", requestDto.getUsername());
@@ -84,6 +110,7 @@ public class TrainerController {
         TrainerEntity savedTrainer = trainerService.updateTrainerProfile(updatedTrainer);
 
         UpdateTrainerProfileResponseDto responseDto = mapper.updateTrainerProfileMapToResponseDto(savedTrainer);
+        log.info("Controller: Trainer profile updated successfully, Response: {}", responseDto);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -93,25 +120,22 @@ public class TrainerController {
      * @param requestDto The request DTO containing the username to activate.
      * @return ResponseEntity indicating the result of the activation.
      */
-    @PatchMapping("/activate")
-    public ResponseEntity<Void> activateTrainer(@RequestBody ActivateRequestDto requestDto) {
-        log.info("Setting trainer status to active: {}", requestDto.getUsername());
+    @PatchMapping("/toggle-activate")
+    @Operation(summary = "Activate a trainer's account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainer activated successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> toggleTrainerStatus(@RequestBody ActivateRequestDto requestDto) {
+        log.info("Controller: toggle trainer profile request for username: {}", requestDto.getUsername());
+
         trainerService.toggleTrainerStatus(requestDto);
+
+        log.info("Controller: Trainer profile toggle successfully");
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    /**
-     * Deactivates a trainer's account.
-     *
-     * @param requestDto The request DTO containing the username to deactivate.
-     * @return ResponseEntity indicating the result of the deactivation.
-     */
-    @PatchMapping("/de-activate")
-    public ResponseEntity<Void> deactivateTrainer(@RequestBody ActivateRequestDto requestDto) {
-        log.info("Setting trainer status to inactive: {}", requestDto.getUsername());
-        trainerService.toggleTrainerStatus(requestDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }
 
 

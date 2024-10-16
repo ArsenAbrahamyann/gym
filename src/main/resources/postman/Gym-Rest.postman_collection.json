@@ -209,37 +209,7 @@
 					"response": []
 				},
 				{
-					"name": "Activate Trainee",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"username\": \"John.Doe\",\r\n  \"isPublic\": true\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8080/api/trainee/activate",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"trainee",
-								"activate"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deActivate Trainee",
+					"name": "Toggle activate Trainee",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -253,7 +223,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/trainee/de-activate",
+							"raw": "http://localhost:8080/api/trainee/toggle-activate",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -262,7 +232,7 @@
 							"path": [
 								"api",
 								"trainee",
-								"de-activate"
+								"toggle-activate"
 							]
 						}
 					},
@@ -372,13 +342,13 @@
 					"response": []
 				},
 				{
-					"name": "Activate Trainer",
+					"name": "Toggle activate Trainer",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"username\": \"John.Doe4\",\r\n  \"isPublic\": true\r\n}\r\n",
+							"raw": "{\r\n  \"username\": \"John.Doe1\",\r\n  \"isPublic\": false\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -386,7 +356,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/trainer/activate",
+							"raw": "http://localhost:8080/api/trainer/toggle-activate",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -395,37 +365,7 @@
 							"path": [
 								"api",
 								"trainer",
-								"activate"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DeActivate Trainer",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"username\": \"John.Doe4\",\r\n  \"isPublic\": false\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8080/api/trainer/de-activate",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"trainer",
-								"de-activate"
+								"toggle-activate"
 							]
 						}
 					},

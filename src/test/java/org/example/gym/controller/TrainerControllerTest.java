@@ -124,22 +124,10 @@ public class TrainerControllerTest {
     public void activateTrainer_ShouldReturnOkResponse() {
         doNothing().when(trainerService).toggleTrainerStatus(activateRequestDto);
 
-        ResponseEntity<Void> response = trainerController.activateTrainer(activateRequestDto);
+        ResponseEntity<Void> response = trainerController.toggleTrainerStatus(activateRequestDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(trainerService, times(1)).toggleTrainerStatus(activateRequestDto);
     }
 
-    /**
-     * Tests deactivation of a trainer's account.
-     */
-    @Test
-    public void deactivateTrainer_ShouldReturnOkResponse() {
-        doNothing().when(trainerService).toggleTrainerStatus(activateRequestDto);
-
-        ResponseEntity<Void> response = trainerController.deactivateTrainer(activateRequestDto);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(trainerService, times(1)).toggleTrainerStatus(activateRequestDto);
-    }
 }
