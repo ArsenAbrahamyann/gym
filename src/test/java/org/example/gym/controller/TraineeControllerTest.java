@@ -161,20 +161,7 @@ public class TraineeControllerTest {
         ActivateRequestDto requestDto = new ActivateRequestDto();
 
         // Act
-        ResponseEntity<Void> response = traineeController.activateTrainee(requestDto);
-
-        // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(traineeService).toggleTraineeStatus(requestDto);
-    }
-
-    @Test
-    public void testDeActivateTrainee() {
-        // Arrange
-        ActivateRequestDto requestDto = new ActivateRequestDto();
-
-        // Act
-        ResponseEntity<Void> response = traineeController.deActivateTrainee(requestDto);
+        ResponseEntity<Void> response = traineeController.toggleTraineeStatus(requestDto);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

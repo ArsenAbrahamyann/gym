@@ -1,5 +1,8 @@
 package org.example.gym.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
@@ -32,15 +35,20 @@ public class UserController {
      * @return a ResponseEntity indicating the success or failure of the login attempt
      */
     @GetMapping("/login")
+    @Operation(summary = "User login", description = "Authenticates based on the provided username and password.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User authenticated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid username or password")
+    })
     public ResponseEntity<Void> login(@RequestBody String username, @RequestBody String password) {
         log.info("Controller: User login attempt for username: {}", username);
         boolean isAuthenticated = userService.authenticateUser(username, password);
 
         if (isAuthenticated) {
-            log.info("Controller: User {} logged in successfully", password);
+            log.info("Controller: User {} logged in successfully", username);
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
-            log.warn("Controller: User {} failed to log in", password);
+            log.warn("Controller: User {} failed to log in", username);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -52,6 +60,11 @@ public class UserController {
      * @return a ResponseEntity indicating the success of the password change
      */
     @PutMapping("/change/login")
+    @Operation(summary = "Change user password", description = "Allows a user to change their password.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
     public ResponseEntity<Void> changeLogin(@RequestBody ChangeLoginRequestDto requestDto) {
         log.info("Controller: Change login for user: {}", requestDto.getUsername());
         userService.changePassword(requestDto);

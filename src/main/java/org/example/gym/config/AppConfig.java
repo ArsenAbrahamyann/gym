@@ -1,5 +1,7 @@
 package org.example.gym.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import java.util.Objects;
 import java.util.Properties;
 import javax.sql.DataSource;
@@ -7,6 +9,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,15 +22,15 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * Configuration class for setting up Hibernate and Spring integration.
  * It handles database configuration, session factory creation, and transaction management.
  */
+
 @Data
 @Configuration
 @EnableWebMvc
@@ -61,19 +64,29 @@ public class AppConfig implements WebMvcConfigurer {
     private String ddlAuto;
 
 
-    /**
-     * Configures the ViewResolver for JSP views.
-     *
-     * @return the configured InternalResourceViewResolver
-     */
     @Bean
-    public ViewResolver viewResolver() {
-        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/WEB-INF/views/");
-        resolver.setSuffix(".jsp");
-        return resolver;
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                .group("public-api")
+                .pathsToMatch("/**")
+                .build();
     }
 
+    @Bean
+    public OpenAPI customOpenApi() {
+        return new OpenAPI()
+                .info(new Info().title("Your API Title")
+                        .description("Your API Description")
+                        .version("1.0"));
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/swagger-ui/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/springdoc-openapi-ui/")
+
+        .resourceChain(false);
+    }
     /**
      * Configures the DataSource for database connections.
      *
@@ -114,7 +127,6 @@ public class AppConfig implements WebMvcConfigurer {
 
 
     }
-
 
     /**
      * Configures the PlatformTransactionManager.
