@@ -73,7 +73,8 @@ public class TraineeMapper {
         profileResponseDto.setLastName(trainee.getLastName());
         profileResponseDto.setFirstName(trainee.getFirstName());
         Set<TrainerEntity> trainers = trainee.getTrainers();
-        Set<TrainerListResponseDto> trainerList = profileResponseDto.getTrainerList();
+        Set<TrainerListResponseDto> trainerList = new HashSet<>();
+
         for (TrainerEntity entity : trainers) {
             TrainerListResponseDto trainerListResponseDto = new TrainerListResponseDto(
                     entity.getUsername(), entity.getFirstName(),
