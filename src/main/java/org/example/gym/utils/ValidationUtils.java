@@ -29,12 +29,17 @@ public class ValidationUtils {
      * @throws ValidationException if any required fields are missing or invalid.
      */
     public void validateTrainee(TraineeEntity trainee) {
-        if (trainee.getUsername() == null || trainee.getUsername().isEmpty()) {
-            throw new ValidationException("Trainee username is required.");
+
+        if (trainee == null) {
+            throw new ValidationException("Trainee not found");
         }
 
-        if (trainee == null || trainee.getPassword() == null || trainee.getPassword().isEmpty()) {
+        if (trainee.getPassword() == null || trainee.getPassword().isEmpty()) {
             throw new ValidationException("Trainee password is required.");
+        }
+
+        if (trainee.getUsername() == null || trainee.getUsername().isEmpty()) {
+            throw new ValidationException("Trainee username is required.");
         }
 
         if (trainee.getAddress() == null || trainee.getAddress().isEmpty()) {
@@ -53,11 +58,15 @@ public class ValidationUtils {
      * @throws ValidationException if any required fields are missing or invalid.
      */
     public void validateTrainer(TrainerEntity trainer) {
+
+        if (trainer == null) {
+            throw new ValidationException("trainer not found");
+        }
         if (trainer.getUsername() == null || trainer.getUsername().isEmpty()) {
             throw new ValidationException("Trainer username is required.");
         }
 
-        if (trainer == null || trainer.getPassword() == null || trainer.getPassword().isEmpty()) {
+        if (trainer.getPassword() == null || trainer.getPassword().isEmpty()) {
             throw new ValidationException("Trainer password is required.");
         }
 
@@ -114,7 +123,7 @@ public class ValidationUtils {
             validateDateFormat(requestDto.getPeriodFrom(), "From date");
         }
 
-        if (requestDto.getPeriodTo() != null && requestDto.getPeriodTo() != null) {
+        if (requestDto.getPeriodTo() != null) {
             validateDateFormat(requestDto.getPeriodTo(), "To date");
         }
 
@@ -141,7 +150,7 @@ public class ValidationUtils {
             validateDateFormat(requestDto.getPeriodFrom(), "From date");
         }
 
-        if (requestDto.getPeriodTo() != null && requestDto.getPeriodTo() != null) {
+        if (requestDto.getPeriodTo() != null) {
             validateDateFormat(requestDto.getPeriodTo(), "To date");
         }
 

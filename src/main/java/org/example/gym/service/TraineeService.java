@@ -66,7 +66,6 @@ public class TraineeService {
         trainee.setPassword(generatePassword);
         validationUtils.validateTrainee(trainee);
         traineeRepository.save(trainee);
-        userService.authenticateUser(trainee.getUsername(), trainee.getPassword());
         log.info("Trainee profile created successfully for {}", trainee.getUsername());
         return trainee;
     }
@@ -80,7 +79,7 @@ public class TraineeService {
     public void toggleTraineeStatus(ActivateRequestDto requestDto) {
         log.info("Toggling trainee status for {}", requestDto.getUsername());
         TraineeEntity trainee = getTrainee(requestDto.getUsername());
-        trainee.setIsActive(requestDto.isPublic());
+        trainee.setIsActive(requestDto.isActive());
         traineeRepository.save(trainee);
         log.info("Trainee status toggled successfully for {}", requestDto.getUsername());
     }

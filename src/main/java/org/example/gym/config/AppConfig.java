@@ -1,19 +1,20 @@
 package org.example.gym.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import java.util.Objects;
 import java.util.Properties;
 import javax.sql.DataSource;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.aspects.AuthAspect;
+import org.example.gym.logger.TransactionInterceptor;
 import org.flywaydb.core.Flyway;
-import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -23,7 +24,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -38,8 +39,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @PropertySource("classpath:application.properties")
 @EnableJpaRepositories(basePackages = "org.example.gym.repository")
 @EnableTransactionManagement
+@EnableAspectJAutoProxy
 @RequiredArgsConstructor
 @Slf4j
+@Import({org.springdoc.webmvc.ui.SwaggerConfig.class})
 public class AppConfig implements WebMvcConfigurer {
 
     @Value("${hibernate.db.driver-class-name}")
@@ -63,30 +66,16 @@ public class AppConfig implements WebMvcConfigurer {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
-
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("public-api")
-                .pathsToMatch("/**")
-                .build();
-    }
-
-    @Bean
-    public OpenAPI customOpenApi() {
-        return new OpenAPI()
-                .info(new Info().title("Your API Title")
-                        .description("Your API Description")
-                        .version("1.0"));
-    }
-
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/swagger-ui/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/springdoc-openapi-ui/")
-
-        .resourceChain(false);
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new TransactionInterceptor());
     }
+
+    @Bean
+    public AuthAspect authAspect() {
+        return new AuthAspect();
+    }
+
     /**
      * Configures the DataSource for database connections.
      *
@@ -107,6 +96,7 @@ public class AppConfig implements WebMvcConfigurer {
         return dataSource;
     }
 
+
     /**
      * Creates the EntityManagerFactory for JPA.
      *
@@ -124,8 +114,6 @@ public class AppConfig implements WebMvcConfigurer {
 
         log.info("EntityManagerFactory created successfully");
         return em;
-
-
     }
 
     /**
@@ -173,3 +161,5 @@ public class AppConfig implements WebMvcConfigurer {
         return flyway;
     }
 }
+
+

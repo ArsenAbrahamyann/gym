@@ -38,7 +38,7 @@ public class TrainingMapper {
         for (TrainingEntity entity : trainingsForTrainee) {
 
             TrainingResponseDto responseDto = new TrainingResponseDto(entity.getTrainingName(),
-                    entity.getTrainingDate(), entity.getTrainingType().getTrainingTypeName(),
+                    entity.getTrainingDate().toString(), entity.getTrainingType().getTrainingTypeName(),
                     entity.getTrainingDuration(),
                     entity.getTrainer().getUsername());
             responseDtos.add(responseDto);
@@ -58,7 +58,7 @@ public class TrainingMapper {
         for (TrainingEntity entity : trainingsForTrainer) {
             GetTrainerTrainingListResponseDto responseDto =
                     new GetTrainerTrainingListResponseDto(entity.getTrainingName(),
-                            entity.getTrainingDate(), entity.getTrainingType(), entity.getTrainingDuration(),
+                            entity.getTrainingDate().toString(), entity.getTrainingType(), entity.getTrainingDuration(),
                             entity.getTrainee().getUsername());
             responseDtos.add(responseDto);
         }

@@ -80,7 +80,6 @@ public class TrainerService {
 
         trainerRepository.save(trainer);
 
-        userService.authenticateUser(trainer.getUsername(), trainer.getPassword());
         log.debug("Trainer profile created: {}", trainer);
         return trainer;
     }
@@ -94,7 +93,7 @@ public class TrainerService {
     public void toggleTrainerStatus(ActivateRequestDto requestDto) {
         log.info("Toggling trainer status for {}", requestDto.getUsername());
         TrainerEntity trainer = getTrainer(requestDto.getUsername());
-        trainer.setIsActive(requestDto.isPublic());
+        trainer.setIsActive(requestDto.isActive());
         trainerRepository.save(trainer);
         log.info("Trainer status toggled successfully for {}", requestDto.getUsername());
     }

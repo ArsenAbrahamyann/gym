@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +42,7 @@ public class UserController {
         @ApiResponse(responseCode = "200", description = "User authenticated successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
-    public ResponseEntity<Void> login(@RequestBody String username, @RequestBody String password) {
+    public ResponseEntity<Void> login(@RequestHeader String username, @RequestHeader String password) {
         log.info("Controller: User login attempt for username: {}", username);
         boolean isAuthenticated = userService.authenticateUser(username, password);
 
@@ -60,6 +62,7 @@ public class UserController {
      * @return a ResponseEntity indicating the success of the password change
      */
     @PutMapping("/change/login")
+    @Authenticated
     @Operation(summary = "Change user password", description = "Allows a user to change their password.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Password changed successfully"),

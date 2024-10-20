@@ -78,7 +78,6 @@ public class TraineeServiceTest {
         assertEquals("john.doe", createdTrainee.getUsername());
         assertEquals("password123", createdTrainee.getPassword());
         verify(traineeRepository).save(trainee);
-        verify(userService).authenticateUser("john.doe", "password123");
     }
 
     @Test
@@ -87,7 +86,7 @@ public class TraineeServiceTest {
         String username = "john.doe";
         ActivateRequestDto requestDto = new ActivateRequestDto();
         requestDto.setUsername(username);
-        requestDto.setPublic(true);
+        requestDto.setActive(true);
 
         TraineeEntity trainee = new TraineeEntity();
         trainee.setUsername(username);
