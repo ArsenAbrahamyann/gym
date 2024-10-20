@@ -121,8 +121,8 @@ public class TraineeMapper {
             trainerList.add(trainerResponseDto);
         }
         UpdateTraineeResponseDto responseDto = new UpdateTraineeResponseDto(trainee.getUsername(),
-                trainee.getFirstName(), trainee.getLastName(), trainee.getDateOfBirth(), trainee.getAddress(),
-                trainerList);
+               trainee.getFirstName(), trainee.getLastName(), trainee.getDateOfBirth().toString(), trainee.getAddress(),
+               trainerList);
         log.info("Mapped TraineeEntity to UpdateTraineeResponseDto: {}", responseDto);
         return responseDto;
 
