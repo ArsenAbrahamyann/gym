@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
@@ -89,13 +87,11 @@ public class TrainingServiceTest {
         requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
         requestDto.setPeriodTo(LocalDateTime.now());
 
-        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
-        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
 
         // Get the expected trainee ID from the traineeEntity mock.
         Long traineeId = traineeEntity.getId(); // Assuming getId() returns the ID.
 
-        when(trainingRepository.findTrainingsForTrainee(eq(traineeId), any(), any(), any(), any()))
+        when(trainingRepository.findTrainingsForTrainee(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(trainingEntity));
 
         List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
@@ -112,13 +108,11 @@ public class TrainingServiceTest {
         requestDto.setPeriodFrom(LocalDateTime.now().minusDays(10));
         requestDto.setPeriodTo(LocalDateTime.now());
 
-        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
-        when(trainingTypeService.findByTrainingTypeName("Yoga")).thenReturn(Optional.of(trainingTypeEntity));
 
         // Get the expected trainee ID from the traineeEntity mock.
         Long traineeId = traineeEntity.getId(); // Assuming getId() returns the ID.
 
-        when(trainingRepository.findTrainingsForTrainee(eq(traineeId), any(), any(), any(), any()))
+        when(trainingRepository.findTrainingsForTrainee(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {

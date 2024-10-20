@@ -29,17 +29,23 @@ tasks.withType(JavaCompile) {
 }
 
 
-
-
 dependencies {
     // Servlet API for provided runtime (optional)
     implementation "jakarta.servlet:jakarta.servlet-api:6.1.0"
     implementation "jakarta.annotation:jakarta.annotation-api:3.0.0"
     implementation "jakarta.validation:jakarta.validation-api:3.0.2"
 
-    implementation "io.swagger.core.v3:swagger-annotations-jakarta:2.2.23"
-    implementation("io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.23")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.2.0")
+
+
+    implementation("ch.qos.logback:logback-access:1.4.14")
+    implementation("ch.qos.logback:logback-core:1.4.14")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+
+
+
+    implementation("org.aspectj:aspectjweaver:1.9.9.1")
 
     // Spring dependencies
     implementation "org.springframework:spring-core:6.0.8"
@@ -49,7 +55,7 @@ dependencies {
     implementation "org.springframework:spring-jdbc:6.0.8"
     implementation "org.springframework:spring-tx:6.0.8"
     implementation "org.springframework:spring-orm:6.0.8"
-    implementation"org.springframework.data:spring-data-jpa:3.0.8"
+    implementation "org.springframework.data:spring-data-jpa:3.0.8"
     implementation "org.springframework.data:spring-data-rest-webmvc:3.7.0"
 
 
@@ -103,3 +109,4 @@ checkstyle {
     maxWarnings = 0
     configFile = rootProject.file("config/checkstyle/checkstyle.xml")
 }
+

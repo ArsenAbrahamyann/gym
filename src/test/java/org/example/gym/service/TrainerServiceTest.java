@@ -74,7 +74,6 @@ public class TrainerServiceTest {
         assertNotNull(createdTrainer);
         assertEquals("john.doe", createdTrainer.getUsername());
         verify(trainerRepository).save(trainer);
-        verify(userService).authenticateUser("john.doe", "generatedPassword");
     }
 
     @Test

@@ -5,10 +5,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
-import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
-import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
@@ -78,15 +76,10 @@ public class TrainingService {
         log.info("Fetching trainings for trainee: {}", requestDto.getTraineeName());
 
         validationUtils.validateTraineeTrainingsCriteria(requestDto);
-        TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeName());
 
-        TrainingTypeEntity byTrainingTypeName = trainingTypeService.findByTrainingTypeName(
-                        requestDto.getTrainingType())
-                .orElseThrow(() -> new ResourceNotFoundException("TrainingTypeEntity not found."));
-
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(trainee.getId(),
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainee(requestDto.getTraineeName(),
                 requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTrainerName(),
-                byTrainingTypeName);
+                requestDto.getTrainingType());
 
         if (trainings.isEmpty()) {
             log.warn("No trainings found for trainee: {}", requestDto.getTraineeName());
