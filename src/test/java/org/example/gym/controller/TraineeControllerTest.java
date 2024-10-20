@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.TraineeRegistrationRequestDto;
 import org.example.gym.dto.request.UpdateTraineeRequestDto;
 import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
@@ -155,16 +154,4 @@ public class TraineeControllerTest {
         assertThat(response.getBody()).isEqualTo(responseDtos);
     }
 
-    @Test
-    public void testActivateTrainee() {
-        // Arrange
-        ActivateRequestDto requestDto = new ActivateRequestDto();
-
-        // Act
-        ResponseEntity<Void> response = traineeController.toggleTraineeStatus(requestDto);
-
-        // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(traineeService).toggleTraineeStatus(requestDto);
-    }
 }

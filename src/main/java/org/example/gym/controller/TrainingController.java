@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.request.AddTrainingRequestDto;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
@@ -23,8 +24,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -51,6 +52,7 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainee
      */
     @GetMapping("/trainee")
+    @Authenticated
     @Operation(summary = "Get trainings for a trainee", description = "Fetches the list of trainings"
             + " for a specific trainee with optional filters.")
     @ApiResponses(value = {
@@ -61,11 +63,11 @@ public class TrainingController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<TrainingResponseDto>> getTraineeTrainingsList(
-            @RequestHeader String traineeName,
-            @RequestHeader(required = false) LocalDateTime periodFrom,
-            @RequestHeader(required = false) LocalDateTime periodTo,
-            @RequestHeader(required = false) String trainerName,
-            @RequestHeader(required = false) String trainingType) {
+            @RequestParam String traineeName,
+            @RequestParam(required = false) LocalDateTime periodFrom,
+            @RequestParam(required = false) LocalDateTime periodTo,
+            @RequestParam(required = false) String trainerName,
+            @RequestParam(required = false) String trainingType) {
 
         log.info("Fetching training list for trainee: {}", traineeName);
         TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto(traineeName, periodFrom,
@@ -90,6 +92,7 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainer
      */
     @GetMapping("/trainer")
+    @Authenticated
     @Operation(summary = "Get trainings for a trainer", description = "Fetches the list of trainings for "
             + "a specific trainer with optional filters.")
     @ApiResponses(value = {
@@ -100,10 +103,10 @@ public class TrainingController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
-            @RequestHeader String trainerName,
-            @RequestHeader(required = false) String periodFrom,
-            @RequestHeader(required = false) String periodTo,
-            @RequestHeader(required = false) String traineeName) {
+            @RequestParam String trainerName,
+            @RequestParam(required = false) String periodFrom,
+            @RequestParam(required = false) String periodTo,
+            @RequestParam(required = false) String traineeName) {
 
         log.info("Fetching training list for trainer: {}", trainerName);
 
@@ -123,6 +126,7 @@ public class TrainingController {
      * @return a response entity indicating the result of the operation
      */
     @PostMapping("/add")
+    @Authenticated
     @Operation(summary = "Add a new training", description = "Adds a new training session to the system.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Training added successfully", content = @Content),

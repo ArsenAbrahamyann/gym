@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
     /**
      * Handles resource not found exceptions and returns a response entity with the error details.
      *
@@ -48,15 +53,7 @@ public class GlobalExceptionHandler {
 
         // Timestamp as an array of integers
         LocalDateTime now = LocalDateTime.now();
-        errorResponse.put("timestamp", new int[]{
-                now.getYear(),
-                now.getMonthValue(),
-                now.getDayOfMonth(),
-                now.getHour(),
-                now.getMinute(),
-                now.getSecond(),
-                now.getNano()
-        });
+        errorResponse.put("timestamp", now.toString());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
@@ -75,15 +72,7 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", ex.getMessage());
 
         LocalDateTime now = LocalDateTime.now();
-        errorResponse.put("timestamp", new int[]{
-                now.getYear(),
-                now.getMonthValue(),
-                now.getDayOfMonth(),
-                now.getHour(),
-                now.getMinute(),
-                now.getSecond(),
-                now.getNano()
-        });
+        errorResponse.put("timestamp", now.toString());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }

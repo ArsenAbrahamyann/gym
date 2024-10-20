@@ -13,6 +13,6 @@ public class ActivateRequestDto {
     private String username;
 
     @NotBlank
-    @JsonProperty(value = "isPublic")
-    private boolean isPublic;
+    @JsonProperty(value = "isActive")
+    private boolean isActive;
 }
