@@ -48,8 +48,6 @@ public class TraineeController {
     private final TraineeService traineeService;
     private final TraineeMapper mapper;
 
-
-
     /**
      * Registers a new trainee.
      *
@@ -225,5 +223,4 @@ public class TraineeController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
 }
