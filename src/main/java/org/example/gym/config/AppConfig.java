@@ -31,7 +31,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Configuration class for setting up Hibernate and Spring integration.
  * It handles database configuration, session factory creation, and transaction management.
  */
-
 @Data
 @Configuration
 @EnableWebMvc
@@ -66,11 +65,30 @@ public class AppConfig implements WebMvcConfigurer {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
+    /**
+     * Configures the application's interceptors.
+     * <p>
+     * This method adds a {@link TransactionInterceptor} to the interceptor registry,
+     * which will be applied to incoming requests for transaction management.
+     * </p>
+     *
+     * @param registry the interceptor registry to which the interceptor will be added
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new TransactionInterceptor());
     }
 
+    /**
+     * Creates a bean of type {@link AuthAspect}.
+     * <p>
+     * This aspect is responsible for handling authorization concerns across
+     * the application. It can be used to enforce security rules before
+     * executing specific methods or controllers.
+     * </p>
+     *
+     * @return an instance of {@link AuthAspect}
+     */
     @Bean
     public AuthAspect authAspect() {
         return new AuthAspect();

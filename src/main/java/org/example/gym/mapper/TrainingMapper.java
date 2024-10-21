@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TrainingMapper {
-
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 

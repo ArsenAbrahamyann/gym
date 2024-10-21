@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Lazy
 public class TrainingService {
-
     private final TrainingRepository trainingRepository;
     private final TraineeService traineeService;
     private final TrainingTypeService trainingTypeService;

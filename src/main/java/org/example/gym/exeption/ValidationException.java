@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Slf4j
 public class ValidationException extends RuntimeException {
+
     /**
      * -- GETTER --
      *  Getter for the HTTP status.
