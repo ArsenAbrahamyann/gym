@@ -135,7 +135,6 @@ public class TrainerController {
         log.info("Controller: Trainer profile toggle successfully");
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
 }
 
 

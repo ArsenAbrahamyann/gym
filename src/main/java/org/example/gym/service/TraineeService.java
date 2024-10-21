@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 public class TraineeService {
-
     private final TraineeRepository traineeRepository;
     private final TrainerService trainerService;
     private final UserService userService;
