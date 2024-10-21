@@ -31,6 +31,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
+    /**
+     * Handles {@link UnauthorizedException} thrown by the application.
+     * <p>
+     * This method intercepts UnauthorizedExceptions and returns a
+     * standardized response indicating that the request is unauthorized.
+     * The response will have a status code of 401 (Unauthorized) and
+     * include the exception message in the response body.
+     * </p>
+     *
+     * @param ex the {@link UnauthorizedException} that was thrown
+     * @return a {@link ResponseEntity} containing the error message
+     *         and HTTP status 401 (Unauthorized)
+     */
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());

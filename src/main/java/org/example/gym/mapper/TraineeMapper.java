@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TraineeMapper {
-
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 
@@ -155,6 +154,7 @@ public class TraineeMapper {
     public TraineeEntity updateTraineeTrainerListMapToEntity(
             UpdateTraineeTrainerListRequestDto updateTraineeTrainerListRequestDto) {
         TraineeEntity trainee = traineeService.getTrainee(updateTraineeTrainerListRequestDto.getTraineeUsername());
+
         List<TrainerEntity> trainers = trainerService.findByUsernames(
                 updateTraineeTrainerListRequestDto.getTrainerUsername());
         trainee.setTrainers(new HashSet<>(trainers));
