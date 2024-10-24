@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Acts as a facade between the client and the TrainerService.
  */
 @RestController
-@RequestMapping("api/trainer")
+@RequestMapping("trainer")
 @CrossOrigin
 @RequiredArgsConstructor
 @Slf4j

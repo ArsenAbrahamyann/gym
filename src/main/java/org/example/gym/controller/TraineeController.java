@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.TraineeRegistrationRequestDto;
 import org.example.gym.dto.request.UpdateTraineeRequestDto;
@@ -40,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "Trainee-Controller")
 @RestController
-@RequestMapping("api/trainee")
+@RequestMapping("trainee")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -80,7 +79,6 @@ public class TraineeController {
      * @return a response entity containing the trainee's profile details
      */
     @GetMapping("/{username}")
-    @Authenticated
     @Operation(summary = "Get trainee profile", description = "Retrieves the profile of a trainee by their username.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile retrieved successfully", content = @Content),
@@ -104,7 +102,6 @@ public class TraineeController {
      * @return a response entity containing the updated trainee's response
      */
     @PutMapping("/update")
-    @Authenticated
     @Operation(summary = "Update trainee profile", description = "Updates a trainee's profile information.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile updated successfully", content = @Content),
@@ -131,7 +128,6 @@ public class TraineeController {
      * @return a response entity with no content
      */
     @DeleteMapping("/delete/{username}")
-    @Authenticated
     @Operation(summary = "Delete trainee profile", description = "Deletes a trainee's profile by username.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile deleted successfully", content = @Content),
@@ -153,7 +149,6 @@ public class TraineeController {
      * @return a response entity containing the list of unassigned trainers
      */
     @GetMapping("/unassigned-trainers/{traineeName}")
-    @Authenticated
     @Operation(summary = "Get unassigned trainers", description = "Retrieves a list of active trainers who"
             + " are not assigned to a trainee.")
     @ApiResponses(value = {
@@ -179,7 +174,6 @@ public class TraineeController {
      * @return a response entity containing the updated list of trainers
      */
     @PutMapping("/update/trainerList")
-    @Authenticated
     @Operation(summary = "Update trainee's trainer list", description = "Updates the list of trainers "
             + "assigned to a trainee.")
     @ApiResponses(value = {
@@ -207,7 +201,6 @@ public class TraineeController {
      * @return a response entity with no content
      */
     @PatchMapping("/toggle-activate")
-    @Authenticated
     @Operation(summary = "Activate trainee account", description = "Activates a trainee's account.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trainee account activated successfully", content = @Content),

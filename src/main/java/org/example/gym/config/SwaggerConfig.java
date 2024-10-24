@@ -7,16 +7,13 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
- * Configuration class for setting up OpenAPI (Swagger) documentation for the Gym CRM system.
+ * Swagger config class.
  */
 @Configuration
 @Slf4j
-@Import({org.springdoc.webmvc.ui.SwaggerConfig.class})
-public class OpenApiConfig {
-
+public class SwaggerConfig {
 
     /**
      * Defines custom OpenAPI settings, including server URL and API information.
