@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

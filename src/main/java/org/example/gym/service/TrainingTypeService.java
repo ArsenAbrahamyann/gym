@@ -5,8 +5,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.repository.TrainingTypeRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
