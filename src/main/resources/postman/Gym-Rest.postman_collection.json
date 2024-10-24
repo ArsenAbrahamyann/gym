@@ -1,0 +1,857 @@
+{
+	"info": {
+		"_postman_id": "6149bdb3-09b0-4c90-b42a-cc31dfeba793",
+		"name": "Gym-Rest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33141960"
+	},
+	"item": [
+		{
+			"name": "TraineeController",
+			"item": [
+				{
+					"name": "Trainee Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firsName\": \"John\",\r\n  \"lastName\": \"Doe\",\r\n  \"dateOfBrith\": \"1998-01-01T00:00:00\",\r\n  \"address\": \"123 Main Street\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/registration",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"registration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get trainee profile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe25",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "YAKYFsMMhk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/John.Doe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"John.Doe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update trainee profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"John.Doe\",\r\n  \"firstName\": \"John\",\r\n  \"lastName\": \"Doe\",\r\n  \"dateOfBirth\": \"1990-10-07T11:22:56.585459\",\r\n  \"address\": \"1234 Main Street\",\r\n  \"isPublic\": true\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete traine profile",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/delete/John.Doe24",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"delete",
+								"John.Doe24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Not Assigned On Trainee Active Trainers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/unassigned-trainers/John.Doe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"unassigned-trainers",
+								"John.Doe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Trainee Trainer List",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"traineeUsername\": \"John.Doe\",\r\n  \"trainerUsername\": [\"John.Doe24\", \"Johnn.Doe\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainee/update/trainerList",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainee",
+								"update",
+								"trainerList"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle activate Trainee",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"John.Doe\",\r\n  \"isActive\": true\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/trainee/toggle-activate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"trainee",
+								"toggle-activate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TrainerController",
+			"item": [
+				{
+					"name": "Trainer Registration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"John\",\r\n  \"lastName\": \"Doe\",\r\n  \"trainingTypeId\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainer/registration",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainer",
+								"registration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Trainer Profile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainer/John.Doe1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainer",
+								"John.Doe1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Trainer Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"John.Doe1\",\r\n  \"firstName\": \"John1\",\r\n  \"lastName\": \"Doe\",\r\n  \"trainingTypeId\": 3,\r\n  \"isPublic\": false\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainer/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainer",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle activate Trainer",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"John.Doe1\",\r\n  \"isPublic\": false\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainer/toggle-activate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainer",
+								"toggle-activate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TrainingController",
+			"item": [
+				{
+					"name": "Get trainee trainings list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/training/trainee?traineeName=John.Doe&periodFrom=2024-01-01T00:00:00&periodTo=2024-10-21T11:09:59&trainerName=John.Doe1&trainingType=Yoga Session",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"training",
+								"trainee"
+							],
+							"query": [
+								{
+									"key": "traineeName",
+									"value": "John.Doe"
+								},
+								{
+									"key": "periodFrom",
+									"value": "2024-01-01T00:00:00"
+								},
+								{
+									"key": "periodTo",
+									"value": "2024-10-21T11:09:59"
+								},
+								{
+									"key": "trainerName",
+									"value": "John.Doe1"
+								},
+								{
+									"key": "trainingType",
+									"value": "Yoga Session"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get trainer training list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/training/trainer?trainerName=John.Doe1&periodFrom=2023-01-01T00:00:00&periodTo=2024-10-20T13:45:59&traineeName=John.Doe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"training",
+								"trainer"
+							],
+							"query": [
+								{
+									"key": "trainerName",
+									"value": "John.Doe1"
+								},
+								{
+									"key": "periodFrom",
+									"value": "2023-01-01T00:00:00"
+								},
+								{
+									"key": "periodTo",
+									"value": "2024-10-20T13:45:59"
+								},
+								{
+									"key": "traineeName",
+									"value": "John.Doe"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add training",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"traineeUsername\": \"John.Doe\",\r\n  \"trainerUsername\": \"John.Doe11\",\r\n  \"trainingName\": \"Strength Training\",\r\n  \"trainingDate\": \"2024-10-03T14:00:00\",\r\n  \"trainingDuration\": 60\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/training/add",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"training",
+								"add"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TrainingTypeController",
+			"item": [
+				{
+					"name": "Generate training Type",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Username",
+								"value": "John.Doe27",
+								"type": "text"
+							},
+							{
+								"key": "Password",
+								"value": "6q9UDfH50h",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/trainingType",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"trainingType"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UserController",
+			"item": [
+				{
+					"name": "Login",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "John.Doe",
+								"type": "text"
+							},
+							{
+								"key": "password",
+								"value": "testPassword",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Login",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"John.Doe\",\r\n  \"oldPassword\": \"8Wsq8lomeK\",\r\n  \"newPassword\": \"testPassword\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/user/change/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"change",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Metrics",
+			"item": [
+				{
+					"name": "Login metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/custom/metrics/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"custom",
+								"metrics",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/metrics/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"metrics",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track request metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/metrics/track",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"metrics",
+								"track"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track request Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/prometheus",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"prometheus"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
