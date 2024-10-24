@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.response.TrainingTypesResponseDto;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.mapper.TrainingTypeMapper;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Provides endpoints to fetch training types.
  */
 @RestController
-@RequestMapping("api/trainingType")
+@RequestMapping("trainingType")
 @RequiredArgsConstructor
 @Slf4j
 public class TrainingTypeController {
@@ -34,7 +33,6 @@ public class TrainingTypeController {
      * @return ResponseEntity containing a list of TrainingTypesResponseDto objects.
      */
     @GetMapping
-    @Authenticated
     @Operation(summary = "Fetch all training types", description = "Retrieves a list of all available training types.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully fetched the list of training types"),

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * UserController handles user-related operations such as login and changing passwords.
  */
 @RestController
-@RequestMapping("api/user")
+@RequestMapping("user")
 @CrossOrigin
 @RequiredArgsConstructor
 @Slf4j
@@ -62,7 +61,6 @@ public class UserController {
      * @return a ResponseEntity indicating the success of the password change
      */
     @PutMapping("/change/login")
-    @Authenticated
     @Operation(summary = "Change user password", description = "Allows a user to change their password.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Password changed successfully"),

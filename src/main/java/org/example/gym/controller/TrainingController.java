@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.annotation.Authenticated;
 import org.example.gym.dto.request.AddTrainingRequestDto;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
@@ -33,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Acts as a facade between the client and the TrainingService.
  */
 @RestController
-@RequestMapping("api/training")
+@RequestMapping("training")
 @CrossOrigin
 @RequiredArgsConstructor
 @Slf4j
@@ -52,7 +51,6 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainee
      */
     @GetMapping("/trainee")
-    @Authenticated
     @Operation(summary = "Get trainings for a trainee", description = "Fetches the list of trainings"
             + " for a specific trainee with optional filters.")
     @ApiResponses(value = {
@@ -92,7 +90,6 @@ public class TrainingController {
      * @return a list of training response DTOs for the trainer
      */
     @GetMapping("/trainer")
-    @Authenticated
     @Operation(summary = "Get trainings for a trainer", description = "Fetches the list of trainings for "
             + "a specific trainer with optional filters.")
     @ApiResponses(value = {
@@ -126,7 +123,6 @@ public class TrainingController {
      * @return a response entity indicating the result of the operation
      */
     @PostMapping("/add")
-    @Authenticated
     @Operation(summary = "Add a new training", description = "Adds a new training session to the system.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Training added successfully", content = @Content),
