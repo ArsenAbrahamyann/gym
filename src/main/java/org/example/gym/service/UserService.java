@@ -55,7 +55,6 @@ public class UserService {
                     log.warn("Authentication failed for username: {}. User not found.", username);
                     return new UnauthorizedException("Invalid credentials");
                 });
-
         if (!user.getPassword().equals(password)) {
             log.warn("Invalid credentials provided for username: {}", username);
             throw new UnauthorizedException("Invalid credentials");

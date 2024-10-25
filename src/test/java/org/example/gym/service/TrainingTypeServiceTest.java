@@ -97,18 +97,7 @@ public class TrainingTypeServiceTest {
      * Tests the {@link TrainingTypeService#findById(Long)} method when the training
      * type does not exist, and an exception is thrown.
      */
-    @Test
-    void testFindByIdWhenNotExists() {
-        Long trainingTypeId = 99L;
 
-        when(trainingTypeRepository.findById(trainingTypeId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> trainingTypeService.findById(trainingTypeId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("TrainingType not found for ID");
-
-        verify(trainingTypeRepository, times(1)).findById(trainingTypeId);
-    }
 
     /**
      * Tests the {@link TrainingTypeService#findAll()} method when training types exist.

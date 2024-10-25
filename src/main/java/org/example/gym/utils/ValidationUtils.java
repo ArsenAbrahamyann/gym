@@ -188,7 +188,7 @@ public class ValidationUtils {
      * @param fieldName The name of the field being validated.
      * @throws ValidationException if the date is not in the correct format.
      */
-    private void validateDateFormat(LocalDateTime date, String fieldName) {
+    void validateDateFormat(LocalDateTime date, String fieldName) {
         SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         sdf.setLenient(false);
         try {
