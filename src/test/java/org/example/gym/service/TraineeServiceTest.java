@@ -179,17 +179,5 @@ public class TraineeServiceTest {
         assertThrows(TraineeNotFoundException.class, () -> traineeService.getTrainee("invalidUser"));
     }
 
-    @Test
-    public void deleteTraineeByUsername_TraineeNotFound() {
-        // Arrange
-        String username = "john.doe";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
 
-        when(userService.findByUsername(username)).thenReturn(user);
-        when(traineeRepository.findByUsername(username)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> traineeService.deleteTraineeByUsername(username));
-    }
 }

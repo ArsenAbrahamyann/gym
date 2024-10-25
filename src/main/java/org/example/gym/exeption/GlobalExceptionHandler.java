@@ -1,5 +1,6 @@
 package org.example.gym.exeption;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -103,6 +104,7 @@ public class GlobalExceptionHandler {
      * @param request The {@link WebRequest} information for the current request.
      * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
      */
+    @SneakyThrows
     @ExceptionHandler(TrainingNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTrainingNotFound(TrainingNotFoundException ex, WebRequest request) {
         log.error("Training not found: {}", ex.getMessage());
