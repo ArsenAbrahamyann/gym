@@ -1,7 +1,6 @@
 package org.example.gym.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.repository.TrainingTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,12 +90,6 @@ public class TrainingTypeServiceTest {
         assertThat(result.getId()).isEqualTo(trainingTypeId);
         verify(trainingTypeRepository, times(1)).findById(trainingTypeId);
     }
-
-    /**
-     * Tests the {@link TrainingTypeService#findById(Long)} method when the training
-     * type does not exist, and an exception is thrown.
-     */
-
 
     /**
      * Tests the {@link TrainingTypeService#findAll()} method when training types exist.

@@ -15,7 +15,6 @@ import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
