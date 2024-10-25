@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.exeption.ErrorResponse;
 import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.service.UserService;
@@ -92,8 +93,12 @@ public class AuthInterceptor implements HandlerInterceptor {
     private void sendErrorResponse(HttpServletResponse response, String message, HttpStatus status) throws Exception {
         response.setContentType("application/json");
         response.setStatus(status.value());
+
+        String requestUri = response.getHeader("Referer") != null ? response.getHeader("Referer") : "/";
+        ErrorResponse errorResponse = new ErrorResponse(message, status, requestUri);
+
         ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
-        String json = objectWriter.writeValueAsString(new ResourceNotFoundException(message, status));
+        String json = objectWriter.writeValueAsString(errorResponse);
         response.getWriter().write(json);
     }
 }

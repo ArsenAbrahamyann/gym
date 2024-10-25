@@ -1,12 +1,11 @@
 package org.example.gym.service;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
@@ -136,29 +135,6 @@ public class TrainerService {
         return trainerRepository.findByTrainees_Id(id);
     }
 
-    /**
-     * Retrieves a list of {@link TrainerEntity} records by their unique IDs.
-     *
-     * @param trainerIds the list of unique trainer IDs to find.
-     * @return a list of {@link TrainerEntity} records corresponding to the provided IDs.
-     */
-    @Transactional
-    public List<TrainerEntity> findAllById(List<Long> trainerIds) {
-        log.info("Finding trainers by IDs: {}", trainerIds);
-        return trainerRepository.findAllByIdIn(trainerIds);
-    }
-
-    /**
-     * Finds a {@link TrainerEntity} by its unique ID.
-     *
-     * @param trainerId the unique ID of the trainer to find.
-     * @return an {@link Optional} containing the {@link TrainerEntity} if found.
-     */
-    @Transactional
-    public Optional<TrainerEntity> findById(Long trainerId) {
-        log.info("Finding trainer by ID {}", trainerId);
-        return trainerRepository.findById(trainerId);
-    }
 
     /**
      * Finds a {@link TrainerEntity} by the trainer's username.
@@ -172,7 +148,7 @@ public class TrainerService {
         return trainerRepository.findTrainerByUsername(trainerUsername)
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username: {}", trainerUsername);
-                    return new ResourceNotFoundException("Trainer not found with username: " + trainerUsername);
+                    return new TrainerNotFoundException("Trainer not found with username: " + trainerUsername);
                 });
     }
 
