@@ -7,7 +7,6 @@ import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
@@ -94,7 +93,7 @@ public class TraineeService {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
 
         TraineeEntity trainee = traineeRepository.findByUsername(traineeUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Trainee not found for username: "
+                .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
                         + traineeUsername));
 
         List<TrainerEntity> allTrainers = trainerService.findAll();
@@ -149,23 +148,10 @@ public class TraineeService {
         UserEntity user = userService.findByUsername(username);
 
         TraineeEntity trainee = traineeRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("TraineeEntity not found"));
+                .orElseThrow(() -> new TraineeNotFoundException("TraineeEntity not found"));
 
         traineeRepository.delete(trainee);
         log.info("Trainee deleted successfully with username: {}", username);
-    }
-
-    /**
-     * Finds a trainee by their ID.
-     *
-     * @param traineeId The ID of the trainee.
-     * @return The found TraineeEntity.
-     */
-    @Transactional
-    public TraineeEntity findById(Long traineeId) {
-        return traineeRepository.findById(traineeId)
-                .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for traineeId: "
-                        + traineeId));
     }
 
     /**
@@ -176,6 +162,7 @@ public class TraineeService {
      */
     @Transactional
     public TraineeEntity getTrainee(String username) {
+        log.info("Retrieving trainee by username: {}", username);
         return traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
                         + username));

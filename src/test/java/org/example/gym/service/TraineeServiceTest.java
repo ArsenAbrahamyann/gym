@@ -155,21 +155,6 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void findById_ShouldReturnTrainee() {
-        // Arrange
-        Long traineeId = 1L;
-        TraineeEntity trainee = new TraineeEntity();
-        when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(trainee));
-
-        // Act
-        TraineeEntity foundTrainee = traineeService.findById(traineeId);
-
-        // Assert
-        assertNotNull(foundTrainee);
-        assertEquals(trainee, foundTrainee);
-    }
-
-    @Test
     public void getTrainee_ShouldReturnTrainee() {
         // Arrange
         String username = "john.doe";

@@ -122,33 +122,6 @@ public class TrainerServiceTest {
         verify(trainerRepository).findByTrainees_Id(traineeId);
     }
 
-
-    @Test
-    public void testFindAllById() {
-        Long trainerId = 1L;
-        when(trainerRepository.findAllByIdIn(Arrays.asList(trainerId))).thenReturn(Arrays.asList(trainer));
-
-        var trainers = trainerService.findAllById(Arrays.asList(trainerId));
-
-        assertNotNull(trainers);
-        assertEquals(1, trainers.size());
-        verify(trainerRepository).findAllByIdIn(Arrays.asList(trainerId));
-    }
-
-
-    @Test
-    public void testFindById() {
-        Long trainerId = 1L;
-        when(trainerRepository.findById(trainerId)).thenReturn(Optional.of(trainer));
-
-        Optional<TrainerEntity> foundTrainer = trainerService.findById(trainerId);
-
-        assertTrue(foundTrainer.isPresent());
-        assertEquals(trainer, foundTrainer.get());
-        verify(trainerRepository).findById(trainerId);
-    }
-
-
     @Test
     public void testGetTrainer() {
         String username = "john.doe";

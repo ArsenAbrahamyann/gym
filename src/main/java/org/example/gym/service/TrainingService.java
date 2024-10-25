@@ -1,13 +1,12 @@
 package org.example.gym.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.exeption.TrainingNotFoundException;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
@@ -54,7 +53,6 @@ public class TrainingService {
      * Adds a new training record.
      *
      * @param training The details of the training to be added.
-     * @throws ResourceNotFoundException If the specified trainee or trainer is not found.
      */
     @Transactional
     public void addTraining(TrainingEntity training) {
@@ -67,7 +65,6 @@ public class TrainingService {
      * Retrieves a list of trainings for a specific trainee based on the provided criteria.
      *
      * @return A list of training entities that match the criteria.
-     * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
     @Transactional
     public List<TrainingEntity> getTrainingsForTrainee(TraineeTrainingsRequestDto requestDto) {
@@ -82,7 +79,7 @@ public class TrainingService {
 
         if (trainings.isEmpty()) {
             log.warn("No trainings found for trainee: {}", requestDto.getTraineeName());
-            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
+            throw new TrainingNotFoundException("No trainings found for the specified criteria.");
         }
 
         log.info("Found {} trainings for trainee: {}", trainings.size(), requestDto.getTraineeName());
@@ -93,7 +90,6 @@ public class TrainingService {
      * Retrieves a list of trainings conducted by a specific trainer based on the provided criteria.
      *
      * @return A list of training entities that match the criteria.
-     * @throws ResourceNotFoundException If no trainings are found that match the criteria.
      */
     @Transactional
     public List<TrainingEntity> getTrainingsForTrainer(TrainerTrainingRequestDto requestDto) {
@@ -108,34 +104,11 @@ public class TrainingService {
 
         if (trainings.isEmpty()) {
             log.warn("No trainings found for trainer: {}", requestDto.getTrainerUsername());
-            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
+            throw new TrainingNotFoundException("No trainings found for the specified criteria.");
         }
 
         log.info("Found {} trainings for trainer: {}", trainings.size(), requestDto.getTrainerUsername());
         return trainings;
     }
 
-    /**
-     * Retrieves a list of {@link TrainingEntity} records for a specific trainer within a
-     * given date range and trainee name.
-     *
-     * @param id          the unique ID of the trainer for whom the trainings are to be found.
-     * @param fromDate    the start of the date range for retrieving the trainings.
-     * @param toDate      the end of the date range for retrieving the trainings.
-     * @param traineeName the name of the trainee to filter the trainings.
-     * @return a list of {@link TrainingEntity} records that match the criteria.
-     */
-    @Transactional
-    public List<TrainingEntity> findTrainingsForTrainer(Long id, LocalDateTime fromDate, LocalDateTime toDate,
-                                                        String traineeName) {
-        log.info("Fetching trainings for trainer ID: {} from {} to {} for trainee: {}", id, fromDate, toDate,
-                traineeName);
-
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(id, fromDate, toDate, traineeName);
-        if (trainings.isEmpty()) {
-            log.warn("No trainings found for trainer ID: {}", id);
-            throw new ResourceNotFoundException("No trainings found for the specified criteria.");
-        }
-        return trainings;
-    }
 }
