@@ -78,8 +78,7 @@ public class TraineeController {
      * @param username the username of the trainee
      * @return a response entity containing the trainee's profile details
      */
-//    @GetMapping("/{username}")
-    @RequestMapping
+    @GetMapping("/{username}")
     @Operation(summary = "Get trainee profile", description = "Retrieves the profile of a trainee by their username.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile retrieved successfully", content = @Content),
