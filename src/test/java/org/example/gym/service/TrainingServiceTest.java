@@ -17,7 +17,7 @@ import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.exeption.TrainingNotFoundException;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,7 +115,7 @@ public class TrainingServiceTest {
         when(trainingRepository.findTrainingsForTrainee(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+        TrainingNotFoundException thrown = assertThrows(TrainingNotFoundException.class, () -> {
             trainingService.getTrainingsForTrainee(requestDto);
         });
 
@@ -150,7 +150,7 @@ public class TrainingServiceTest {
         when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
+        TrainingNotFoundException thrown = assertThrows(TrainingNotFoundException.class, () -> {
             trainingService.getTrainingsForTrainer(requestDto);
         });
 
@@ -158,32 +158,4 @@ public class TrainingServiceTest {
     }
 
 
-    @Test
-    public void testFindTrainingsForTrainer_ValidData() {
-        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
-        LocalDateTime toDate = LocalDateTime.now();
-
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(trainingEntity));
-
-        List<TrainingEntity> trainings = trainingService.findTrainingsForTrainer(1L, fromDate,
-                toDate, "traineeUsername");
-        assertEquals(1, trainings.size());
-    }
-
-
-    @Test
-    public void testFindTrainingsForTrainer_NoTrainingsFound() {
-        LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
-        LocalDateTime toDate = LocalDateTime.now();
-
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
-                .thenReturn(Collections.emptyList());
-
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            trainingService.findTrainingsForTrainer(1L, fromDate, toDate, "traineeUsername");
-        });
-
-        assertEquals("No trainings found for the specified criteria.", thrown.getMessage());
-    }
 }

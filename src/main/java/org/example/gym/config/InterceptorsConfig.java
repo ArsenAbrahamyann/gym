@@ -27,17 +27,18 @@ public class InterceptorsConfig implements WebMvcConfigurer {
      * Adds interceptors to the registry for specific URL patterns.
      * - The {@link TransactionInterceptor} is applied to all incoming requests.
      * - The {@link AuthInterceptor} is applied to specific paths related to trainees, trainers, training, and users,
-     *   excluding paths for registration and metrics tracking.
+     * excluding paths for registration and metrics tracking.
      *
      * @param registry the {@link InterceptorRegistry} to which the interceptors are added
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns("/trainee/*", "/trainer/*", "/training/*", "/user/*", "/trainingType/*")
+                .excludePathPatterns("/trainee/registration", "/trainer/registration", "/custom/metrics");
+
         registry.addInterceptor(transactionInterceptor)
                 .addPathPatterns("/**");
 
-        registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/trainee", "/trainer", "/training", "/user", "/trainingType")
-                .excludePathPatterns("/trainee/registration", "/trainer/registration", "/custom/metrics");
     }
 }

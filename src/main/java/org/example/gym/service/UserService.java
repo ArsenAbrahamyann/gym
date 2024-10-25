@@ -7,8 +7,8 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
 import org.example.gym.exeption.UnauthorizedException;
+import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.UserRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -49,17 +49,19 @@ public class UserService {
      */
     @Transactional
     public boolean authenticateUser(String username, String password) {
-        log.info("Authenticating user: {}", username);
+        log.debug("Entering authenticateUser() with username: {}", username);
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
+                .orElseThrow(() -> {
+                    log.warn("Authentication failed for username: {}. User not found.", username);
+                    return new UnauthorizedException("Invalid credentials");
+                });
 
-        // Check if the provided password matches the stored password
         if (!user.getPassword().equals(password)) {
-            log.warn("Authentication failed for user {}", username);
-            throw new UnauthorizedException("Invalid credentials"); // Throw exception if the password is incorrect
+            log.warn("Invalid credentials provided for username: {}", username);
+            throw new UnauthorizedException("Invalid credentials");
         }
 
-        log.info("User {} authenticated successfully", username);
+        log.info("User {} authenticated successfully.", username);
         return true;
     }
 
@@ -70,8 +72,9 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public List<String> findAllUsernames() {
-        log.info("Fetching all usernames from the repository.");
+        log.debug("Fetching all usernames from the repository.");
         List<String> allUsernames = userRepository.findAllUsername();
+        log.info("Retrieved {} usernames from the repository.", allUsernames.size());
         return allUsernames.isEmpty() ? Collections.emptyList() : allUsernames;
     }
 
@@ -83,10 +86,13 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserEntity findByUsername(String username) {
-        log.info("Retrieving user by username: {}", username);
+        log.debug("Retrieving user by username: {}", username);
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User name not found."
-                        + username));
+                .orElseThrow(() -> {
+                    log.warn("User not found for username: {}", username);
+                    return new UserNotFoundException("User name not found: "
+                            + username);
+                });
     }
 
 
@@ -96,12 +102,18 @@ public class UserService {
      * @param changeLoginRequestDto contains the username and old/new passwords.
      */
     public void changePassword(ChangeLoginRequestDto changeLoginRequestDto) {
+        log.debug("Changing password for user: {}", changeLoginRequestDto.getUsername());
 
-        UserEntity byUsername = userRepository.findByUsername(changeLoginRequestDto.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        byUsername.setPassword(changeLoginRequestDto.getNewPassword());
-        userRepository.save(byUsername);
-        log.info("User Password exchange successful for username {}", byUsername.getUsername());
+        UserEntity user = userRepository.findByUsername(changeLoginRequestDto.getUsername())
+                .orElseThrow(() -> {
+                    log.warn("User not found for username: {}", changeLoginRequestDto.getUsername());
+                    return new UserNotFoundException("User not found");
+                });
+
+        user.setPassword(changeLoginRequestDto.getNewPassword());
+        userRepository.save(user);
+        log.info("User password changed successfully for username: {}", user.getUsername());
+
     }
 
 }
