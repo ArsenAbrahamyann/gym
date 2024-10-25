@@ -1,5 +1,7 @@
 package org.example.gym.exeption;
 
+import org.springframework.http.HttpStatus;
+
 /**
  * Exception thrown when an unauthorized access attempt is made.
  * <p>
@@ -8,15 +10,14 @@ package org.example.gym.exeption;
  * the necessary permissions.
  * </p>
  */
-public class UnauthorizedException  extends RuntimeException {
+public class UnauthorizedException  extends ApplicationException {
 
     /**
-     * Constructs a new {@code UnauthorizedException} with the specified detail message.
+     * Constructs a new UnauthorizedException with the specified detail message.
      *
-     * @param message the detail message, which is saved for later retrieval
-     *                by the {@link Throwable#getMessage()} method
+     * @param message The detail message.
      */
     public UnauthorizedException(String message) {
-        super(message);
+        super(message, HttpStatus.UNAUTHORIZED);
     }
 }

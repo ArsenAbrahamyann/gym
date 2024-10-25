@@ -1,52 +1,28 @@
 package org.example.gym.exeption;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
 /**
  * Custom exception class to represent a resource not found scenario.
  */
-@Getter
-@Slf4j
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends ApplicationException {
 
     /**
-     * -- GETTER --
-     *  Getter for the HTTP status.
+     * Constructs a new ResourceNotFoundException with a specified message.
      *
-     * @return the HTTP status associated with the exception
-     */
-    private final HttpStatus httpStatus;
-
-    /**
-     * Constructor that takes a message and a specific HTTP status.
-     *
-     * @param message   the detail message
-     * @param httpStatus the HTTP status associated with the exception
-     */
-    public ResourceNotFoundException(String message, HttpStatus httpStatus) {
-        super(message);
-        this.httpStatus = httpStatus;
-        logError(message, httpStatus);
-    }
-
-    /**
-     * Constructor that only takes a message, defaulting to NOT_FOUND status.
-     *
-     * @param message the detail message
+     * @param message The detail message.
      */
     public ResourceNotFoundException(String message) {
-        this(message, HttpStatus.NOT_FOUND);
+        super(message, HttpStatus.NOT_FOUND);
     }
 
     /**
-     * Logs the error message and HTTP status.
+     * Constructs a new ResourceNotFoundException with a specified message.
      *
-     * @param message   the detail message
-     * @param httpStatus the HTTP status associated with the exception
+     * @param message The detail message.
+     * @param httpStatus The detail message.
      */
-    private void logError(String message, HttpStatus httpStatus) {
-        log.error("ResourceNotFoundException: {}, HTTP Status: {}", message, httpStatus);
+    public ResourceNotFoundException(String message, HttpStatus httpStatus) {
+        super(message, httpStatus);
     }
 }

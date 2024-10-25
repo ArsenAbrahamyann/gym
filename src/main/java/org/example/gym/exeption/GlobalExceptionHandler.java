@@ -1,8 +1,5 @@
 package org.example.gym.exeption;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,96 +8,146 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Global exception handler for managing exceptions in the application.
- * This class provides centralized handling of exceptions thrown by
- * controllers, allowing for consistent response formatting.
+ * Centralized exception handler for handling exceptions globally in the application.
+ * Provides consistent error response formatting for various exception types.
  */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     /**
-     * Handles validation exceptions and returns a response entity with the error message.
+     * Handles ValidationException and returns an appropriate response.
      *
-     * @param e the validation exception
-     * @return response entity with error message and appropriate HTTP status
+     * @param e       The exception that occurred.
+     * @param request The web request information.
+     * @return Response entity containing the error response.
      */
-    @ExceptionHandler(org.example.gym.exeption.ValidationException.class)
-    public ResponseEntity<String> handleValidationException(ValidationException e) {
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException e, WebRequest request) {
         log.warn("Validation error occurred: {}", e.getMessage());
-        return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+        return buildErrorResponse(e.getMessage(), e.getHttpStatus(), request);
     }
 
     /**
-     * Handles {@link UnauthorizedException} thrown by the application.
-     * <p>
-     * This method intercepts UnauthorizedExceptions and returns a
-     * standardized response indicating that the request is unauthorized.
-     * The response will have a status code of 401 (Unauthorized) and
-     * include the exception message in the response body.
-     * </p>
+     * Builds the error response based on the exception details and request information.
      *
-     * @param ex the {@link UnauthorizedException} that was thrown
-     * @return a {@link ResponseEntity} containing the error message
-     *         and HTTP status 401 (Unauthorized)
+     * @param message The error message.
+     * @param status  The HTTP status of the error.
+     * @param request The web request information.
+     * @return Response entity containing the formatted error response.
+     */
+    private ResponseEntity<ErrorResponse> buildErrorResponse(String message, HttpStatus status, WebRequest request) {
+        String path = request.getDescription(false).replace("uri=", "");
+        ErrorResponse errorResponse = new ErrorResponse(message, status, path);
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    /**
+     * Handles unauthorized access exceptions, which occur when a user attempts to access
+     * a resource without proper authorization.
+     *
+     * @param ex The {@link UnauthorizedException} representing an unauthorized access attempt.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} with a structured {@link ErrorResponse} indicating unauthorized access.
      */
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
+        log.warn("Unauthorized access attempt: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
     /**
-     * Handles resource not found exceptions and returns a response entity with the error details.
+     * Handles cases where a requested resource cannot be found.
      *
-     * @param ex the resource not found exception
-     * @param request the web request
-     * @return response entity with error details and NOT_FOUND status
+     * @param ex The {@link ResourceNotFoundException} for a missing resource.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex,
-                                                                               WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
+                                                                         WebRequest request) {
         log.error("Resource not found: {}", ex.getMessage());
-
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("message", ex.getMessage());
-
-        // Timestamp as an array of integers
-        LocalDateTime now = LocalDateTime.now();
-        errorResponse.put("timestamp", now.toString());
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
     }
 
     /**
-     * Handles trainee not found exceptions and returns a response entity with the error details.
+     * Handles cases where a specific trainee cannot be found in the system.
      *
-     * @param ex the trainee not found exception
-     * @return response entity with error details and NOT_FOUND status
+     * @param ex The {@link TraineeNotFoundException} representing a missing trainee.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
      */
-    @ExceptionHandler(org.example.gym.exeption.TraineeNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleTraineeNotFound(TraineeNotFoundException ex) {
+    @ExceptionHandler(TraineeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTraineeNotFound(TraineeNotFoundException ex, WebRequest request) {
         log.error("Trainee not found: {}", ex.getMessage());
-
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("message", ex.getMessage());
-
-        LocalDateTime now = LocalDateTime.now();
-        errorResponse.put("timestamp", now.toString());
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
     }
 
     /**
-     * Handles general exceptions and returns a response entity with an error message.
+     * Handles cases where a specific trainer cannot be found in the system.
      *
-     * @param e the general exception
-     * @return response entity with an unexpected error message and INTERNAL_SERVER_ERROR status
+     * @param ex The {@link TrainerNotFoundException} representing a missing trainer.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
+     */
+    @ExceptionHandler(TrainerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTrainerNotFound(TrainerNotFoundException ex, WebRequest request) {
+        log.error("Trainer not found: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+    }
+
+    /**
+     * Handles cases where a specific training session cannot be found in the system.
+     *
+     * @param ex The {@link TrainingNotFoundException} representing a missing training session.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
+     */
+    @ExceptionHandler(TrainingNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTrainingNotFound(TrainingNotFoundException ex, WebRequest request) {
+        log.error("Training not found: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+    }
+
+    /**
+     * Handles cases where a specific user cannot be found in the system.
+     *
+     * @param ex The {@link UserNotFoundException} representing a missing user.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, WebRequest request) {
+        log.error("User not found: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+    }
+
+
+    /**
+     * Handles general application-level exceptions, providing a consistent response format.
+     *
+     * @param e The {@link ApplicationException} thrown within the application.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} with a standardized {@link ErrorResponse}.
+     */
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException e, WebRequest request) {
+        log.error("An Application error occurred: {}", e.getMessage(), e);
+        return buildErrorResponse("An Application error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    /**
+     * Handles general, unexpected exceptions, providing a fallback error response.
+     *
+     * @param e The {@link Exception} that occurred unexpectedly.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} with a standardized {@link ErrorResponse}.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e, WebRequest request) {
         log.error("An unexpected error occurred: {}", e.getMessage(), e);
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An unexpected error occurred: " + e.getMessage());
+        return buildErrorResponse("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
+
+
 }

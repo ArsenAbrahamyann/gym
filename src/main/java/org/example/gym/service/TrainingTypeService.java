@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.exeption.ResourceNotFoundException;
+import org.example.gym.exeption.TrainingTypeNotFoundException;
 import org.example.gym.repository.TrainingTypeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,14 +50,14 @@ public class TrainingTypeService {
      *
      * @param trainingTypeId the unique ID of the {@link TrainingTypeEntity}.
      * @return the found {@link TrainingTypeEntity}.
-     * @throws ResourceNotFoundException if the training type is not found.
+     * @throws TrainingTypeNotFoundException if the training type is not found.
      */
     @Transactional
     public TrainingTypeEntity findById(Long trainingTypeId) {
         return trainingTypeRepository.findById(trainingTypeId)
                 .orElseThrow(() -> {
                     log.warn("No training type found with ID {}", trainingTypeId);
-                    return new ResourceNotFoundException("TrainingType not found for ID: "
+                    return new TrainingTypeNotFoundException("TrainingType not found for ID: "
                             + trainingTypeId);
                 });
     }
