@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
  * Represents a general application exception that captures an HTTP status and error message.
  * Provides logging functionality for error messages.
  */
-@Getter
+@Getter // TODO why do you need setter in exception?
 @Slf4j
 public class ApplicationException extends RuntimeException {
     private final HttpStatus httpStatus;
