@@ -48,6 +48,8 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response,
                              @NonNull Object handler) throws Exception {
         String requestUri = request.getRequestURI();
+        // TODO there must be a pattern for secured URLs
+        // TODO why would we even need this urls?
         if (requestUri.equals("/swagger-ui/favicon-16x16.png") || requestUri.equals("/favicon.ico")) {
             return true;
         }
@@ -66,6 +68,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             userService.authenticateUser(username, password);
         } catch (ResourceNotFoundException e) {
             log.warn("Authentication failed for user: {}. Reason: {}", username, e.getMessage());
+            // TODO we should not separate Authentication failed and Invalid credentials, security reasons,
+            //  user must not know why authentication was failed
             sendErrorResponse(response, "Authentication failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
             return false;
         } catch (UnauthorizedException e) {
@@ -97,6 +101,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String requestUri = response.getHeader("Referer") != null ? response.getHeader("Referer") : "/";
         ErrorResponse errorResponse = new ErrorResponse(message, status, requestUri);
 
+        // TODO the JSON is for "machines", no withDefaultPrettyPrinter is required
         ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
         String json = objectWriter.writeValueAsString(errorResponse);
         response.getWriter().write(json);

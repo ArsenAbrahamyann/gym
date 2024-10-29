@@ -101,7 +101,7 @@ public class TraineeController {
      * @param requestDto the updated details of the trainee
      * @return a response entity containing the updated trainee's response
      */
-    @PutMapping("/update")
+    @PutMapping("/update") // TODO NO verbs in the path
     @Operation(summary = "Update trainee profile", description = "Updates a trainee's profile information.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile updated successfully", content = @Content),
@@ -127,7 +127,7 @@ public class TraineeController {
      * @param username the username of the trainee
      * @return a response entity with no content
      */
-    @DeleteMapping("/delete/{username}")
+    @DeleteMapping("/delete/{username}") //TODO No verbs like DELETE in the path
     @Operation(summary = "Delete trainee profile", description = "Deletes a trainee's profile by username.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile deleted successfully", content = @Content),
@@ -173,7 +173,7 @@ public class TraineeController {
      * @param requestDto the details of the trainee and the trainers to assign
      * @return a response entity containing the updated list of trainers
      */
-    @PutMapping("/update/trainerList")
+    @PutMapping("/update/trainerList") // TODO no verbs
     @Operation(summary = "Update trainee's trainer list", description = "Updates the list of trainers "
             + "assigned to a trainee.")
     @ApiResponses(value = {
@@ -200,7 +200,7 @@ public class TraineeController {
      * @param requestDto the details of the trainee to activate
      * @return a response entity with no content
      */
-    @PatchMapping("/toggle-activate")
+    @PatchMapping("/toggle-activate") // TODO no verbs
     @Operation(summary = "Activate trainee account", description = "Activates a trainee's account.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trainee account activated successfully", content = @Content),
