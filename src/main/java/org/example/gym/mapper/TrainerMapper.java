@@ -1,13 +1,11 @@
 package org.example.gym.mapper;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.TrainerRegistrationRequestDto;
-import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.dto.response.GetTrainerProfileResponseDto;
 import org.example.gym.dto.response.RegistrationResponseDto;
 import org.example.gym.dto.response.TraineeListResponseDto;
@@ -15,8 +13,6 @@ import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.service.TrainerService;
-import org.example.gym.service.TrainingTypeService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,8 +22,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TrainerMapper {
-    private final TrainingTypeService trainingTypeService;
-    private final TrainerService trainerService;
 
     /**
      * Maps a TrainerRegistrationRequestDto to a TrainerEntity.
@@ -38,7 +32,8 @@ public class TrainerMapper {
     public TrainerEntity trainerRegistrationMapToEntity(TrainerRegistrationRequestDto registrationDto) {
         log.debug("Mapping TrainerRegistrationRequestDto to TrainerEntity: {}", registrationDto);
         TrainerEntity trainer = new TrainerEntity();
-        TrainingTypeEntity trainingType = trainingTypeService.findById(registrationDto.getTrainingTypeId());
+        TrainingTypeEntity trainingType = new TrainingTypeEntity();
+        trainingType.setId(registrationDto.getTrainingTypeId());
         trainer.setSpecialization(trainingType);
         trainer.setIsActive(true);
         trainer.setFirstName(registrationDto.getFirstName());
@@ -90,38 +85,6 @@ public class TrainerMapper {
                 entity.getIsActive(), responseDtos);
         log.info("Mapped UpdateTrainerProfileResponseDto: {}", responseDto);
         return responseDto;
-    }
-
-    /**
-     * Updates a TrainerEntity based on the provided UpdateTrainerRequestDto.
-     *
-     * @param updateDto the UpdateTrainerRequestDto containing updated trainer information
-     * @return the updated TrainerEntity
-     * @throws EntityNotFoundException if the trainer or training type cannot be found
-     */
-    public TrainerEntity updateRequestDtoMapToTrainerEntity(UpdateTrainerRequestDto updateDto) {
-        log.debug("Updating TrainerEntity for username: {}", updateDto.getUsername());
-        TrainerEntity trainer = trainerService.getTrainer(updateDto.getUsername());
-
-        if (trainer == null) {
-            log.error("Trainer not found for username: {}", updateDto.getUsername());
-            throw new EntityNotFoundException("Trainer not found");
-        }
-
-        trainer.setIsActive(updateDto.isPublic());
-        trainer.setFirstName(updateDto.getFirstName());
-        trainer.setLastName(updateDto.getLastName());
-        trainer.setUsername(updateDto.getUsername());
-
-        TrainingTypeEntity trainingType = trainingTypeService.findById(updateDto.getTrainingTypeId());
-        if (trainingType == null) {
-            log.error("Training type not found for ID: {}", updateDto.getTrainingTypeId());
-            throw new EntityNotFoundException("Training type not found");
-        }
-
-        trainer.setSpecialization(trainingType);
-        log.info("Updated TrainerEntity: {}", trainer);
-        return trainer;
     }
 
     /**

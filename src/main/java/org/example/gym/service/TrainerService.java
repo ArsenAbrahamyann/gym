@@ -3,6 +3,7 @@ package org.example.gym.service;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
+import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.exeption.TrainerNotFoundException;
@@ -59,9 +60,7 @@ public class TrainerService {
     public TrainerEntity createTrainerProfile(TrainerEntity trainer) {
         log.info("Creating trainer profile ");
 
-        List<String> allUsernames = userService.findAllUsernames();
-        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName(),
-                allUsernames);
+        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName());
         trainer.setUsername(generateUsername);
 
         String generatePassword = userUtils.generatePassword();
@@ -99,14 +98,20 @@ public class TrainerService {
     /**
      * Updates the profile of the trainer.
      *
-     * @param trainer The trainer entity with updated information.
+     * @param requestDto The trainer entity with updated information.
      * @return The updated TrainerEntity.
      */
     @Transactional
-    public TrainerEntity updateTrainerProfile(TrainerEntity trainer) {
-        log.info("Updating trainer profile for {}", trainer.getUsername());
+    public TrainerEntity updateTrainerProfile(UpdateTrainerRequestDto requestDto) {
+        log.info("Updating trainer profile for {}", requestDto.getUsername());
+        TrainerEntity trainer = getTrainer(requestDto.getUsername());
+        trainer.setUsername(requestDto.getUsername());
+        trainer.setFirstName(requestDto.getFirstName());
+        trainer.setLastName(requestDto.getLastName());
+        trainer.setIsActive(requestDto.isPublic());
+        TrainingTypeEntity trainingType = trainingTypeService.findById(requestDto.getTrainingTypeId());
+        trainer.setSpecialization(trainingType);
         validationUtils.validateUpdateTrainer(trainer);
-
         TrainerEntity save = trainerRepository.save(trainer);
         log.info("Trainee profile updated successfully for {}", save.getUsername());
         return save;

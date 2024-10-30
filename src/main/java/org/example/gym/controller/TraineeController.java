@@ -101,7 +101,7 @@ public class TraineeController {
      * @param requestDto the updated details of the trainee
      * @return a response entity containing the updated trainee's response
      */
-    @PutMapping("/update") // TODO NO verbs in the path
+    @PutMapping
     @Operation(summary = "Update trainee profile", description = "Updates a trainee's profile information.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile updated successfully", content = @Content),
@@ -113,8 +113,7 @@ public class TraineeController {
             @RequestBody UpdateTraineeRequestDto requestDto) {
         log.info(" Controller: Update trainee profile request for username: {}", requestDto.getUsername());
 
-        TraineeEntity trainee = mapper.updateDtoMapToTraineeEntity(requestDto);
-        TraineeEntity traineeEntityUpdated = traineeService.updateTraineeProfile(trainee);
+        TraineeEntity traineeEntityUpdated = traineeService.updateTraineeProfile(requestDto);
 
         UpdateTraineeResponseDto responseDto = mapper.traineeEntityMapToUpdateResponse(traineeEntityUpdated);
         log.info("Controller: Trainee profile updated successfully, Response: {}", responseDto);
@@ -127,7 +126,7 @@ public class TraineeController {
      * @param username the username of the trainee
      * @return a response entity with no content
      */
-    @DeleteMapping("/delete/{username}") //TODO No verbs like DELETE in the path
+    @DeleteMapping("/{username}")
     @Operation(summary = "Delete trainee profile", description = "Deletes a trainee's profile by username.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Profile deleted successfully", content = @Content),
@@ -173,7 +172,7 @@ public class TraineeController {
      * @param requestDto the details of the trainee and the trainers to assign
      * @return a response entity containing the updated list of trainers
      */
-    @PutMapping("/update/trainerList") // TODO no verbs
+    @PutMapping("/trainers")
     @Operation(summary = "Update trainee's trainer list", description = "Updates the list of trainers "
             + "assigned to a trainee.")
     @ApiResponses(value = {
@@ -186,8 +185,7 @@ public class TraineeController {
             @RequestBody UpdateTraineeTrainerListRequestDto requestDto) {
         log.info(" Controller: Update trainee trainer list request for username: {}", requestDto.getTraineeUsername());
 
-        TraineeEntity trainee = mapper.updateTraineeTrainerListMapToEntity(requestDto);
-        TraineeEntity traineeEntity = traineeService.updateTraineeTrainers(trainee);
+        TraineeEntity traineeEntity = traineeService.updateTraineeTrainerList(requestDto);
 
         List<TrainerResponseDto> responseDtos = mapper.updateTraineeTrainerListMapToTrainerResponse(traineeEntity);
         log.info(" Controller: Trainee trainer list updated successfully, Response size: {}", responseDtos.size());
@@ -200,7 +198,7 @@ public class TraineeController {
      * @param requestDto the details of the trainee to activate
      * @return a response entity with no content
      */
-    @PatchMapping("/toggle-activate") // TODO no verbs
+    @PatchMapping("/status")
     @Operation(summary = "Activate trainee account", description = "Activates a trainee's account.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trainee account activated successfully", content = @Content),

@@ -3,6 +3,7 @@ package org.example.gym.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for managing training types.
  * Provides endpoints to fetch training types.
  */
+@Tag(name = "TrainingType-Controller")
 @RestController
 @RequestMapping("trainingType")
 @RequiredArgsConstructor

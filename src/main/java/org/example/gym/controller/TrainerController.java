@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
@@ -17,7 +18,6 @@ import org.example.gym.mapper.TrainerMapper;
 import org.example.gym.service.TrainerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller class responsible for handling trainer-related operations.
  * Acts as a facade between the client and the TrainerService.
  */
+@Tag(name = "Trainer-Controller")
 @RestController
 @RequestMapping("trainer")
-@CrossOrigin
 @RequiredArgsConstructor
 @Slf4j
 public class TrainerController {
@@ -94,7 +94,7 @@ public class TrainerController {
      * @param requestDto The request DTO containing the updated trainer details.
      * @return ResponseEntity with the updated trainer profile response DTO.
      */
-    @PutMapping("/update")
+    @PutMapping
     @Operation(summary = "Update trainer profile")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trainer profile updated successfully", content = @Content),
@@ -106,8 +106,7 @@ public class TrainerController {
             @RequestBody UpdateTrainerRequestDto requestDto) {
         log.info("Updating trainer profile for: {}", requestDto.getUsername());
 
-        TrainerEntity updatedTrainer = mapper.updateRequestDtoMapToTrainerEntity(requestDto);
-        TrainerEntity savedTrainer = trainerService.updateTrainerProfile(updatedTrainer);
+        TrainerEntity savedTrainer = trainerService.updateTrainerProfile(requestDto);
 
         UpdateTrainerProfileResponseDto responseDto = mapper.updateTrainerProfileMapToResponseDto(savedTrainer);
         log.info("Controller: Trainer profile updated successfully, Response: {}", responseDto);
@@ -120,7 +119,7 @@ public class TrainerController {
      * @param requestDto The request DTO containing the username to activate.
      * @return ResponseEntity indicating the result of the activation.
      */
-    @PatchMapping("/toggle-activate")
+    @PatchMapping("/status")
     @Operation(summary = "Activate a trainer's account")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trainer activated successfully", content = @Content),

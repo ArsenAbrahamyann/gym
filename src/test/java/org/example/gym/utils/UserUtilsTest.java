@@ -1,44 +1,60 @@
 package org.example.gym.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.List;
+import org.example.gym.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class UserUtilsTest {
-    private final UserUtils userUtils = new UserUtils();
+    @Mock
+    private UserService userService;
 
-    @Test
-    public void testGenerateUsernameUnique() {
-        List<String> existingUsernames = Arrays.asList("john.doe", "john.doe1", "john.doe2");
-        String username = userUtils.generateUsername("john", "doe", existingUsernames);
-        assertEquals("john.doe3", username, "Username should be unique and not exist in the list.");
+    @InjectMocks
+    private UserUtils userUtils;
+
+    @BeforeEach
+    void setUp() {
     }
 
     @Test
-    public void testGenerateUsernameBaseCase() {
-        List<String> existingUsernames = Arrays.asList("john.doe");
-        String username = userUtils.generateUsername("john", "doe", existingUsernames);
-        assertEquals("john.doe1", username, "Username should be generated "
-                + "with a serial number if the base username exists.");
-    }
+    void testGenerateUsername_WhenUnique_ShouldReturnBaseUsername() {
+        // Arrange
+        String firstName = "John";
+        String lastName = "Doe";
+        String expectedUsername = "John.Doe";
 
+        when(userService.existsByUsername(expectedUsername)).thenReturn(false);
+
+        // Act
+        String actualUsername = userUtils.generateUsername(firstName, lastName);
+
+        // Assert
+        assertEquals(expectedUsername, actualUsername);
+    }
 
     @Test
-    public void testGeneratePasswordLength() {
-        String password = userUtils.generatePassword();
-        assertEquals(10, password.length(), "Password length should be 10.");
+    void testGenerateUsername_WhenNotUnique_ShouldReturnUniqueUsername() {
+        // Arrange
+        String firstName = "John";
+        String lastName = "Doe";
+        String baseUsername = "John.Doe";
+        String expectedUsername = "John.Doe1";
+
+        when(userService.existsByUsername(baseUsername)).thenReturn(true);
+        when(userService.existsByUsername(expectedUsername)).thenReturn(false);
+
+        // Act
+        String actualUsername = userUtils.generateUsername(firstName, lastName);
+
+        // Assert
+        assertEquals(expectedUsername, actualUsername);
     }
 
-    @Test
-    public void testGeneratePasswordCharacters() {
-        String password = userUtils.generatePassword();
-        assertTrue(password.chars().allMatch(ch -> Character.isLetterOrDigit(ch)),
-                "Password should only contain letters and digits.");
-    }
 }

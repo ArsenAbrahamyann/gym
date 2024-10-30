@@ -3,7 +3,7 @@ package org.example.gym.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
@@ -207,7 +207,7 @@ public class ValidationUtils {
      * @param trainers The list of TrainerEntity to validate.
      * @throws ValidationException if the trainee ID or trainers list is missing.
      */
-    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, Set<TrainerEntity> trainers) {
+    public void validateUpdateTraineeTrainerList(TraineeEntity trainee, List<TrainerEntity> trainers) {
         if (trainee == null || trainee.getId() == null) {
             throw new ValidationException("Trainee ID is required.");
         }
