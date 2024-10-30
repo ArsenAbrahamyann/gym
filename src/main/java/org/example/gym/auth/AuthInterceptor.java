@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.exeption.ErrorResponse;
-import org.example.gym.exeption.ResourceNotFoundException;
-import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -47,10 +45,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response,
                              @NonNull Object handler) throws Exception {
-        String requestUri = request.getRequestURI();
-        if (requestUri.equals("/swagger-ui/favicon-16x16.png") || requestUri.equals("/favicon.ico")) {
-            return true;
-        }
 
         String username = request.getHeader(USERNAME_HEADER);
         String password = request.getHeader(PASSWORD_HEADER);
@@ -64,17 +58,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         try {
             userService.authenticateUser(username, password);
-        } catch (ResourceNotFoundException e) {
-            log.warn("Authentication failed for user: {}. Reason: {}", username, e.getMessage());
-            sendErrorResponse(response, "Authentication failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-            return false;
-        } catch (UnauthorizedException e) {
-            log.warn("Invalid credentials for user: {}. Reason: {}", username, e.getMessage());
-            sendErrorResponse(response, "Invalid credentials: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-            return false;
         } catch (Exception e) {
-            log.error("An unexpected error occurred during authentication for user: {}", username, e);
-            sendErrorResponse(response, "An error occurred during authentication.", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.warn("Authentication failed for user: {}", username);
+            sendErrorResponse(response, "Authentication failed.", HttpStatus.UNAUTHORIZED);
             return false;
         }
 
@@ -97,7 +83,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String requestUri = response.getHeader("Referer") != null ? response.getHeader("Referer") : "/";
         ErrorResponse errorResponse = new ErrorResponse(message, status, requestUri);
 
-        ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
+        ObjectWriter objectWriter = mapper.writer();
         String json = objectWriter.writeValueAsString(errorResponse);
         response.getWriter().write(json);
     }

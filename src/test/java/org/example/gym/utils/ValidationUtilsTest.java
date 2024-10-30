@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
@@ -166,7 +167,7 @@ public class ValidationUtilsTest {
     // Validation of updating Trainee trainer list with missing trainee ID
     @Test
     public void testValidateUpdateTraineeTrainerList_MissingTrainee_ExceptionThrown() {
-        HashSet<TrainerEntity> trainers = new HashSet<>();
+        List<TrainerEntity> trainers = new ArrayList<>();
         trainers.add(new TrainerEntity());
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
@@ -180,7 +181,7 @@ public class ValidationUtilsTest {
     public void testValidateUpdateTraineeTrainerList_ValidInputs_NoException() {
         TraineeEntity trainee = new TraineeEntity();
         trainee.setId(1L);
-        HashSet<TrainerEntity> trainers = new HashSet<>();
+        List<TrainerEntity> trainers = new ArrayList<>();
         trainers.add(new TrainerEntity());
 
         validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);

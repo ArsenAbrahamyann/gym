@@ -6,8 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.entity.UserEntity;
@@ -77,24 +75,6 @@ public class UserServiceTest {
         verify(userRepository).findByUsername(username);
     }
 
-    @Test
-    public void testFindAllUsernames_EmptyList() {
-        when(userRepository.findAllUsername()).thenReturn(Collections.emptyList());
-
-        List<String> usernames = userService.findAllUsernames();
-        assertTrue(usernames.isEmpty());
-        verify(userRepository).findAllUsername();
-    }
-
-    @Test
-    public void testFindAllUsernames_NonEmptyList() {
-        List<String> mockUsernames = List.of("user1", "user2");
-        when(userRepository.findAllUsername()).thenReturn(mockUsernames);
-
-        List<String> usernames = userService.findAllUsernames();
-        assertTrue(usernames.containsAll(mockUsernames));
-        verify(userRepository).findAllUsername();
-    }
 
     @Test
     public void testFindByUsername_Success() {

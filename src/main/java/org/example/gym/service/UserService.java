@@ -1,8 +1,6 @@
 package org.example.gym.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
@@ -49,33 +47,21 @@ public class UserService {
      */
     @Transactional
     public boolean authenticateUser(String username, String password) {
-        log.debug("Entering authenticateUser() with username: {}", username);
+        log.debug("Authenticating user with username: {}", username);
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
-                    log.warn("Authentication failed for username: {}. User not found.", username);
+                    log.warn("Authentication failed - User not found for username: {}", username);
                     return new UnauthorizedException("Invalid credentials");
                 });
         if (!user.getPassword().equals(password)) {
-            log.warn("Invalid credentials provided for username: {}", username);
+            log.warn("Authentication failed - Incorrect password for username: {}", username);
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        log.info("User {} authenticated successfully.", username);
+        log.info("Authentication successful for username: {}", username);
         return true;
     }
 
-    /**
-     * Retrieves all usernames from the repository.
-     *
-     * @return a list of usernames. If no usernames are found, an empty list is returned.
-     */
-    @Transactional(readOnly = true)
-    public List<String> findAllUsernames() {
-        log.debug("Fetching all usernames from the repository.");
-        List<String> allUsernames = userRepository.findAllUsername();
-        log.info("Retrieved {} usernames from the repository.", allUsernames.size());
-        return allUsernames.isEmpty() ? Collections.emptyList() : allUsernames;
-    }
 
     /**
      * Retrieves a {@link UserEntity} by its username.
@@ -115,4 +101,7 @@ public class UserService {
 
     }
 
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
 }

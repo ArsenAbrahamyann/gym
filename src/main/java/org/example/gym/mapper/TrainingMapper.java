@@ -10,8 +10,6 @@ import org.example.gym.dto.response.TrainingResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
-import org.example.gym.service.TraineeService;
-import org.example.gym.service.TrainerService;
 import org.springframework.stereotype.Component;
 
 
@@ -23,8 +21,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TrainingMapper {
-    private final TrainerService trainerService;
-    private final TraineeService traineeService;
 
     /**
      * Maps a list of TrainingEntity objects to a list of TrainingResponseDto.
@@ -36,8 +32,10 @@ public class TrainingMapper {
         List<TrainingResponseDto> responseDtos = new ArrayList<>();
         for (TrainingEntity entity : trainingsForTrainee) {
 
-            TrainingResponseDto responseDto = new TrainingResponseDto(entity.getTrainingName(),
-                    entity.getTrainingDate().toString(), entity.getTrainingType().getTrainingTypeName(),
+            TrainingResponseDto responseDto = new TrainingResponseDto(
+                    entity.getTrainingName(),
+                    entity.getTrainingDate().toString(),
+                    entity.getTrainingType().getTrainingTypeName(),
                     entity.getTrainingDuration(),
                     entity.getTrainer().getUsername());
             responseDtos.add(responseDto);
@@ -56,8 +54,11 @@ public class TrainingMapper {
         List<GetTrainerTrainingListResponseDto> responseDtos = new ArrayList<>();
         for (TrainingEntity entity : trainingsForTrainer) {
             GetTrainerTrainingListResponseDto responseDto =
-                    new GetTrainerTrainingListResponseDto(entity.getTrainingName(),
-                            entity.getTrainingDate().toString(), entity.getTrainingType(), entity.getTrainingDuration(),
+                    new GetTrainerTrainingListResponseDto(
+                            entity.getTrainingName(),
+                            entity.getTrainingDate().toString(),
+                            entity.getTrainingType(),
+                            entity.getTrainingDuration(),
                             entity.getTrainee().getUsername());
             responseDtos.add(responseDto);
         }
@@ -71,16 +72,18 @@ public class TrainingMapper {
      * @param requestDto the AddTrainingRequestDto to map
      * @return a TrainingEntity object
      */
-    public TrainingEntity requestDtoMapToTrainingEntity(AddTrainingRequestDto requestDto) {
+    public TrainingEntity requestDtoMapToTrainingEntity(AddTrainingRequestDto requestDto,
+                                                        TraineeEntity trainee,
+                                                        TrainerEntity trainer) {
         TrainingEntity trainingEntity = new TrainingEntity();
         trainingEntity.setTrainingDuration(requestDto.getTrainingDuration());
         trainingEntity.setTrainingDate(requestDto.getTrainingDate());
         trainingEntity.setTrainingName(requestDto.getTrainingName());
-        TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeUsername());
         trainingEntity.setTrainee(trainee);
-        TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
-        trainingEntity.setTrainingType(trainer.getSpecialization());
         trainingEntity.setTrainer(trainer);
+
+        trainingEntity.setTrainingType(trainer.getSpecialization());
+
         return trainingEntity;
     }
 }

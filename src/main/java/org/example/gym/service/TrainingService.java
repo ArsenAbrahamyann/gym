@@ -2,11 +2,14 @@ package org.example.gym.service;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gym.dto.request.AddTrainingRequestDto;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
+import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.exeption.TrainingNotFoundException;
+import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
@@ -25,6 +28,7 @@ public class TrainingService {
     private final TraineeService traineeService;
     private final TrainingTypeService trainingTypeService;
     private final TrainerService trainerService;
+    private final TrainingMapper trainingMapper;
     private final ValidationUtils validationUtils;
 
     /**
@@ -41,7 +45,8 @@ public class TrainingService {
      */
     public TrainingService(TrainingRepository trainingRepository, @Lazy TraineeService traineeService,
                            @Lazy TrainingTypeService trainingTypeService, @Lazy TrainerService trainerService,
-                           ValidationUtils validationUtils) {
+                           ValidationUtils validationUtils, TrainingMapper trainingMapper) {
+        this.trainingMapper = trainingMapper;
         this.trainingRepository = trainingRepository;
         this.traineeService = traineeService;
         this.trainingTypeService = trainingTypeService;
@@ -52,11 +57,15 @@ public class TrainingService {
     /**
      * Adds a new training record.
      *
-     * @param training The details of the training to be added.
+     * @param requestDto The details of the training to be added.
      */
     @Transactional
-    public void addTraining(TrainingEntity training) {
+    public void addTraining(AddTrainingRequestDto requestDto) {
 
+        TraineeEntity trainee = traineeService.getTrainee(requestDto.getTraineeUsername());
+        TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
+
+        TrainingEntity training = trainingMapper.requestDtoMapToTrainingEntity(requestDto, trainee, trainer);
         trainingRepository.save(training);
         log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
     }

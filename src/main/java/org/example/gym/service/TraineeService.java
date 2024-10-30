@@ -1,12 +1,14 @@
 package org.example.gym.service;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
+import org.example.gym.dto.request.UpdateTraineeRequestDto;
+import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
@@ -50,21 +52,21 @@ public class TraineeService {
     /**
      * Creates a new trainee profile and generates username and password.
      *
-     * @param trainee The trainee entity containing profile information.
+     * @param trainee The trainee trainee containing profile information.
      * @return The created TraineeEntity.
      */
     @Transactional
     public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
-        List<String> allUsernames = userService.findAllUsernames();
-        String generateUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName(),
-                allUsernames);
-        trainee.setUsername(generateUsername);
-        String generatePassword = userUtils.generatePassword();
-        trainee.setPassword(generatePassword);
+
+        String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
+        trainee.setUsername(generatedUsername);
+        trainee.setPassword(userUtils.generatePassword());
         validationUtils.validateTrainee(trainee);
+
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUsername());
+
         return trainee;
     }
 
@@ -107,33 +109,46 @@ public class TraineeService {
     /**
      * Updates the trainers associated with a trainee.
      *
-     * @param trainee The trainee entity with updated trainers.
+     * @param requestDto The trainee trainee with updated trainers.
      * @return The updated TraineeEntity.
      */
     @Transactional
-    public TraineeEntity updateTraineeTrainers(TraineeEntity trainee) {
-        log.info("Updating trainers for trainee: {}", trainee.getUsername());
-        Set<TrainerEntity> trainers = trainee.getTrainers();
+    public TraineeEntity updateTraineeTrainerList(UpdateTraineeTrainerListRequestDto requestDto) {
+        log.info("Updating trainer list for trainee: {}", requestDto.getTraineeUsername());
+
+        TraineeEntity trainee = traineeRepository.findByUsername(requestDto.getTraineeUsername())
+                .orElseThrow(() -> new TraineeNotFoundException("Trainee not found"));
+
+        List<TrainerEntity> trainers = trainerService.findByUsernames(requestDto.getTrainerUsername());
         validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
-        trainers.forEach(validationUtils::validateTrainer);
-        TraineeEntity traineeEntity = traineeRepository.save(trainee);
-        log.info("Successfully updated trainer list for trainee: {}", trainee.getUsername());
-        return traineeEntity;
+        trainee.setTrainers(new HashSet<>(trainers));
+
+        traineeRepository.save(trainee);
+        log.info("Updated trainer list for trainee: {}", trainee.getUsername());
+
+        return trainee;
     }
 
     /**
      * Updates the profile of an existing trainee.
      *
-     * @param traineeEntity The trainee entity with updated profile information.
+     * @param requestDto The trainee trainee with updated profile information.
      * @return The updated TraineeEntity.
      */
     @Transactional
-    public TraineeEntity updateTraineeProfile(TraineeEntity traineeEntity) {
-        log.info("Updating trainee profile for {}", traineeEntity.getUsername());
-        validationUtils.validateUpdateTrainee(traineeEntity);
-        TraineeEntity trainee = traineeRepository.save(traineeEntity);
+    public TraineeEntity updateTraineeProfile(UpdateTraineeRequestDto requestDto) {
+        log.info("Updating trainee profile for {}", requestDto.getUsername());
+        TraineeEntity trainee = getTrainee(requestDto.getUsername());
+        trainee.setDateOfBirth(LocalDateTime.parse(requestDto.getDateOfBirth()));
+        trainee.setAddress(requestDto.getAddress());
+        trainee.setUsername(requestDto.getUsername());
+        trainee.setLastName(requestDto.getLastName());
+        trainee.setFirstName(requestDto.getFirstName());
+        trainee.setIsActive(requestDto.isPublic());
+        validationUtils.validateUpdateTrainee(trainee);
+        traineeRepository.save(trainee);
 
-        log.info("Trainee profile updated successfully for {}", traineeEntity.getUsername());
+        log.info("Trainee profile updated successfully for {}", trainee.getUsername());
         return trainee;
     }
 
@@ -145,11 +160,8 @@ public class TraineeService {
     @Transactional
     public void deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username: {}", username);
-        UserEntity user = userService.findByUsername(username);
-
-        TraineeEntity trainee = traineeRepository.findByUsername(user.getUsername())
+        TraineeEntity trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new TraineeNotFoundException("TraineeEntity not found"));
-
         traineeRepository.delete(trainee);
         log.info("Trainee deleted successfully with username: {}", username);
     }

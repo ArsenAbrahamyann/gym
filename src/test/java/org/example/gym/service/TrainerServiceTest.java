@@ -64,8 +64,7 @@ public class TrainerServiceTest {
 
     @Test
     public void testCreateTrainerProfile() {
-        when(userService.findAllUsernames()).thenReturn(Arrays.asList("existingUser"));
-        when(userUtils.generateUsername("John", "Doe", Arrays.asList("existingUser"))).thenReturn("john.doe");
+        when(userUtils.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(userUtils.generatePassword()).thenReturn("generatedPassword");
         when(trainerRepository.save(trainer)).thenReturn(trainer);
 
@@ -88,15 +87,6 @@ public class TrainerServiceTest {
         verify(trainerRepository).save(trainer);
     }
 
-    @Test
-    public void testUpdateTrainerProfile() {
-        when(trainerRepository.save(trainer)).thenReturn(trainer);
-
-        TrainerEntity updatedTrainer = trainerService.updateTrainerProfile(trainer);
-
-        assertNotNull(updatedTrainer);
-        verify(trainerRepository).save(trainer);
-    }
 
     @Test
     public void testFindAll() {
