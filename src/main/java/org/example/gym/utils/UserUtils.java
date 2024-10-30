@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserUtils {
     private final String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    // TODO passwordLength could be parameterized with default value
     private final int passwordLength = 10;
     private final SecureRandom random = new SecureRandom();
 
@@ -54,6 +55,7 @@ public class UserUtils {
     public  String generatePassword() {
         StringBuilder password = new StringBuilder(passwordLength);
         for (int i = 0; i < passwordLength; i++) {
+            // TODO not sure abut special characters, check the task
             password.append(characters.charAt(random.nextInt(characters.length())));
         }
         return password.toString();

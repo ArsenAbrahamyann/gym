@@ -17,12 +17,15 @@ repositories {
 }
 
 ext {
-    junitVersion = '5.9.2'
+    junitVersion = '5.9.2' // TODO what is this for? (seems like a good idea, but not implemented)
 }
 
+// TODO Execution failed for task ':compileJava'.
+//  error: invalid source release: 21
+//  Works only with 17
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType(JavaCompile) {
@@ -64,13 +67,21 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+/*
+TODO
+ > Task :test FAILED
+ 98 tests completed, 1 failed
+ */
 tasks.test {
     useJUnitPlatform()
 }
+
+// TODO this it not how flyway migration should be applied
 tasks.named('flywayMigrate') {
     dependsOn 'clean'
 }
 
+// TODO username and password must be parameters
 flyway {
     url = 'jdbc:postgresql://localhost:5432/gym_crm'
     user = 'postgres'
@@ -79,7 +90,7 @@ flyway {
 }
 
 checkstyle {
-    ignoreFailures = true
+    ignoreFailures = false // TODO ignore failures?????
     maxWarnings = 0
     configFile = rootProject.file("config/checkstyle/checkstyle.xml")
 }

@@ -25,6 +25,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TraineeMapper {
+    // TODO in mapper layer we do not user services, only other mappers,
+    //  when we involve services some business logic is lost in the code
+    //  in my case I didn't get the process of update profile, validation in there must've failed
     private final TrainerService trainerService;
     private final TraineeService traineeService;
 
