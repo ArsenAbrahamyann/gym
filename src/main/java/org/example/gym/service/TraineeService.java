@@ -56,6 +56,8 @@ public class TraineeService {
     @Transactional
     public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
+        // TODO do you want to load ALL usernames into memory to generate new one?
+        //  You can do better with proper request to DB
         List<String> allUsernames = userService.findAllUsernames();
         String generateUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName(),
                 allUsernames);
@@ -145,6 +147,8 @@ public class TraineeService {
     @Transactional
     public void deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username: {}", username);
+        // TODO with correct repository method you don't need to load user
+        //  and you can even understand whether was user deleted or not
         UserEntity user = userService.findByUsername(username);
 
         TraineeEntity trainee = traineeRepository.findByUsername(user.getUsername())

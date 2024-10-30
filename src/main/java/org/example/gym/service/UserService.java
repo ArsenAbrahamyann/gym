@@ -49,6 +49,7 @@ public class UserService {
      */
     @Transactional
     public boolean authenticateUser(String username, String password) {
+        // TODO with correct logs name of the method will be in logs, write meaningful logs only
         log.debug("Entering authenticateUser() with username: {}", username);
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {

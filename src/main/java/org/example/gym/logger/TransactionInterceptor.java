@@ -30,6 +30,7 @@ public class TransactionInterceptor implements HandlerInterceptor {
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                              @NonNull Object handler) throws Exception {
         String transactionId = UUID.randomUUID().toString();
+        // TODO transactionId should be constant, core duplication
         MDC.put("transactionId", transactionId);
         return true;
     }
