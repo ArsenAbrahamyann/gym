@@ -16,13 +16,6 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    junitVersion = '5.9.2' // TODO what is this for? (seems like a good idea, but not implemented)
-}
-
-// TODO Execution failed for task ':compileJava'.
-//  error: invalid source release: 21
-//  Works only with 17
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -47,8 +40,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:9.6.0'
     implementation 'org.postgresql:postgresql:42.6.0'
 
-    implementation("io.micrometer:micrometer-core")
-    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.micrometer:micrometer-core:1.11.0")
 
 
     implementation("org.apache.logging.log4j:log4j-api:2.19.0")
@@ -62,35 +54,25 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-/*
-TODO
- > Task :test FAILED
- 98 tests completed, 1 failed
- */
 tasks.test {
     useJUnitPlatform()
 }
 
-// TODO this it not how flyway migration should be applied
-tasks.named('flywayMigrate') {
-    dependsOn 'clean'
-}
-
-// TODO username and password must be parameters
 flyway {
-    url = 'jdbc:postgresql://localhost:5432/gym_crm'
-    user = 'postgres'
-    password = 'postgres'
-    schemas = ['public']
+    url = System.getenv('FLYWAY_URL') ?: 'jdbc:postgresql://localhost:5432/gym_crm'
+    user = System.getenv('FLYWAY_USER') ?: 'postgres'
+    password = System.getenv('FLYWAY_PASSWORD') ?: 'postgres'
+    schemas = ['gym_crm_schema']
 }
 
 checkstyle {
-    ignoreFailures = false // TODO ignore failures?????
+    ignoreFailures = false
     maxWarnings = 0
     configFile = rootProject.file("config/checkstyle/checkstyle.xml")
 }

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomHealthIndicator implements HealthIndicator {
     private final JdbcTemplate jdbcTemplate;
-
     private static final long DISK_SPACE_THRESHOLD = 1000000000L;
     private static final double CPU_USAGE_THRESHOLD = 0.9;
     private static final int THREAD_COUNT_THRESHOLD = 1000;

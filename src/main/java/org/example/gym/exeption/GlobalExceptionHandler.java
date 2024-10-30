@@ -57,19 +57,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
-    /**
-     * Handles cases where a requested resource cannot be found.
-     *
-     * @param ex The {@link ResourceNotFoundException} for a missing resource.
-     * @param request The {@link WebRequest} information for the current request.
-     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
-                                                                         WebRequest request) {
-        log.error("Resource not found: {}", ex.getMessage());
-        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
-    }
 
     /**
      * Handles cases where a specific trainee cannot be found in the system.

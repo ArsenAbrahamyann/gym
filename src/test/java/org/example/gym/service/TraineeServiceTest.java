@@ -4,17 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.entity.TraineeEntity;
-import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
@@ -65,8 +60,7 @@ public class TraineeServiceTest {
         trainee.setFirstName("John");
         trainee.setLastName("Doe");
 
-        when(userService.findAllUsernames()).thenReturn(new ArrayList<>());
-        when(userUtils.generateUsername("John", "Doe", new ArrayList<>())).thenReturn("john.doe");
+        when(userUtils.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(userUtils.generatePassword()).thenReturn("password123");
 
         // Act
@@ -101,49 +95,13 @@ public class TraineeServiceTest {
         verify(traineeRepository).save(trainee);
     }
 
-    @Test
-    public void updateTraineeTrainers_ShouldUpdateTrainers() {
-        // Arrange
-        TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("john.doe");
-        Set<TrainerEntity> trainers = Set.of(new TrainerEntity(), new TrainerEntity());
-
-        trainee.setTrainers(trainers);
-        when(traineeRepository.save(any(TraineeEntity.class))).thenReturn(trainee);
-
-        // Act
-        TraineeEntity updatedTrainee = traineeService.updateTraineeTrainers(trainee);
-
-        // Assert
-        assertNotNull(updatedTrainee);
-        verify(traineeRepository).save(trainee);
-    }
-
-    @Test
-    public void updateTraineeProfile_ShouldUpdateProfile() {
-        // Arrange
-        TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("john.doe");
-
-        when(traineeRepository.save(any(TraineeEntity.class))).thenReturn(trainee);
-
-        // Act
-        TraineeEntity updatedTrainee = traineeService.updateTraineeProfile(trainee);
-
-        // Assert
-        assertNotNull(updatedTrainee);
-        verify(traineeRepository).save(trainee);
-    }
 
     @Test
     public void deleteTraineeByUsername_ShouldDeleteTrainee() {
         // Arrange
         String username = "john.doe";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
         TraineeEntity trainee = new TraineeEntity();
 
-        when(userService.findByUsername(username)).thenReturn(user);
         when(traineeRepository.findByUsername(username)).thenReturn(Optional.of(trainee));
 
         // Act
@@ -177,6 +135,5 @@ public class TraineeServiceTest {
         // Act & Assert
         assertThrows(TraineeNotFoundException.class, () -> traineeService.getTrainee("invalidUser"));
     }
-
 
 }

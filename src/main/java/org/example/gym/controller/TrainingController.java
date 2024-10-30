@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.service.TrainingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller class responsible for handling training-related operations.
  * Acts as a facade between the client and the TrainingService.
  */
+@Tag(name = "Training-Controller")
 @RestController
 @RequestMapping("training")
-@CrossOrigin
 @RequiredArgsConstructor
 @Slf4j
 public class TrainingController {
@@ -122,7 +122,7 @@ public class TrainingController {
      * @param requestDto the request DTO containing training details
      * @return a response entity indicating the result of the operation
      */
-    @PostMapping("/add")
+    @PostMapping("/registration")
     @Operation(summary = "Add a new training", description = "Adds a new training session to the system.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Training added successfully", content = @Content),
@@ -136,8 +136,7 @@ public class TrainingController {
         log.info("Adding training for trainee: {} with trainer: {}", requestDto.getTraineeUsername(),
                 requestDto.getTrainerUsername());
 
-        TrainingEntity trainingEntity = mapper.requestDtoMapToTrainingEntity(requestDto);
-        trainingService.addTraining(trainingEntity);
+        trainingService.addTraining(requestDto);
         log.info("Training added successfully");
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
