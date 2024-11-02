@@ -1,18 +1,14 @@
-#environment:
-#  name: DEV
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/gym_crm
+    url: jdbc:postgresql://localhost:5432/gym_crm_local
     username: postgres
     password: postgres
 
   flyway:
-    url: jdbc:postgresql://localhost:5432/gym_crm
+    url: jdbc:postgresql://localhost:5432/gym_crm_local
     user: postgres
     password: postgres
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] [%X{transactionId}] %-5level %logger{36} - %msg%n"
   level:
       root: debug
