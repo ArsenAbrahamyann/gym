@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> e2f64c6 (some fix)
 spring:
   profiles:
     active: local
@@ -58,7 +55,4 @@ user:
   password:
     length: 12
     characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()"
-<<<<<<< HEAD
-=======
 
->>>>>>> e2f64c6 (some fix)
