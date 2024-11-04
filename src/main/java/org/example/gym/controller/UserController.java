@@ -7,9 +7,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
+import org.example.gym.dto.response.JwtResponse;
+import org.example.gym.security.JWTTokenProvider;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
+    private final JWTTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Authenticates a user based on the provided username and password.
@@ -41,17 +49,14 @@ public class UserController {
         @ApiResponse(responseCode = "200", description = "User authenticated successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
-    public ResponseEntity<Void> login(@RequestHeader String username, @RequestHeader String password) {
+    public ResponseEntity<JwtResponse> login(@RequestHeader String username, @RequestHeader String password) {
         log.info("Controller: User login attempt for username: {}", username);
-        boolean isAuthenticated = userService.authenticateUser(username, password);
-
-        if (isAuthenticated) {
-            log.info("Controller: User {} logged in successfully", username);
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            log.warn("Controller: User {} failed to log in", username);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtTokenProvider.generateToken(authentication);
+        log.info("Controller: User {} logged in successfully", username);
+        return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
     /**
