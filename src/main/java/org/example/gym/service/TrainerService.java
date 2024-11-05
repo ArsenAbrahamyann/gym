@@ -22,9 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Lazy
 public class TrainerService {
     private final TrainerRepository trainerRepository;
-    private final TrainingService trainingService;
+    private final TrainingService trainingService; // TODO
     private final TrainingTypeService trainingTypeService;
-    private final UserService userService;
+    private final UserService userService; // TODO
     private final UserUtils userUtils;
     private final ValidationUtils validationUtils;
 
@@ -69,7 +69,7 @@ public class TrainerService {
         validationUtils.validateTrainer(trainer);
 
         TrainingTypeEntity trainingType = trainer.getSpecialization();
-        if (trainingType != null) {
+        if (trainingType != null) { // TODO Can we have a trainer without specialization?
             trainingType = trainingTypeService.findById(trainingType.getId());
 
             trainer.setSpecialization(trainingType);

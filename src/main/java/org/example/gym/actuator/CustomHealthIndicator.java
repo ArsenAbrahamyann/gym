@@ -46,7 +46,7 @@ public class CustomHealthIndicator implements HealthIndicator {
         Health threadHealth = checkThreadHealth();
 
         if (databaseHealth.getStatus() == Health.up().build().getStatus()
-                &&
+                && // TODO just stop it, please, it hurts :)
                 diskSpaceHealth.getStatus() == Health.up().build().getStatus()
                 &&
                 cpuHealth.getStatus() == Health.up().build().getStatus()

@@ -39,6 +39,7 @@ public class UserUtils {
         String username = baseUsername;
         int serialNumber = 1;
 
+        // TODO why while? And why is it very very bad idea? You should use correct SQL
         while (userService.existsByUsername(username)) {
             username = baseUsername + serialNumber;
             serialNumber++;

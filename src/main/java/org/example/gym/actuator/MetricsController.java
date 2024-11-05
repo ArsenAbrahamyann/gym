@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
  * and track requests with response times.
  */
 @RestController
-@RequestMapping("/custom")
+@RequestMapping("/custom") // TODO metrics are not just a controller, the are configured in a different way
 public class MetricsController {
     private final MetricsService metricsService;
 

@@ -24,6 +24,16 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
      * @param trainingType the type of training (optional)
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
+    /* TODO
+            Request
+        I. Username (required)
+        II. Period From (optional)
+        III. Period To (optional)
+        IV. Trainer Name (optional)
+        V. Training Type (optional)
+
+        TODO Find a problem
+     */
     @Query("SELECT t FROM TrainingEntity t WHERE t.trainee.username = :traineeName "
             + "AND t.trainingDate BETWEEN :fromDate AND :toDate"
             + " AND (:trainerName IS NULL OR t.trainer.username = :trainerName)"
@@ -43,6 +53,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
      * @param traineeName the name of the trainee (optional)
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
+    // TODO same
     @Query("SELECT t FROM TrainingEntity t WHERE t.trainer.id = :trainerId"
             + " AND t.trainingDate BETWEEN :fromDate AND :toDate"
             + " AND (:traineeName IS NULL OR t.trainee.username = :traineeName)")

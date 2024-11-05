@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeService traineeService;
-    private final TrainingTypeService trainingTypeService;
+    private final TrainingTypeService trainingTypeService; // TODO clean your classes
     private final TrainerService trainerService;
     private final TrainingMapper trainingMapper;
     private final ValidationUtils validationUtils;

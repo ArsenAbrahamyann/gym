@@ -62,7 +62,8 @@ public class TraineeService {
         String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
         trainee.setUsername(generatedUsername);
         trainee.setPassword(userUtils.generatePassword());
-        validationUtils.validateTrainee(trainee);
+        validationUtils.validateTrainee(trainee); // TODO I could get new ValidationException("Trainee not found");
+        // although I was not searching for anything here technically
 
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUsername());
