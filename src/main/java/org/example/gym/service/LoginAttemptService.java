@@ -22,7 +22,6 @@ public class LoginAttemptService {
         attempts++;
         attemptsCache.put(username, attempts);
 
-        // Lock the user if the max attempts are reached
         if (attempts >= MAX_ATTEMPTS) {
             lockTimeCache.put(username, LocalDateTime.now());
         }
@@ -33,11 +32,10 @@ public class LoginAttemptService {
             LocalDateTime lockTime = lockTimeCache.get(username);
             long secondsElapsed = java.time.Duration.between(lockTime, LocalDateTime.now()).toSeconds();
             if (secondsElapsed < LOCK_TIME_DURATION) {
-                return true; // User is still locked
+                return true;
             } else {
-                // Unlock the user after the lock duration
                 lockTimeCache.remove(username);
-                attemptsCache.remove(username); // Reset attempts after unlock
+                attemptsCache.remove(username);
             }
         }
         return false;

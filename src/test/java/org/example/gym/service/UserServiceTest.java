@@ -75,7 +75,6 @@ public class UserServiceTest {
         verify(userRepository).findByUsername(username);
     }
 
-
     @Test
     public void testFindByUsername_Success() {
         String username = "testUser";
@@ -110,6 +109,7 @@ public class UserServiceTest {
 
         userService.changePassword(dto);
         verify(userRepository).save(user);
+        assertTrue(user.getPassword().equals(newPassword));
     }
 
     @Test
@@ -121,5 +121,36 @@ public class UserServiceTest {
 
         assertThrows(UserNotFoundException.class, () -> userService.changePassword(dto));
         verify(userRepository, never()).save(new UserEntity());
+    }
+
+    @Test
+    public void testExistsByUsername() {
+        String username = "existingUser";
+        when(userRepository.existsByUsername(username)).thenReturn(true);
+
+        boolean exists = userService.existsByUsername(username);
+        assertTrue(exists);
+        verify(userRepository).existsByUsername(username);
+    }
+
+    @Test
+    public void testFindById_Success() {
+        long userId = 1L;
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        UserEntity foundUser = userService.findById(userId);
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    public void testFindById_UserNotFound() {
+        long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.findById(userId));
+        verify(userRepository).findById(userId);
     }
 }

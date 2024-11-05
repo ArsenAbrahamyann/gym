@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
@@ -26,7 +27,6 @@ public class ValidationUtilsTest {
         validationUtils = new ValidationUtils();
     }
 
-    // Test for a valid Trainee entity
     @Test
     public void testValidateTrainee_ValidTrainee_NoException() {
         TraineeEntity trainee = new TraineeEntity();
@@ -38,7 +38,6 @@ public class ValidationUtilsTest {
         validationUtils.validateTrainee(trainee);
     }
 
-    // Test for a missing Trainee username
     @Test
     public void testValidateTrainee_EmptyUsername_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
@@ -53,7 +52,6 @@ public class ValidationUtilsTest {
         assertEquals("Trainee username is required.", exception.getMessage());
     }
 
-    // Additional test: null Trainee password
     @Test
     public void testValidateTrainee_NullPassword_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
@@ -68,7 +66,6 @@ public class ValidationUtilsTest {
         assertEquals("Trainee password is required.", exception.getMessage());
     }
 
-    // Test for Trainer validation with valid fields
     @Test
     public void testValidateTrainer_ValidTrainer_NoException() {
         TrainerEntity trainer = new TrainerEntity();
@@ -80,7 +77,6 @@ public class ValidationUtilsTest {
         validationUtils.validateTrainer(trainer);
     }
 
-    // Test for Trainer with empty specialization
     @Test
     public void testValidateTrainer_EmptySpecialization_ExceptionThrown() {
         TrainerEntity trainer = new TrainerEntity();
@@ -95,7 +91,6 @@ public class ValidationUtilsTest {
         assertEquals("Trainer specialization is required.", exception.getMessage());
     }
 
-    // Date validation tests
     @Test
     public void testValidateDateRange_InvalidDateRange_ExceptionThrown() {
         LocalDateTime fromDate = LocalDateTime.now().plusDays(1);
@@ -125,7 +120,6 @@ public class ValidationUtilsTest {
         assertEquals("Invalid date must be in the format yyyy-MM-dd", exception.getMessage());
     }
 
-    // Validating update for Trainer
     @Test
     public void testValidateUpdateTrainer_ValidTrainer_NoException() {
         TrainerEntity trainer = new TrainerEntity();
@@ -138,7 +132,6 @@ public class ValidationUtilsTest {
         validationUtils.validateUpdateTrainer(trainer);
     }
 
-    // Test for validateUpdateTrainee with missing ID
     @Test
     public void testValidateUpdateTrainee_MissingId_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
@@ -153,7 +146,6 @@ public class ValidationUtilsTest {
         assertEquals("Trainee ID is required for updates.", exception.getMessage());
     }
 
-    // Test for validating TraineeTrainingsCriteria with valid DTO
     @Test
     public void testValidateTraineeTrainingsCriteria_ValidRequestDto_NoException() {
         TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
@@ -164,7 +156,6 @@ public class ValidationUtilsTest {
         validationUtils.validateTraineeTrainingsCriteria(requestDto);
     }
 
-    // Validation of updating Trainee trainer list with missing trainee ID
     @Test
     public void testValidateUpdateTraineeTrainerList_MissingTrainee_ExceptionThrown() {
         List<TrainerEntity> trainers = new ArrayList<>();
@@ -176,7 +167,6 @@ public class ValidationUtilsTest {
         assertEquals("Trainee ID is required.", exception.getMessage());
     }
 
-    // Additional test: Validating UpdateTraineeTrainerList with valid inputs
     @Test
     public void testValidateUpdateTraineeTrainerList_ValidInputs_NoException() {
         TraineeEntity trainee = new TraineeEntity();
@@ -185,5 +175,48 @@ public class ValidationUtilsTest {
         trainers.add(new TrainerEntity());
 
         validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
+    }
+
+    @Test
+    public void testValidateDateFormat_ValidFormat_NoException() {
+        LocalDateTime validDate = LocalDateTime.now();
+        validationUtils.validateDateFormat(validDate, "Valid date");
+    }
+
+    @Test
+    public void testValidateTrainee_NullTrainee_ExceptionThrown() {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            validationUtils.validateTrainee(null);
+        });
+        assertEquals("Trainee not found", exception.getMessage());
+    }
+
+    @Test
+    public void testValidateUpdateTraineeTrainerList_EmptyTrainersList_NoException() {
+        TraineeEntity trainee = new TraineeEntity();
+        trainee.setId(1L);
+        List<TrainerEntity> emptyTrainersList = new ArrayList<>();
+
+        validationUtils.validateUpdateTraineeTrainerList(trainee, emptyTrainersList);
+    }
+
+    @Test
+    public void testValidateTraineeTrainingsCriteria_MissingTraineeName_ExceptionThrown() {
+        TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
+        requestDto.setPeriodFrom(LocalDateTime.now().minusDays(1));
+        requestDto.setPeriodTo(LocalDateTime.now());
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            validationUtils.validateTraineeTrainingsCriteria(requestDto);
+        });
+        assertEquals("Trainee username is required for fetching training list.", exception.getMessage());
+    }
+
+    @Test
+    public void testValidateTrainerTrainingsCriteria_NullDates_NoException() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("validTrainer");
+
+        validationUtils.validateTrainerTrainingsCriteria(requestDto);
     }
 }

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 import org.example.gym.dto.request.TrainerRegistrationRequestDto;
+import org.example.gym.dto.response.GetTrainerProfileResponseDto;
 import org.example.gym.dto.response.RegistrationResponseDto;
 import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
 import org.example.gym.entity.TraineeEntity;
@@ -54,8 +55,6 @@ public class TrainerMapperTest {
         assertTrue(result.getIsActive());
     }
 
-
-
     @Test
     void testTrainerMapToResponse() {
         trainerEntity.setUsername("john_doe");
@@ -78,7 +77,6 @@ public class TrainerMapperTest {
         Set<TraineeEntity> trainees = new HashSet<>();
         trainees.add(traineeEntity1);
 
-        TrainerEntity trainerEntity = new TrainerEntity();
         trainerEntity.setUsername("trainer_user");
         trainerEntity.setFirstName("Jane");
         trainerEntity.setLastName("Doe");
@@ -94,5 +92,37 @@ public class TrainerMapperTest {
         assertEquals("Doe", responseDto.getLastName());
         assertFalse(responseDto.isPublic());
         assertEquals(1, responseDto.getTrainerResponseDtos().size());
+    }
+
+    @Test
+    void testTrainerEntityMapToGetResponse() {
+        TraineeEntity trainee1 = new TraineeEntity();
+        trainee1.setUsername("trainee1");
+        trainee1.setFirstName("Alice");
+        trainee1.setLastName("Smith");
+
+        TraineeEntity trainee2 = new TraineeEntity();
+        trainee2.setUsername("trainee1");
+        trainee2.setFirstName("Bob");
+        trainee2.setLastName("Johnson");
+
+        Set<TraineeEntity> trainees = new HashSet<>();
+        trainees.add(trainee1);
+        trainees.add(trainee2);
+
+        trainerEntity.setUsername("trainer_user");
+        trainerEntity.setTrainees(trainees);
+        trainerEntity.setSpecialization(new TrainingTypeEntity());
+        trainerEntity.getSpecialization().setId(3L);
+
+        GetTrainerProfileResponseDto responseDto = trainerMapper.trainerEntityMapToGetResponse(trainerEntity);
+
+        assertNotNull(responseDto);
+        assertEquals("John", responseDto.getFirstName());
+        assertEquals("Doe", responseDto.getLastName());
+        assertEquals(3L, responseDto.getTrainingTypeId());
+        assertTrue(responseDto.getTraineeListResponseDtos().size() >= 2);
+        assertEquals("trainee1", responseDto.getTraineeListResponseDtos().get(0).getTraineeName());
+        assertEquals("trainee1", responseDto.getTraineeListResponseDtos().get(1).getTraineeName());
     }
 }

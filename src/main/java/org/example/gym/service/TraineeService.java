@@ -14,6 +14,7 @@ import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class TraineeService {
     private final UserService userService;
     private final ValidationUtils validationUtils;
     private final UserUtils userUtils;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
      * Constructs a new {@link TraineeService} instance, injecting the necessary dependencies for managing trainee operations.
@@ -41,12 +43,14 @@ public class TraineeService {
      * @param userUtils         a utility class {@link UserUtils} used for handling user-related helper methods, such as user generation or formatting
      */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
-                          UserService userService, ValidationUtils validationUtils, UserUtils userUtils) {
+                          UserService userService, ValidationUtils validationUtils, UserUtils userUtils,
+                          BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
         this.userService = userService;
         this.validationUtils = validationUtils;
         this.userUtils = userUtils;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     /**
@@ -61,7 +65,7 @@ public class TraineeService {
 
         String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
         trainee.setUsername(generatedUsername);
-        trainee.setPassword(userUtils.generatePassword());
+        trainee.setPassword(bCryptPasswordEncoder.encode(userUtils.generatePassword()));
         validationUtils.validateTrainee(trainee);
 
         traineeRepository.save(trainee);

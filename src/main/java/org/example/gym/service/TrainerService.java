@@ -11,6 +11,7 @@ import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class TrainerService {
     private final UserService userService;
     private final UserUtils userUtils;
     private final ValidationUtils validationUtils;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
      * Constructs a new {@link TrainerService} instance, injecting the necessary dependencies for managing trainer operations.
@@ -41,13 +43,15 @@ public class TrainerService {
      */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingService trainingService,
                           @Lazy TrainingTypeService trainingTypeService, @Lazy UserService userService,
-                          ValidationUtils validationUtils, UserUtils userUtils) {
+                          ValidationUtils validationUtils, UserUtils userUtils,
+                          BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.trainerRepository = trainerRepository;
         this.trainingService = trainingService;
         this.trainingTypeService = trainingTypeService;
         this.userService = userService;
         this.validationUtils = validationUtils;
         this.userUtils = userUtils;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     /**
@@ -63,8 +67,7 @@ public class TrainerService {
         String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName());
         trainer.setUsername(generateUsername);
 
-        String generatePassword = userUtils.generatePassword();
-        trainer.setPassword(generatePassword);
+        trainer.setPassword(bCryptPasswordEncoder.encode(userUtils.generatePassword()));
 
         validationUtils.validateTrainer(trainer);
 
