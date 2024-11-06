@@ -2,6 +2,7 @@ package org.example.gym.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,8 +10,10 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Optional;
 import org.example.gym.dto.request.ActivateRequestDto;
+import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
@@ -51,8 +54,12 @@ public class TrainerServiceTest {
     private TrainerEntity trainer;
 
     /**
-     * Sets up the test environment by initializing necessary objects and mocking
-     * dependencies before each test.
+     * Initializes the test environment by setting up a default `TrainerEntity` instance.
+     * This method is run before each test case to ensure consistent starting values.
+     * The `trainer` instance is created with the following default values:
+     * - First name: "John"
+     * - Last name: "Doe"
+     * - Specialization: A `TrainingTypeEntity` with ID `1L` and type name "Yoga"
      */
     @BeforeEach
     public void setUp() {
@@ -87,7 +94,6 @@ public class TrainerServiceTest {
         verify(trainerRepository).save(trainer);
     }
 
-
     @Test
     public void testFindAll() {
         when(trainerRepository.findAll()).thenReturn(Arrays.asList(trainer));
@@ -98,7 +104,6 @@ public class TrainerServiceTest {
         assertEquals(1, trainers.size());
         verify(trainerRepository).findAll();
     }
-
 
     @Test
     public void testFindAssignedTrainers() {
@@ -124,6 +129,48 @@ public class TrainerServiceTest {
         verify(trainerRepository).findTrainerByUsername(username);
     }
 
+    @Test
+    public void testGetTrainerNotFound() {
+        String username = "nonexistent.user";
+        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.empty());
+
+        assertThrows(TrainerNotFoundException.class, () -> trainerService.getTrainer(username));
+    }
+
+    @Test
+    public void testUpdateTrainerProfile() {
+        String username = "john.doe";
+        UpdateTrainerRequestDto requestDto = new UpdateTrainerRequestDto(username, "John", "Doe",
+                1L, true);
+
+        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.of(trainer));
+        when(trainingTypeService.findById(1L))
+                .thenReturn(new TrainingTypeEntity(1L, "Yoga"));
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+
+        TrainerEntity updatedTrainer = trainerService.updateTrainerProfile(requestDto);
+
+        assertNotNull(updatedTrainer);
+        assertEquals("john.doe", updatedTrainer.getUsername());
+        assertEquals("John", updatedTrainer.getFirstName());
+        assertEquals("Doe", updatedTrainer.getLastName());
+        assertTrue(updatedTrainer.getIsActive());
+
+        verify(trainerRepository).findTrainerByUsername(username);
+        verify(trainingTypeService).findById(1L);
+        verify(trainerRepository).save(trainer);
+    }
+
+    @Test
+    public void testUpdateTrainerProfileNotFound() {
+        String username = "nonexistent.user";
+        UpdateTrainerRequestDto requestDto = new UpdateTrainerRequestDto();
+        requestDto.setUsername(username);
+
+        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.empty());
+
+        assertThrows(TrainerNotFoundException.class, () -> trainerService.updateTrainerProfile(requestDto));
+    }
 
     @Test
     public void testFindByUsernames() {
