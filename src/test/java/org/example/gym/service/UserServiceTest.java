@@ -1,6 +1,7 @@
 package org.example.gym.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.entity.UserEntity;
+import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,49 +25,111 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private TrainerService trainerService;
-
-    @Mock
-    private TraineeService traineeService;
+    private MetricsService metricsService;
 
     @InjectMocks
     private UserService userService;
 
+    private UserEntity mockUser;
+
+    /**
+     * Sets up a mock user entity before each test.
+     * Initializes a {@link UserEntity} with a username and password to
+     * be used in various test cases.
+     */
     @BeforeEach
     public void setUp() {
+        mockUser = new UserEntity();
+        mockUser.setUsername("testUser");
+        mockUser.setPassword("correctPassword");
     }
 
     @Test
     public void testFindByUsername_Success() {
-        String username = "testUser";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        UserEntity foundUser = userService.findByUsername("testUser");
 
-        UserEntity foundUser = userService.findByUsername(username);
-        verify(userRepository).findByUsername(username);
+        verify(userRepository).findByUsername("testUser");
     }
 
     @Test
     public void testFindByUsername_UserNotFound() {
-        String username = "nonExistentUser";
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.findByUsername(username));
-        verify(userRepository).findByUsername(username);
+        assertThrows(UserNotFoundException.class, () -> userService.findByUsername("nonExistentUser"));
+        verify(userRepository).findByUsername("nonExistentUser");
     }
 
+    @Test
+    public void testAuthenticateUser_Success() {
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
 
+        boolean isAuthenticated = userService.authenticateUser("testUser", "correctPassword");
+
+        assertTrue(isAuthenticated);
+        verify(metricsService).recordLoginSuccess();
+        verify(metricsService, never()).recordLoginFailure();
+    }
+
+    @Test
+    public void testAuthenticateUser_UserNotFound() {
+        when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
+
+        assertThrows(UnauthorizedException.class, () -> userService.authenticateUser("nonExistentUser", "password"));
+        verify(metricsService).recordLoginFailure();
+        verify(metricsService, never()).recordLoginSuccess();
+    }
+
+    @Test
+    public void testAuthenticateUser_IncorrectPassword() {
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+
+        assertThrows(UnauthorizedException.class, () -> userService.authenticateUser("testUser", "wrongPassword"));
+        verify(metricsService).recordLoginFailure();
+        verify(metricsService, never()).recordLoginSuccess();
+    }
+
+    @Test
+    public void testChangePassword_Success() {
+        ChangeLoginRequestDto dto = new ChangeLoginRequestDto("testUser", "correctPassword", "newPassword");
+
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+
+        userService.changePassword(dto);
+
+        verify(userRepository).save(mockUser);
+        verify(metricsService).recordPasswordChange();
+        assertTrue(mockUser.getPassword().equals("newPassword"));
+    }
 
     @Test
     public void testChangePassword_UserNotFound() {
-        String username = "nonExistentUser";
-        ChangeLoginRequestDto dto = new ChangeLoginRequestDto(username, "oldPassword", "newPassword");
+        ChangeLoginRequestDto dto = new ChangeLoginRequestDto("nonExistentUser", "oldPassword", "newPassword");
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.changePassword(dto));
-        verify(userRepository, never()).save(new UserEntity());
     }
+
+    @Test
+    public void testExistsByUsername_UserExists() {
+        when(userRepository.existsByUsername("existingUser")).thenReturn(true);
+
+        boolean exists = userService.existsByUsername("existingUser");
+
+        assertTrue(exists);
+        verify(userRepository).existsByUsername("existingUser");
+    }
+
+    @Test
+    public void testExistsByUsername_UserDoesNotExist() {
+        when(userRepository.existsByUsername("nonExistentUser")).thenReturn(false);
+
+        boolean exists = userService.existsByUsername("nonExistentUser");
+
+        assertTrue(!exists);
+        verify(userRepository).existsByUsername("nonExistentUser");
+    }
+
 }
