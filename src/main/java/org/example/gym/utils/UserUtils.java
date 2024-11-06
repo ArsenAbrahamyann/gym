@@ -36,7 +36,7 @@ public class UserUtils {
      */
     public String generateUsername(String firstName, String lastName) {
         String baseUsername = firstName + "." + lastName;
-        int i = userService.countByUsernameStartingWith(baseUsername);
+        Integer i = userService.countByUsernameStartingWith(baseUsername);
         return baseUsername + (i == 0 ? "" : i);
     }
 

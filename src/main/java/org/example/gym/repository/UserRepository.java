@@ -34,5 +34,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @return the count of usernames that start with the given prefix
      */
     @Query("SELECT COUNT(u.username) FROM UserEntity u WHERE u.username LIKE :prefix%")
-    int countByUsernameStartingWith(String prefix);
+    Integer countByUsernameStartingWith(String prefix);
 }
