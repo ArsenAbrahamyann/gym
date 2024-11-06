@@ -103,7 +103,7 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public int countByUsernameStartingWith(String username) {
+    public Integer countByUsernameStartingWith(String username) {
 
         return userRepository.countByUsernameStartingWith(username);
     }
