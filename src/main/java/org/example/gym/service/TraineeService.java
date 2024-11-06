@@ -1,6 +1,5 @@
 package org.example.gym.service;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TraineeService {
     private final TraineeRepository traineeRepository;
     private final TrainerService trainerService;
-    private final UserService userService;
     private final ValidationUtils validationUtils;
     private final UserUtils userUtils;
 
@@ -36,15 +34,13 @@ public class TraineeService {
      *
      * @param trainerService    the {@link TrainerService} instance used for managing trainers, injected lazily to prevent circular dependency issues
      * @param traineeRepository the {@link TraineeRepository} used for CRUD operations on {@link TraineeEntity} objects
-     * @param userService       the {@link UserService} responsible for handling user-related operations such as authentication and registration
      * @param validationUtils   a utility class {@link ValidationUtils} used for performing validation checks on trainee data
      * @param userUtils         a utility class {@link UserUtils} used for handling user-related helper methods, such as user generation or formatting
      */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
-                          UserService userService, ValidationUtils validationUtils, UserUtils userUtils) {
+                          ValidationUtils validationUtils, UserUtils userUtils) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
-        this.userService = userService;
         this.validationUtils = validationUtils;
         this.userUtils = userUtils;
     }
@@ -62,7 +58,6 @@ public class TraineeService {
         String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
         trainee.setUsername(generatedUsername);
         trainee.setPassword(userUtils.generatePassword());
-        validationUtils.validateTrainee(trainee);
 
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUsername());
@@ -139,8 +134,12 @@ public class TraineeService {
     public TraineeEntity updateTraineeProfile(UpdateTraineeRequestDto requestDto) {
         log.info("Updating trainee profile for {}", requestDto.getUsername());
         TraineeEntity trainee = getTrainee(requestDto.getUsername());
-        trainee.setDateOfBirth(LocalDateTime.parse(requestDto.getDateOfBirth()));
-        trainee.setAddress(requestDto.getAddress());
+        if (requestDto.getDateOfBirth() != null) {
+            trainee.setDateOfBirth(requestDto.getDateOfBirth());
+        }
+        if (requestDto.getAddress() != null) {
+            trainee.setAddress(requestDto.getAddress());
+        }
         trainee.setUsername(requestDto.getUsername());
         trainee.setLastName(requestDto.getLastName());
         trainee.setFirstName(requestDto.getFirstName());

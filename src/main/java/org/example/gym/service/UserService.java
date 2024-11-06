@@ -8,7 +8,6 @@ import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.UserRepository;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,21 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
-    private final TrainerService trainerService;
-    private final TraineeService traineeService;
+    private final MetricsService metricsService;
 
     /**
      * Constructs a {@link UserService} with the specified user repository and services.
      *
      * @param userRepository the repository for managing user entities.
-     * @param trainerService the service for managing trainer entities.
-     * @param traineeService the service for managing trainee entities.
+     * @param metricsService the metrics for managing user entities.
      */
-    public UserService(UserRepository userRepository, @Lazy TrainerService trainerService,
-                       @Lazy TraineeService traineeService) {
+    public UserService(UserRepository userRepository, MetricsService metricsService) {
+        this.metricsService = metricsService;
         this.userRepository = userRepository;
-        this.trainerService = trainerService;
-        this.traineeService = traineeService;
     }
 
     /**
@@ -50,15 +45,18 @@ public class UserService {
         log.debug("Authenticating user with username: {}", username);
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
+                    metricsService.recordLoginFailure();
                     log.warn("Authentication failed - User not found for username: {}", username);
                     return new UnauthorizedException("Invalid credentials");
                 });
         if (!user.getPassword().equals(password)) {
+            metricsService.recordLoginFailure();
             log.warn("Authentication failed - Incorrect password for username: {}", username);
             throw new UnauthorizedException("Invalid credentials");
         }
 
         log.info("Authentication successful for username: {}", username);
+        metricsService.recordLoginSuccess();
         return true;
     }
 
@@ -98,7 +96,7 @@ public class UserService {
         user.setPassword(changeLoginRequestDto.getNewPassword());
         userRepository.save(user);
         log.info("User password changed successfully for username: {}", user.getUsername());
-
+        metricsService.recordPasswordChange();
     }
 
     public boolean existsByUsername(String username) {

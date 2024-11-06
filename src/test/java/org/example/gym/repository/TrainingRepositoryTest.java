@@ -96,12 +96,12 @@ public class TrainingRepositoryTest {
 
         // Mock
         when(trainingRepository.findTrainingsForTrainer(
-                trainer.getId(), fromDate, toDate, "traineeUser"))
+                trainer.getUsername(), fromDate, toDate, "traineeUser"))
                 .thenReturn(List.of(training));
 
         // Call
         List<TrainingEntity> result = trainingRepository.findTrainingsForTrainer(
-                trainer.getId(), fromDate, toDate, "traineeUser");
+                trainer.getUsername(), fromDate, toDate, "traineeUser");
 
         // Verify
         assertNotNull(result);

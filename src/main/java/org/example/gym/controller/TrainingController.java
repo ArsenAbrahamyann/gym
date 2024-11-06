@@ -101,14 +101,14 @@ public class TrainingController {
     })
     public ResponseEntity<List<GetTrainerTrainingListResponseDto>> getTrainerTrainingList(
             @RequestParam String trainerName,
-            @RequestParam(required = false) String periodFrom,
-            @RequestParam(required = false) String periodTo,
+            @RequestParam(required = false) LocalDateTime periodFrom,
+            @RequestParam(required = false) LocalDateTime periodTo,
             @RequestParam(required = false) String traineeName) {
 
         log.info("Fetching training list for trainer: {}", trainerName);
 
         TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto(trainerName,
-                LocalDateTime.parse(periodFrom), LocalDateTime.parse(periodTo), traineeName);
+                periodFrom, periodTo, traineeName);
         List<TrainingEntity> trainingsForTrainer = trainingService.getTrainingsForTrainer(requestDto);
 
         List<GetTrainerTrainingListResponseDto> responseDto = mapper.mapToDtoTrainingTrainer(trainingsForTrainer);

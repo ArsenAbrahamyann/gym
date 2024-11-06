@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeService traineeService;
-    private final TrainingTypeService trainingTypeService;
     private final TrainerService trainerService;
     private final TrainingMapper trainingMapper;
     private final ValidationUtils validationUtils;
@@ -37,19 +36,16 @@ public class TrainingService {
      * @param trainingRepository  the {@link TrainingRepository} used for performing CRUD operations on training entities.
      * @param traineeService      the {@link TraineeService} used for managing trainees. This service is injected lazily
      *                            to prevent circular dependency.
-     * @param trainingTypeService the {@link TrainingTypeService} used for managing training type entities. Injected lazily to avoid
-     *                            circular dependency.
      * @param trainerService      the {@link TrainerService} used for managing trainers. Injected lazily to prevent circular
      *                            dependency.
      * @param validationUtils     the {@link ValidationUtils} used for performing validation tasks on training data.
      */
     public TrainingService(TrainingRepository trainingRepository, @Lazy TraineeService traineeService,
-                           @Lazy TrainingTypeService trainingTypeService, @Lazy TrainerService trainerService,
-                           ValidationUtils validationUtils, TrainingMapper trainingMapper) {
+                            @Lazy TrainerService trainerService, ValidationUtils validationUtils,
+                           TrainingMapper trainingMapper) {
         this.trainingMapper = trainingMapper;
         this.trainingRepository = trainingRepository;
         this.traineeService = traineeService;
-        this.trainingTypeService = trainingTypeService;
         this.trainerService = trainerService;
         this.validationUtils = validationUtils;
     }
@@ -108,7 +104,7 @@ public class TrainingService {
         validationUtils.validateTrainerTrainingsCriteria(requestDto);
         TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
 
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getId(),
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getUsername(),
                 requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTraineeName());
 
         if (trainings.isEmpty()) {

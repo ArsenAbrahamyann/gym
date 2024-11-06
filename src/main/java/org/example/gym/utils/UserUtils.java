@@ -21,7 +21,7 @@ public class UserUtils {
     private  String characters;
     @Value("${user.password.length:10}")
     private  Integer passwordLength;
-    private final SecureRandom random = new SecureRandom();
+    private final SecureRandom random;
 
     /**
      * Generates a unique username based on the provided first name and last name.
@@ -39,6 +39,7 @@ public class UserUtils {
         String username = baseUsername;
         int serialNumber = 1;
 
+        // TODO why while? And why is it very very bad idea? You should use correct SQL
         while (userService.existsByUsername(username)) {
             username = baseUsername + serialNumber;
             serialNumber++;
