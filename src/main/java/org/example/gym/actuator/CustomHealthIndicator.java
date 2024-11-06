@@ -45,13 +45,12 @@ public class CustomHealthIndicator implements HealthIndicator {
         Health cpuHealth = checkCpuHealth();
         Health threadHealth = checkThreadHealth();
 
-        if (databaseHealth.getStatus() == Health.up().build().getStatus()
-                && // TODO just stop it, please, it hurts :)
-                diskSpaceHealth.getStatus() == Health.up().build().getStatus()
-                &&
-                cpuHealth.getStatus() == Health.up().build().getStatus()
-                &&
-                threadHealth.getStatus() == Health.up().build().getStatus()) {
+        boolean isDatabaseHealthy = databaseHealth.getStatus() == Health.up().build().getStatus();
+        boolean isDiskSpaceHealthy = diskSpaceHealth.getStatus() == Health.up().build().getStatus();
+        boolean isCpuHealthy = cpuHealth.getStatus() == Health.up().build().getStatus();
+        boolean isThreadHealthy = threadHealth.getStatus() == Health.up().build().getStatus();
+
+        if (isDatabaseHealthy && isDiskSpaceHealthy && isCpuHealthy && isThreadHealthy) {
             return Health.up()
                     .withDetail("database", databaseHealth.getDetails())
                     .withDetail("diskSpace", diskSpaceHealth.getDetails())

@@ -3,7 +3,6 @@ package org.example.gym.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -148,7 +147,7 @@ public class TrainingServiceTest {
         requestDto.setPeriodTo(LocalDateTime.now());
 
         when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+        when(trainingRepository.findTrainingsForTrainer(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(trainingEntity));
 
         List<TrainingEntity> trainings = trainingService.getTrainingsForTrainer(requestDto);
@@ -165,7 +164,7 @@ public class TrainingServiceTest {
         requestDto.setPeriodTo(LocalDateTime.now());
 
         when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
-        when(trainingRepository.findTrainingsForTrainer(anyLong(), any(), any(), any()))
+        when(trainingRepository.findTrainingsForTrainer(any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
         TrainingNotFoundException thrown = assertThrows(TrainingNotFoundException.class, () ->

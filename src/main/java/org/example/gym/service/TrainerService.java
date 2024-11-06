@@ -22,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Lazy
 public class TrainerService {
     private final TrainerRepository trainerRepository;
-    private final TrainingService trainingService; // TODO
     private final TrainingTypeService trainingTypeService;
-    private final UserService userService; // TODO
     private final UserUtils userUtils;
     private final ValidationUtils validationUtils;
 
@@ -33,19 +31,14 @@ public class TrainerService {
      * This constructor uses Spring's `@Lazy` annotation for injecting some dependencies to avoid circular dependencies.
      *
      * @param trainerRepository   the {@link TrainerRepository} used for CRUD operations on {@link TrainerEntity} objects
-     * @param trainingService     the {@link TrainingService} instance, injected lazily to manage training sessions and avoid circular dependencies
      * @param trainingTypeService the {@link TrainingTypeService} instance, injected lazily to manage training types and avoid circular dependencies
-     * @param userService         the {@link UserService} instance, injected lazily to handle user-related operations such as user registration and authentication
      * @param validationUtils     a utility class {@link ValidationUtils} used for performing validation checks on trainer data
      * @param userUtils           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
      */
-    public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingService trainingService,
-                          @Lazy TrainingTypeService trainingTypeService, @Lazy UserService userService,
+    public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingTypeService trainingTypeService,
                           ValidationUtils validationUtils, UserUtils userUtils) {
         this.trainerRepository = trainerRepository;
-        this.trainingService = trainingService;
         this.trainingTypeService = trainingTypeService;
-        this.userService = userService;
         this.validationUtils = validationUtils;
         this.userUtils = userUtils;
     }
@@ -65,15 +58,6 @@ public class TrainerService {
 
         String generatePassword = userUtils.generatePassword();
         trainer.setPassword(generatePassword);
-
-        validationUtils.validateTrainer(trainer);
-
-        TrainingTypeEntity trainingType = trainer.getSpecialization();
-        if (trainingType != null) { // TODO Can we have a trainer without specialization?
-            trainingType = trainingTypeService.findById(trainingType.getId());
-
-            trainer.setSpecialization(trainingType);
-        }
 
         trainerRepository.save(trainer);
 

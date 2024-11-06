@@ -21,7 +21,7 @@ public class UserUtils {
     private  String characters;
     @Value("${user.password.length:10}")
     private  Integer passwordLength;
-    private final SecureRandom random = new SecureRandom();
+    private final SecureRandom random;
 
     /**
      * Generates a unique username based on the provided first name and last name.
