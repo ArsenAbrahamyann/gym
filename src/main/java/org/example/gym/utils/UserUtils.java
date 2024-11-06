@@ -38,7 +38,7 @@ public class UserUtils {
     public String generateUsername(String firstName, String lastName) {
         String baseUsername = firstName + "." + lastName;
         List<String> allUsernames = userService.findByUsernameStartingWith(baseUsername);
-        return baseUsername + allUsernames.size();
+        return baseUsername + (allUsernames.isEmpty() ? "" : allUsernames.size());
     }
 
     /**
