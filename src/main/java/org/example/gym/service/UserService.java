@@ -1,7 +1,6 @@
 package org.example.gym.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
@@ -104,8 +103,8 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public List<String> findByUsernameStartingWith(String username) {
+    public int countByUsernameStartingWith(String username) {
 
-        return userRepository.findByUsernameStartingWith(username);
+        return userRepository.countByUsernameStartingWith(username);
     }
 }

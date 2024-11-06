@@ -1,7 +1,6 @@
 package org.example.gym.utils;
 
 import java.security.SecureRandom;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.gym.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +36,8 @@ public class UserUtils {
      */
     public String generateUsername(String firstName, String lastName) {
         String baseUsername = firstName + "." + lastName;
-        List<String> allUsernames = userService.findByUsernameStartingWith(baseUsername);
-        return baseUsername + (allUsernames.isEmpty() ? "" : allUsernames.size());
+        int i = userService.countByUsernameStartingWith(baseUsername);
+        return baseUsername + (i == 0 ? "" : i);
     }
 
     /**
