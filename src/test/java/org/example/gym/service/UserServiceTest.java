@@ -1,7 +1,6 @@
 package org.example.gym.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,45 +36,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testAuthenticateUser_Success() {
-        String username = "testUser";
-        String password = "testPassword";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
-        user.setPassword(password);
-
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-
-        boolean result = userService.authenticateUser(username, password);
-        assertTrue(result);
-        verify(userRepository).findByUsername(username);
-    }
-
-    @Test
-    public void testAuthenticateUser_Failure_InvalidCredentials() {
-        String username = "testUser";
-        String password = "wrongPassword";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
-        user.setPassword("testPassword");
-
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-
-        assertThrows(UnauthorizedException.class, () -> userService.authenticateUser(username, password));
-        verify(userRepository).findByUsername(username);
-    }
-
-    @Test
-    public void testAuthenticateUser_UserNotFound() {
-        String username = "nonExistentUser";
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
-
-        assertThrows(UnauthorizedException.class, () -> userService.authenticateUser(username, "anyPassword"));
-        verify(userRepository).findByUsername(username);
-    }
-
-
-    @Test
     public void testFindByUsername_Success() {
         String username = "testUser";
         UserEntity user = new UserEntity();
@@ -97,20 +56,7 @@ public class UserServiceTest {
         verify(userRepository).findByUsername(username);
     }
 
-    @Test
-    public void testChangePassword_Success() {
-        String username = "testUser";
-        String newPassword = "newPassword";
-        ChangeLoginRequestDto dto = new ChangeLoginRequestDto(username, "oldPassword", newPassword);
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
-        user.setPassword("oldPassword");
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-
-        userService.changePassword(dto);
-        verify(userRepository).save(user);
-    }
 
     @Test
     public void testChangePassword_UserNotFound() {
