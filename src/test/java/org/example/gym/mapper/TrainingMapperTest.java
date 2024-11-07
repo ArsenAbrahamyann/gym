@@ -30,6 +30,19 @@ public class TrainingMapperTest {
     private TraineeEntity mockTraineeEntity;
     private TrainingTypeEntity mockTrainingType;
 
+    /**
+     * Sets up the mock entities used for testing.
+     * This method is executed before each test case to initialize mock data
+     * for `TrainerEntity`, `TraineeEntity`, `TrainingTypeEntity`, and `TrainingEntity`
+     * objects, ensuring consistent and isolated test conditions.
+     * The mock entities are initialized as follows:
+     * - `mockTrainerEntity`: A `TrainerEntity` with username "trainerUser".
+     * - `mockTraineeEntity`: A `TraineeEntity` with username "traineeUser".
+     * - `mockTrainingType`: A `TrainingTypeEntity` with training type name "Cardio".
+     * - `mockTrainingEntity`: A `TrainingEntity` representing a "Strength Training" session with
+     *   the current date and time as the training date, a duration of 60 minutes,
+     *   and associations with `mockTrainerEntity`, `mockTraineeEntity`, and `mockTrainingType`.
+     */
     @BeforeEach
     public void setUp() {
         mockTrainerEntity = new TrainerEntity();
@@ -102,7 +115,8 @@ public class TrainingMapperTest {
         requestDto.setTrainingDuration(45);
         requestDto.setTrainingDate(LocalDateTime.now());
 
-        TrainingEntity result = trainingMapper.requestDtoMapToTrainingEntity(requestDto, mockTraineeEntity, mockTrainerEntity);
+        TrainingEntity result = trainingMapper.requestDtoMapToTrainingEntity(requestDto,
+                mockTraineeEntity, mockTrainerEntity);
 
         assertThat(result).isNotNull();
         assertThat(result.getTrainingName()).isEqualTo("Yoga");

@@ -8,13 +8,10 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import org.example.gym.dto.request.AddTrainingRequestDto;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.dto.response.GetTrainerTrainingListResponseDto;
 import org.example.gym.dto.response.TrainingResponseDto;
-import org.example.gym.entity.TraineeEntity;
-import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.service.TrainingService;
@@ -27,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("deprecation")
 public class TrainingControllerTest {
 
     @Mock
@@ -77,10 +73,10 @@ public class TrainingControllerTest {
     public void testGetTrainerTrainingList() {
         // Arrange
         String trainerName = "JaneDoe";
-        String periodFrom = LocalDateTime.now().minusDays(7).toString();
-        String periodTo = LocalDateTime.now().toString();
+        LocalDateTime periodFrom = LocalDateTime.parse(LocalDateTime.now().minusDays(7).toString());
+        LocalDateTime periodTo = LocalDateTime.parse(LocalDateTime.now().toString());
         TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto(trainerName,
-                LocalDateTime.parse(periodFrom), LocalDateTime.parse(periodTo), null);
+                periodFrom, periodTo, null);
         TrainingEntity trainingEntity = new TrainingEntity();
         List<TrainingEntity> trainingEntities = Collections.singletonList(trainingEntity);
         GetTrainerTrainingListResponseDto responseDto = new GetTrainerTrainingListResponseDto();

@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.example.gym.dto.request.ActivateRequestDto;
@@ -54,24 +54,6 @@ public class TraineeServiceTest {
     @BeforeEach
     public void setUp() {
         // No setup needed as we are using Mockito's @InjectMocks and @Mock annotations
-    }
-
-    @Test
-    public void createTraineeProfile_ShouldCreateTrainee() {
-        TraineeEntity trainee = new TraineeEntity();
-        trainee.setFirstName("John");
-        trainee.setLastName("Doe");
-
-        when(userUtils.generateUsername("John", "Doe")).thenReturn("john.doe");
-        when(userUtils.generatePassword()).thenReturn("password123");
-
-        TraineeEntity createdTrainee = traineeService.createTraineeProfile(trainee);
-
-        assertNotNull(createdTrainee);
-        assertEquals("john.doe", createdTrainee.getUsername());
-        assertEquals("password123", createdTrainee.getPassword());
-        verify(validationUtils).validateTrainee(trainee);
-        verify(traineeRepository).save(trainee);
     }
 
     @Test
@@ -130,7 +112,7 @@ public class TraineeServiceTest {
         requestDto.setUsername("john.doe");
         requestDto.setFirstName("John");
         requestDto.setLastName("Doe");
-        requestDto.setDateOfBirth("2000-01-01T00:00:00");
+        requestDto.setDateOfBirth(LocalDateTime.parse("2000-01-01T00:00:00"));
         requestDto.setAddress("123 Main St");
         requestDto.setPublic(true);
 

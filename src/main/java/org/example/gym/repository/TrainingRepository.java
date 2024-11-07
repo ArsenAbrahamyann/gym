@@ -25,9 +25,10 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
     @Query("SELECT t FROM TrainingEntity t WHERE t.trainee.username = :traineeName "
-            + "AND t.trainingDate BETWEEN :fromDate AND :toDate"
-            + " AND (:trainerName IS NULL OR t.trainer.username = :trainerName)"
-            + " AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)")
+            + "AND t.trainingDate >= COALESCE(:fromDate, t.trainingDate) "
+            + "AND t.trainingDate <= COALESCE(:toDate, t.trainingDate) "
+            + "AND (:trainerName IS NULL OR t.trainer.username = :trainerName) "
+            + "AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)")
     List<TrainingEntity> findTrainingsForTrainee(@Param("traineeName") String traineeName,
                                                  @Param("fromDate") LocalDateTime fromDate,
                                                  @Param("toDate") LocalDateTime toDate,
@@ -37,16 +38,17 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
     /**
      * Finds trainings for a specific trainer based on optional criteria such as date range and trainee name.
      *
-     * @param trainerId   the ID of the trainer
+     * @param trainerName   the ID of the trainer
      * @param fromDate    the starting date of the training period
      * @param toDate      the ending date of the training period
      * @param traineeName the name of the trainee (optional)
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
-    @Query("SELECT t FROM TrainingEntity t WHERE t.trainer.id = :trainerId"
-            + " AND t.trainingDate BETWEEN :fromDate AND :toDate"
-            + " AND (:traineeName IS NULL OR t.trainee.username = :traineeName)")
-    List<TrainingEntity> findTrainingsForTrainer(@Param("trainerId") Long trainerId,
+    @Query("SELECT t FROM TrainingEntity t WHERE t.trainer.username = :trainerName "
+            + "AND t.trainingDate >= COALESCE(:fromDate, t.trainingDate) "
+            + "AND t.trainingDate <= COALESCE(:toDate, t.trainingDate) "
+            + "AND (:traineeName IS NULL OR t.trainee.username = :traineeName)")
+    List<TrainingEntity> findTrainingsForTrainer(@Param("trainerName") String trainerName,
                                                  @Param("fromDate") LocalDateTime fromDate,
                                                  @Param("toDate") LocalDateTime toDate,
                                                  @Param("traineeName") String traineeName);

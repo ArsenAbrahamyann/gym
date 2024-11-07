@@ -80,6 +80,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         response.setContentType("application/json");
         response.setStatus(status.value());
 
+        // TODO what is Referer and why do you need it?
         String requestUri = response.getHeader("Referer") != null ? response.getHeader("Referer") : "/";
         ErrorResponse errorResponse = new ErrorResponse(message, status, requestUri);
 

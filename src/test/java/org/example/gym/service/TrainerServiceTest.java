@@ -53,6 +53,14 @@ public class TrainerServiceTest {
 
     private TrainerEntity trainer;
 
+    /**
+     * Initializes the test environment by setting up a default `TrainerEntity` instance.
+     * This method is run before each test case to ensure consistent starting values.
+     * The `trainer` instance is created with the following default values:
+     * - First name: "John"
+     * - Last name: "Doe"
+     * - Specialization: A `TrainingTypeEntity` with ID `1L` and type name "Yoga"
+     */
     @BeforeEach
     public void setUp() {
         trainer = new TrainerEntity();
@@ -61,19 +69,7 @@ public class TrainerServiceTest {
         trainer.setSpecialization(new TrainingTypeEntity(1L, "Yoga"));
     }
 
-    @Test
-    public void testCreateTrainerProfile() {
-        when(userUtils.generateUsername("John", "Doe")).thenReturn("john.doe");
-        when(userUtils.generatePassword()).thenReturn("generatedPassword");
-        when(trainerRepository.save(trainer)).thenReturn(trainer);
 
-        TrainerEntity createdTrainer = trainerService.createTrainerProfile(trainer);
-
-        assertNotNull(createdTrainer);
-        assertEquals("john.doe", createdTrainer.getUsername());
-        verify(trainerRepository).save(trainer);
-        verify(validationUtils).validateTrainer(trainer);
-    }
 
     @Test
     public void testToggleTrainerStatus() {

@@ -104,5 +104,4 @@ public class TrainerControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(trainerService, times(1)).toggleTrainerStatus(activateRequestDto);
     }
-
 }

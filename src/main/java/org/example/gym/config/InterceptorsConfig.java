@@ -1,8 +1,10 @@
 package org.example.gym.config;
 
+import java.security.SecureRandom;
 import org.example.gym.auth.AuthInterceptor;
 import org.example.gym.logger.TransactionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -40,5 +42,10 @@ public class InterceptorsConfig implements WebMvcConfigurer {
         registry.addInterceptor(transactionInterceptor)
                 .addPathPatterns("/**");
 
+    }
+
+    @Bean
+    public SecureRandom getSecureRandom() {
+        return new SecureRandom();
     }
 }

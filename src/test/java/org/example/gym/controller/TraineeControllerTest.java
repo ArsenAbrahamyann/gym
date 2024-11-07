@@ -119,7 +119,8 @@ public class TraineeControllerTest {
         when(mapper.mapToTrainerResponse(unassignedTrainers)).thenReturn(trainerResponseDtos);
 
         // Act
-        ResponseEntity<List<TrainerResponseDto>> response = traineeController.getNotAssignedOnTraineeActiveTrainers(traineeName);
+        ResponseEntity<List<TrainerResponseDto>> response = traineeController
+                .getNotAssignedOnTraineeActiveTrainers(traineeName);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -154,4 +155,5 @@ public class TraineeControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(traineeService).toggleTraineeStatus(requestDto);
     }
+
 }

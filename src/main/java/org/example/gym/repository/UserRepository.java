@@ -3,6 +3,7 @@ package org.example.gym.repository;
 import java.util.Optional;
 import org.example.gym.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -24,4 +25,14 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * Exists By Username.
      */
     boolean existsByUsername(String username);
+
+
+    /**
+     * Custom query to get the count of usernames that start with the given prefix.
+     *
+     * @param prefix the prefix to search for
+     * @return the count of usernames that start with the given prefix
+     */
+    @Query("SELECT COUNT(u.username) FROM UserEntity u WHERE u.username LIKE :prefix%")
+    Integer countByUsernameStartingWith(String prefix);
 }
