@@ -4,10 +4,17 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
+import org.example.gym.dto.response.JwtResponse;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.UnauthorizedException;
 import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.UserRepository;
+import org.example.gym.security.JwtUtils;
+import org.example.gym.security.SecurityConstants;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +27,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final MetricsService metricsService;
+    private final JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Constructs a {@link UserService} with the specified user repository and services.
      *
      * @param userRepository the repository for managing user entities.
      * @param metricsService the metrics for managing user entities.
+     * @param jwtUtils .
+     * @param authenticationManager .
      */
-    public UserService(UserRepository userRepository, MetricsService metricsService) {
+    public UserService(UserRepository userRepository, MetricsService metricsService,
+                       JwtUtils jwtUtils, AuthenticationManager authenticationManager) {
         this.metricsService = metricsService;
         this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
+        this.authenticationManager = authenticationManager;
     }
 
     /**
@@ -121,5 +135,21 @@ public class UserService {
     public UserEntity findById(long userId) {
         return userRepository.findById(userId)
               .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+    public JwtResponse login(String username, String password) {
+
+        Authentication authentication;
+
+        authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    username,
+                    password
+        ));
+
+        log.info("Authentication" + authentication.getName());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = SecurityConstants.TOKEN_PREFIX + jwtUtils.generateToken(authentication);
+
+        return new JwtResponse(jwt);
     }
 }

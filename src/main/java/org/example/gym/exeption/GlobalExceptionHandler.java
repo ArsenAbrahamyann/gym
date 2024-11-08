@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -71,6 +73,31 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
     }
 
+    /**
+     * Handles cases where bad credentials exception occurs in the system.
+     *
+     * @param ex The {@link BadCredentialsException} representing invalid credentials.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 401 status code.
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+        log.error("Bad credentials: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    /**
+     * Handles cases where a user is temporarily locked due to failed login attempts.
+     *
+     * @param ex The {@link LockedException} representing a locked user.
+     * @param request The {@link WebRequest} information for the current request.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 423 status code.
+     */
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponse> handleLockedException(LockedException ex, WebRequest request) {
+        log.error("User account is locked: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.LOCKED, request);
+    }
     /**
      * Handles cases where a specific trainer cannot be found in the system.
      *

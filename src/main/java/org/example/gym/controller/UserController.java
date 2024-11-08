@@ -7,32 +7,37 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ChangeLoginRequestDto;
+import org.example.gym.dto.request.LoginRequestDto;
 import org.example.gym.dto.response.JwtResponse;
-import org.example.gym.security.JWTTokenProvider;
+import org.example.gym.security.JwtUtils;
+import org.example.gym.security.SecurityConstants;
 import org.example.gym.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import static org.postgresql.gss.MakeGSS.authenticate;
 
 /**
  * UserController handles user-related operations such as login and changing passwords.
  */
 @Tag(name = "User-Controller")
 @RestController
+@CrossOrigin
 @RequestMapping("user")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    private final JWTTokenProvider jwtTokenProvider;
+    private final JwtUtils jwtUtils;
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
@@ -50,13 +55,27 @@ public class UserController {
         @ApiResponse(responseCode = "400", description = "Invalid username or password")
     })
     public ResponseEntity<JwtResponse> login(@RequestHeader String username, @RequestHeader String password) {
-        log.info("Controller: User login attempt for username: {}", username);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtTokenProvider.generateToken(authentication);
-        log.info("Controller: User {} logged in successfully", username);
-        return ResponseEntity.ok(new JwtResponse(jwt));
+        LoginRequestDto loginRequest = new LoginRequestDto(username, password);
+        try {
+            Authentication authentication = authenticate(loginRequest);
+            String token = JwtUtils.generateToken(authentication);
+            return ResponseEntity.ok()
+                    .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token)
+                    .body(new JwtResponse("Authentication successful!"));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new JwtResponse("Authentication failed: " + e.getMessage()));
+        }
+    }
+
+    private Authentication authenticate(LoginRequestDto loginRequest) {
+        // Use Spring Security's AuthenticationManager to authenticate the user
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                );
+        return authenticationManager.authenticate(authenticationToken);
     }
 
     /**

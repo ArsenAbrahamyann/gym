@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TraineeMapper {
 
+
     /**
      * Maps a TraineeRegistrationRequestDto to a TraineeEntity.
      *
@@ -46,6 +47,7 @@ public class TraineeMapper {
      * @return the mapped RegistrationResponseDto
      */
     public RegistrationResponseDto traineeEntityMapToResponseDto(TraineeEntity traineeEntity) {
+
         RegistrationResponseDto responseDto = new RegistrationResponseDto(traineeEntity.getUsername(),
                 traineeEntity.getPassword());
         log.info("Mapped TraineeEntity to RegistrationResponseDto: {}", responseDto);

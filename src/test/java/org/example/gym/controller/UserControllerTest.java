@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import org.example.gym.dto.request.ChangeLoginRequestDto;
 import org.example.gym.dto.response.JwtResponse;
-import org.example.gym.security.JWTTokenProvider;
+import org.example.gym.security.JwtUtils;
 import org.example.gym.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ public class UserControllerTest {
     private UserService userService;
 
     @Mock
-    private JWTTokenProvider jwtTokenProvider;
+    private JwtUtils jwtUtils;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -60,7 +60,7 @@ public class UserControllerTest {
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
-        when(jwtTokenProvider.generateToken(authentication)).thenReturn(token);
+        when(jwtUtils.generateToken(authentication)).thenReturn(token);
 
         // Act
         ResponseEntity<JwtResponse> response = userController.login(username, password);
@@ -70,7 +70,7 @@ public class UserControllerTest {
         assertNotNull(response.getBody());
         assertEquals(token, response.getBody().getToken());
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtTokenProvider, times(1)).generateToken(authentication);
+        verify(jwtUtils, times(1)).generateToken(authentication);
     }
 
     @Test

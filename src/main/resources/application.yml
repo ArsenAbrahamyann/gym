@@ -1,4 +1,8 @@
-
+jwt:
+  secret:
+    key: sddhfg$d3s#@ssdfkhGHGFcgjsdk
+  expiration:
+    time: 3600000
 spring:
   profiles:
     active: local
@@ -12,6 +16,7 @@ spring:
   h2:
     console:
       enabled: true
+
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -39,8 +44,6 @@ management:
   endpoint:
     health:
       show-details: "ALWAYS"
-
-springdoc:
   api-docs:
     enabled: true
   swagger-ui:

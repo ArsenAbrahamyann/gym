@@ -61,7 +61,9 @@ public class TraineeService {
 
         String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
         trainee.setUsername(generatedUsername);
-        trainee.setPassword(bCryptPasswordEncoder.encode(userUtils.generatePassword()));
+        String rawPassword = userUtils.generatePassword();
+        String encodedPassword = bCryptPasswordEncoder.encode(rawPassword);
+        trainee.setPassword(encodedPassword);
 
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUsername());
