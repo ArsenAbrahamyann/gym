@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,11 +24,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@PrimaryKeyJoinColumn(name = "id")
 public class TrainerEntity extends UserEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "specialization_id", referencedColumnName = "id")
