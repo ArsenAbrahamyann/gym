@@ -36,7 +36,7 @@ public class InterceptorsConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/trainee/*", "/trainer/*", "/training/*", "/user/*", "/trainingType/*")
+                .addPathPatterns("/trainee/**", "/trainer/**", "/training/**", "/user/**", "/trainingType/**")
                 .excludePathPatterns("/trainee/registration", "/trainer/registration", "/custom/metrics");
 
         registry.addInterceptor(transactionInterceptor)

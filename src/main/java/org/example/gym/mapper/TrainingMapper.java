@@ -37,7 +37,7 @@ public class TrainingMapper {
                     entity.getTrainingDate().toString(),
                     entity.getTrainingType().getTrainingTypeName(),
                     entity.getTrainingDuration(),
-                    entity.getTrainer().getUsername());
+                    entity.getTrainer().getUser().getUsername());
             responseDtos.add(responseDto);
         }
         log.info("Mapped {} trainings for trainee to DTOs.", responseDtos.size());
@@ -59,7 +59,7 @@ public class TrainingMapper {
                             entity.getTrainingDate().toString(),
                             entity.getTrainingType(),
                             entity.getTrainingDuration(),
-                            entity.getTrainee().getUsername());
+                            entity.getTrainee().getUser().getUsername());
             responseDtos.add(responseDto);
         }
         log.info("Mapped {} trainings for trainer to DTOs.", responseDtos.size());

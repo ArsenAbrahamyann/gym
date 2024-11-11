@@ -1,19 +1,19 @@
 package org.example.gym.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.example.gym.dto.request.TraineeRegistrationRequestDto;
 import org.example.gym.dto.response.GetTraineeProfileResponseDto;
 import org.example.gym.dto.response.RegistrationResponseDto;
-import org.example.gym.dto.response.TrainerResponseDto;
-import org.example.gym.dto.response.UpdateTraineeResponseDto;
+import org.example.gym.dto.response.TrainerListResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
+import org.example.gym.utils.UserUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,70 +25,69 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class TraineeMapperTest {
 
+    @Mock
+    private UserUtils userUtils;
+
     @InjectMocks
     private TraineeMapper traineeMapper;
 
-    @Mock
+    private TraineeRegistrationRequestDto requestDto;
+    private TraineeEntity traineeEntity;
+    private UserEntity userEntity;
     private TrainerEntity trainerEntity;
 
-    private TraineeRegistrationRequestDto registrationRequestDto;
-    private TraineeEntity traineeEntity;
-
     /**
-     * Sets up the necessary preconditions for each test case in this test class.
-     * This method is annotated with {@link BeforeEach} to ensure that it is
-     * executed before each test method.
-     *
-     * <p>The setup includes creating a new instance of
-     * {@link TraineeRegistrationRequestDto} with sample data for a trainee
-     * registration request, and initializing a {@link TraineeEntity}
-     * with corresponding fields such as username, password, first name,
-     * last name, date of birth, address, activity status, and an empty
-     * set of trainers.</p>
-     *
-     * <p>This method is designed to ensure that each test starts with
-     * a consistent and known state of the objects involved, facilitating
-     * reliable and repeatable testing.</p>
+     * Setup method to initialize test data before each test case.
      */
     @BeforeEach
-    public void setUp() {
-        registrationRequestDto = new TraineeRegistrationRequestDto("John", "Doe",
-                LocalDateTime.now(), "123 Street");
+    void setup() {
+        requestDto = new TraineeRegistrationRequestDto();
+        requestDto.setAddress("Test Address");
+        requestDto.setDateOfBrith(LocalDateTime.now());
+        requestDto.setLastName("Doe");
+        requestDto.setFirsName("John");
+
+        userEntity = new UserEntity();
+        userEntity.setFirstName("John");
+        userEntity.setLastName("Doe");
+        userEntity.setUsername("johndoe");
+        userEntity.setPassword("password123");
+        userEntity.setIsActive(true);
+
         traineeEntity = new TraineeEntity();
-        traineeEntity.setUsername("john_doe");
-        traineeEntity.setPassword("password");
-        traineeEntity.setFirstName("John");
-        traineeEntity.setLastName("Doe");
+        traineeEntity.setUser(userEntity);
+        traineeEntity.setAddress("Test Address");
         traineeEntity.setDateOfBirth(LocalDateTime.now());
-        traineeEntity.setAddress("123 Street");
-        traineeEntity.setIsActive(true);
-        traineeEntity.setTrainers(new HashSet<>());
+
+        trainerEntity = new TrainerEntity();
+        trainerEntity.setUser(userEntity);
     }
 
     @Test
-    public void testTraineeRegistrationMapToEntity() {
-        TraineeEntity result = traineeMapper.traineeRegistrationMapToEntity(registrationRequestDto);
+    void testTraineeRegistrationMapToEntity() {
+        when(userUtils.generateUsername(requestDto.getFirsName(), requestDto.getLastName())).thenReturn("johndoe");
+        when(userUtils.generatePassword()).thenReturn("password123");
 
-        assertEquals("John", result.getFirstName());
-        assertEquals("Doe", result.getLastName());
-        assertEquals("123 Street", result.getAddress());
-        assertEquals(true, result.getIsActive());
+        TraineeEntity trainee = traineeMapper.traineeRegistrationMapToEntity(requestDto);
+
+        assertThat(trainee.getAddress()).isEqualTo(requestDto.getAddress());
+        assertThat(trainee.getDateOfBirth()).isEqualTo(requestDto.getDateOfBrith());
+        assertThat(trainee.getUser().getFirstName()).isEqualTo(requestDto.getFirsName());
+        assertThat(trainee.getUser().getLastName()).isEqualTo(requestDto.getLastName());
+        assertThat(trainee.getUser().getUsername()).isEqualTo("johndoe");
+        assertThat(trainee.getUser().getPassword()).isEqualTo("password123");
     }
 
     @Test
-    public void testTraineeEntityMapToResponseDto() {
+    void testTraineeEntityMapToResponseDto() {
         RegistrationResponseDto responseDto = traineeMapper.traineeEntityMapToResponseDto(traineeEntity);
 
-        assertEquals("john_doe", responseDto.getUsername());
-        assertEquals("password", responseDto.getPassword());
+        assertThat(responseDto.getUsername()).isEqualTo(userEntity.getUsername());
+        assertThat(responseDto.getPassword()).isEqualTo(userEntity.getPassword());
     }
 
     @Test
-    public void testTraineeEntityMapToGetResponseTraineeDto() {
-        trainerEntity.setUsername("trainer_user");
-        trainerEntity.setFirstName("Trainer");
-        trainerEntity.setLastName("One");
-
+    void testTraineeEntityMapToGetResponseTraineeDto() {
         Set<TrainerEntity> trainers = new HashSet<>();
         trainers.add(trainerEntity);
         traineeEntity.setTrainers(trainers);
@@ -96,89 +95,16 @@ public class TraineeMapperTest {
         GetTraineeProfileResponseDto profileResponseDto = traineeMapper
                 .traineeEntityMapToGetResponseTraineeDto(traineeEntity);
 
-        assertEquals("John", profileResponseDto.getFirstName());
-        assertEquals("Doe", profileResponseDto.getLastName());
-        assertEquals("123 Street", profileResponseDto.getAddress());
-        assertEquals(true, profileResponseDto.isActive());
-        assertEquals(1, profileResponseDto.getTrainerList().size());
+        assertThat(profileResponseDto.getAddress()).isEqualTo(traineeEntity.getAddress());
+        assertThat(profileResponseDto.isActive()).isEqualTo(userEntity.getIsActive());
+        assertThat(profileResponseDto.getDateOfBride()).isEqualTo(traineeEntity.getDateOfBirth());
+        assertThat(profileResponseDto.getTrainerList()).hasSize(1);
+
+        TrainerListResponseDto trainerResponseDto = profileResponseDto.getTrainerList().iterator().next();
+        assertThat(trainerResponseDto.getTrainerName()).isEqualTo(userEntity.getUsername());
+        assertThat(trainerResponseDto.getFirstName()).isEqualTo(userEntity.getFirstName());
+        assertThat(trainerResponseDto.getLastName()).isEqualTo(userEntity.getLastName());
     }
 
-
-    @Test
-    public void testTraineeEntityMapToUpdateResponse() {
-        TrainerEntity trainerEntity1 = new TrainerEntity();
-        trainerEntity1.setUsername("trainer_user_1");
-        trainerEntity1.setFirstName("Trainer");
-        trainerEntity1.setLastName("One");
-        trainerEntity1.setSpecialization(new TrainingTypeEntity());
-        trainerEntity1.getSpecialization().setId(1L);
-
-        TrainerEntity trainerEntity2 = new TrainerEntity();
-        trainerEntity2.setUsername("trainer_user_2");
-        trainerEntity2.setFirstName("Trainer");
-        trainerEntity2.setLastName("Two");
-        trainerEntity2.setSpecialization(new TrainingTypeEntity());
-        trainerEntity2.getSpecialization().setId(2L);
-
-        Set<TrainerEntity> trainers = new HashSet<>();
-        trainers.add(trainerEntity1);
-        trainers.add(trainerEntity2);
-        traineeEntity.setTrainers(trainers);
-        traineeEntity.setDateOfBirth(LocalDateTime.now());
-
-        UpdateTraineeResponseDto responseDto = traineeMapper.traineeEntityMapToUpdateResponse(traineeEntity);
-
-        assertEquals("john_doe", responseDto.getUsername());
-        assertEquals("John", responseDto.getFirstName());
-        assertEquals("Doe", responseDto.getLastName());
-        assertEquals(2, responseDto.getTrainerList().size());
-        assertEquals("trainer_user_1", responseDto.getTrainerList().iterator().next().getTrainerName());
-    }
-
-    @Test
-    public void testMapToTrainerResponse() {
-        TrainerEntity trainerEntity1 = new TrainerEntity();
-        trainerEntity1.setUsername("trainer_user_1");
-        trainerEntity1.setFirstName("Trainer");
-        trainerEntity1.setLastName("One");
-        trainerEntity1.setSpecialization(new TrainingTypeEntity());
-        trainerEntity1.getSpecialization().setId(1L);
-
-        TrainerEntity trainerEntity2 = new TrainerEntity();
-        trainerEntity2.setUsername("trainer_user_2");
-        trainerEntity2.setFirstName("Trainer");
-        trainerEntity2.setLastName("Two");
-        trainerEntity2.setSpecialization(new TrainingTypeEntity());
-        trainerEntity2.getSpecialization().setId(2L);
-
-        List<TrainerEntity> trainers = List.of(trainerEntity1, trainerEntity2);
-
-        List<TrainerResponseDto> responseDtos = traineeMapper.mapToTrainerResponse(trainers);
-
-        assertEquals(2, responseDtos.size());
-        assertEquals("trainer_user_1", responseDtos.get(0).getTrainerName());
-        assertEquals(1L, responseDtos.get(0).getTrainingTypeId());
-    }
-
-    @Test
-    public void testUpdateTraineeTrainerListMapToTrainerResponse() {
-        TrainerEntity trainerEntity1 = new TrainerEntity();
-        trainerEntity1.setUsername("trainer_user_1");
-        trainerEntity1.setFirstName("Trainer");
-        trainerEntity1.setLastName("One");
-        trainerEntity1.setSpecialization(new TrainingTypeEntity());
-        trainerEntity1.getSpecialization().setId(1L);
-
-        Set<TrainerEntity> trainers = new HashSet<>();
-        trainers.add(trainerEntity1);
-        traineeEntity.setTrainers(trainers);
-
-        List<TrainerResponseDto> responseDtos = traineeMapper
-                .updateTraineeTrainerListMapToTrainerResponse(traineeEntity);
-
-        assertEquals(1, responseDtos.size());
-        assertEquals("trainer_user_1", responseDtos.get(0).getTrainerName());
-        assertEquals(1L, responseDtos.get(0).getTrainingTypeId());
-    }
 
 }

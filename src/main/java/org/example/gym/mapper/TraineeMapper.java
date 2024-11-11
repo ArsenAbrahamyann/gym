@@ -15,12 +15,16 @@ import org.example.gym.dto.response.TrainerResponseDto;
 import org.example.gym.dto.response.UpdateTraineeResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.UserEntity;
+import org.example.gym.utils.UserUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TraineeMapper {
+
+    private final UserUtils userUtils;
 
     /**
      * Maps a TraineeRegistrationRequestDto to a TraineeEntity.
@@ -32,9 +36,16 @@ public class TraineeMapper {
         TraineeEntity trainee = new TraineeEntity();
         trainee.setAddress(requestDto.getAddress());
         trainee.setDateOfBirth(requestDto.getDateOfBrith());
-        trainee.setIsActive(true);
-        trainee.setLastName(requestDto.getLastName());
-        trainee.setFirstName(requestDto.getFirsName());
+        UserEntity user = new UserEntity();
+        user.setIsActive(true);
+        user.setLastName(requestDto.getLastName());
+        user.setFirstName(requestDto.getFirsName());
+        String username = userUtils.generateUsername(requestDto.getFirsName(),
+                requestDto.getLastName());
+        String password = userUtils.generatePassword();
+        user.setUsername(username);
+        user.setPassword(password);
+        trainee.setUser(user);
         log.info("Mapped TraineeRegistrationRequestDto to TraineeEntity: {}", trainee);
         return trainee;
     }
@@ -46,8 +57,8 @@ public class TraineeMapper {
      * @return the mapped RegistrationResponseDto
      */
     public RegistrationResponseDto traineeEntityMapToResponseDto(TraineeEntity traineeEntity) {
-        RegistrationResponseDto responseDto = new RegistrationResponseDto(traineeEntity.getUsername(),
-                traineeEntity.getPassword());
+        UserEntity user = traineeEntity.getUser();
+        RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(), user.getPassword());
         log.info("Mapped TraineeEntity to RegistrationResponseDto: {}", responseDto);
         return responseDto;
     }
@@ -60,18 +71,20 @@ public class TraineeMapper {
      */
     public GetTraineeProfileResponseDto traineeEntityMapToGetResponseTraineeDto(TraineeEntity trainee) {
         GetTraineeProfileResponseDto profileResponseDto = new GetTraineeProfileResponseDto();
+        UserEntity traineeUser = trainee.getUser();
         profileResponseDto.setAddress(trainee.getAddress());
-        profileResponseDto.setActive(trainee.getIsActive());
-        profileResponseDto.setDateOfBride(String.valueOf(trainee.getDateOfBirth()));
-        profileResponseDto.setLastName(trainee.getLastName());
-        profileResponseDto.setFirstName(trainee.getFirstName());
+        profileResponseDto.setActive(traineeUser.getIsActive());
+        profileResponseDto.setDateOfBride(trainee.getDateOfBirth());
+        profileResponseDto.setLastName(traineeUser.getLastName());
+        profileResponseDto.setFirstName(traineeUser.getFirstName());
         Set<TrainerEntity> trainers = trainee.getTrainers();
         Set<TrainerListResponseDto> trainerList = new HashSet<>();
 
         for (TrainerEntity entity : trainers) {
+            UserEntity user = entity.getUser();
             TrainerListResponseDto trainerListResponseDto = new TrainerListResponseDto(
-                    entity.getUsername(), entity.getFirstName(),
-                    entity.getLastName());
+                    user.getUsername(), user.getFirstName(),
+                    user.getLastName());
             trainerList.add(trainerListResponseDto);
         }
         profileResponseDto.setTrainerList(trainerList);
@@ -92,12 +105,14 @@ public class TraineeMapper {
         Set<TrainerEntity> trainers = trainee.getTrainers();
         Set<TrainerResponseDto> trainerList = new HashSet<>();
         for (TrainerEntity entity : trainers) {
-            TrainerResponseDto trainerResponseDto = new TrainerResponseDto(entity.getUsername(), entity.getFirstName(),
-                    entity.getLastName(), entity.getSpecialization().getId());
+            UserEntity user = entity.getUser();
+            TrainerResponseDto trainerResponseDto = new TrainerResponseDto(user.getUsername(), user.getFirstName(),
+                    user.getLastName(), entity.getSpecialization().getId());
             trainerList.add(trainerResponseDto);
         }
-        UpdateTraineeResponseDto responseDto = new UpdateTraineeResponseDto(trainee.getUsername(),
-               trainee.getFirstName(), trainee.getLastName(), trainee.getDateOfBirth().toString(), trainee.getAddress(),
+        UserEntity user = trainee.getUser();
+        UpdateTraineeResponseDto responseDto = new UpdateTraineeResponseDto(user.getUsername(),
+               user.getFirstName(), user.getLastName(), trainee.getDateOfBirth(), trainee.getAddress(),
                trainerList);
         log.info("Mapped TraineeEntity to UpdateTraineeResponseDto: {}", responseDto);
         return responseDto;
@@ -112,8 +127,10 @@ public class TraineeMapper {
      */
     public List<TrainerResponseDto> mapToTrainerResponse(List<TrainerEntity> trainers) {
         return trainers.stream()
-                .map(trainer -> new TrainerResponseDto(trainer.getUsername(), trainer.getFirstName(),
-                        trainer.getLastName(), trainer.getSpecialization().getId()))
+                .map(trainer -> new TrainerResponseDto(trainer.getUser().getUsername(),
+                        trainer.getUser().getFirstName(),
+                        trainer.getUser().getLastName(),
+                        trainer.getSpecialization().getId()))
                 .collect(Collectors.toList());
 
 
@@ -129,12 +146,13 @@ public class TraineeMapper {
         List<TrainerResponseDto> responseDtos = new ArrayList<>();
         Set<TrainerEntity> trainers = trainee.getTrainers();
         for (TrainerEntity entity : trainers) {
-            TrainerResponseDto responseDto = new TrainerResponseDto(entity.getUsername(), entity.getFirstName(),
-                    entity.getLastName(), entity.getSpecialization().getId());
+            UserEntity user = entity.getUser();
+            TrainerResponseDto responseDto = new TrainerResponseDto(user.getUsername(), user.getFirstName(),
+                    user.getLastName(), entity.getSpecialization().getId());
             responseDtos.add(responseDto);
         }
 
-        log.info("Mapped TrainerResponseDtos for Trainee: {}", trainee.getUsername());
+        log.info("Mapped TrainerResponseDtos for Trainee: {}", trainee.getUser().getUsername());
         return responseDtos;
     }
 }

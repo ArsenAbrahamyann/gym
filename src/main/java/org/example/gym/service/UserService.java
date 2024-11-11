@@ -60,6 +60,10 @@ public class UserService {
         return true;
     }
 
+    public UserEntity save(UserEntity userEntity) {
+        return userRepository.save(userEntity);
+    }
+
 
     /**
      * Retrieves a {@link UserEntity} by its username.

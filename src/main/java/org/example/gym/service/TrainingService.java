@@ -63,7 +63,7 @@ public class TrainingService {
 
         TrainingEntity training = trainingMapper.requestDtoMapToTrainingEntity(requestDto, trainee, trainer);
         trainingRepository.save(training);
-        log.info("Training added successfully for trainee: {}", training.getTrainee().getUsername());
+        log.info("Training added successfully: ");
     }
 
     /**
@@ -104,7 +104,7 @@ public class TrainingService {
         validationUtils.validateTrainerTrainingsCriteria(requestDto);
         TrainerEntity trainer = trainerService.getTrainer(requestDto.getTrainerUsername());
 
-        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getUsername(),
+        List<TrainingEntity> trainings = trainingRepository.findTrainingsForTrainer(trainer.getUser().getUsername(),
                 requestDto.getPeriodFrom(), requestDto.getPeriodTo(), requestDto.getTraineeName());
 
         if (trainings.isEmpty()) {

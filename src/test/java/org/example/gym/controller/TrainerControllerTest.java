@@ -13,6 +13,7 @@ import org.example.gym.dto.response.GetTrainerProfileResponseDto;
 import org.example.gym.dto.response.RegistrationResponseDto;
 import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
 import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.mapper.TrainerMapper;
 import org.example.gym.service.TrainerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ public class TrainerControllerTest {
 
     private TrainerRegistrationRequestDto registrationRequestDto;
     private TrainerEntity trainerEntity;
+    private UserEntity user;
     private RegistrationResponseDto registrationResponseDto;
     private GetTrainerProfileResponseDto getTrainerProfileResponseDto;
     private UpdateTrainerRequestDto updateTrainerRequestDto;
@@ -54,7 +56,9 @@ public class TrainerControllerTest {
         registrationRequestDto.setLastName("Doe");
 
         trainerEntity = new TrainerEntity();
-        trainerEntity.setUsername("johndoe");
+        user = new UserEntity();
+        user.setUsername("johndoe");
+        trainerEntity.setUser(user);
 
         registrationResponseDto = new RegistrationResponseDto();
         registrationResponseDto.setUsername("johndoe");

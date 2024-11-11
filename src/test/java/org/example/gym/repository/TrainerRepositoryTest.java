@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ public class TrainerRepositoryTest {
 
     @Mock
     private TrainerRepository trainerRepository;
+    private UserEntity mockUser;
 
 
     /**
@@ -30,33 +32,35 @@ public class TrainerRepositoryTest {
      */
     @BeforeEach
     public void setUp() {
+        mockUser = new UserEntity();
     }
 
     @Test
     public void testFindTrainerByUsername_WhenExists() {
         String username = "trainer1";
         TrainerEntity trainer = new TrainerEntity();
-        trainer.setUsername(username);
+        mockUser.setUsername(username);
+        trainer.setUser(mockUser);
 
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUser_Username(username)).thenReturn(Optional.of(trainer));
 
-        Optional<TrainerEntity> result = trainerRepository.findTrainerByUsername(username);
+        Optional<TrainerEntity> result = trainerRepository.findByUser_Username(username);
 
         assertTrue(result.isPresent());
-        assertEquals(username, result.get().getUsername());
-        verify(trainerRepository, times(1)).findTrainerByUsername(username);
+        assertEquals(username, result.get().getUser().getUsername());
+        verify(trainerRepository, times(1)).findByUser_Username(username);
     }
 
     @Test
     public void testFindTrainerByUsername_WhenNotExists() {
         String username = "trainer2";
 
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.empty());
+        when(trainerRepository.findByUser_Username(username)).thenReturn(Optional.empty());
 
-        Optional<TrainerEntity> result = trainerRepository.findTrainerByUsername(username);
+        Optional<TrainerEntity> result = trainerRepository.findByUser_Username(username);
 
         assertFalse(result.isPresent());
-        verify(trainerRepository, times(1)).findTrainerByUsername(username);
+        verify(trainerRepository, times(1)).findByUser_Username(username);
     }
 
     @Test
@@ -74,33 +78,4 @@ public class TrainerRepositoryTest {
         verify(trainerRepository, times(1)).findByTrainees_Id(traineeId);
     }
 
-    @Test
-    public void testFindAllByIdIn() {
-        List<Long> trainerIds = Arrays.asList(1L, 2L);
-        TrainerEntity trainer1 = new TrainerEntity();
-        TrainerEntity trainer2 = new TrainerEntity();
-        List<TrainerEntity> trainers = Arrays.asList(trainer1, trainer2);
-
-        when(trainerRepository.findAllByIdIn(trainerIds)).thenReturn(trainers);
-
-        List<TrainerEntity> result = trainerRepository.findAllByIdIn(trainerIds);
-
-        assertEquals(2, result.size());
-        verify(trainerRepository, times(1)).findAllByIdIn(trainerIds);
-    }
-
-    @Test
-    public void testFindAllByUsernameIn() {
-        List<String> trainerUsernames = Arrays.asList("trainer1", "trainer2");
-        TrainerEntity trainer1 = new TrainerEntity();
-        TrainerEntity trainer2 = new TrainerEntity();
-        List<TrainerEntity> trainers = Arrays.asList(trainer1, trainer2);
-
-        when(trainerRepository.findAllByUsernameIn(trainerUsernames)).thenReturn(trainers);
-
-        List<TrainerEntity> result = trainerRepository.findAllByUsernameIn(trainerUsernames);
-
-        assertEquals(2, result.size());
-        verify(trainerRepository, times(1)).findAllByUsernameIn(trainerUsernames);
-    }
 }

@@ -12,6 +12,7 @@ import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ public class TrainingMapperTest {
     private TrainerEntity mockTrainerEntity;
     private TraineeEntity mockTraineeEntity;
     private TrainingTypeEntity mockTrainingType;
+    private UserEntity mockUserEntity;
 
     /**
      * Sets up the mock entities used for testing.
@@ -46,10 +48,13 @@ public class TrainingMapperTest {
     @BeforeEach
     public void setUp() {
         mockTrainerEntity = new TrainerEntity();
-        mockTrainerEntity.setUsername("trainerUser");
+        mockUserEntity = new UserEntity();
+        mockUserEntity.setUsername("trainerUser");
+        mockTrainerEntity.setUser(mockUserEntity);
 
         mockTraineeEntity = new TraineeEntity();
-        mockTraineeEntity.setUsername("traineeUser");
+        mockUserEntity.setUsername("traineeUser");
+        mockTraineeEntity.setUser(mockUserEntity);
 
         mockTrainingType = new TrainingTypeEntity();
         mockTrainingType.setTrainingTypeName("Cardio");
@@ -72,7 +77,7 @@ public class TrainingMapperTest {
         assertThat(result).hasSize(1);
         TrainingResponseDto dto = result.get(0);
         assertThat(dto.getName()).isEqualTo("Strength Training");
-        assertThat(dto.getTrainerName()).isEqualTo("trainerUser");
+        assertThat(dto.getTrainerName()).isEqualTo("traineeUser");
         assertThat(dto.getDuration()).isEqualTo(60);
         assertThat(dto.getType()).isEqualTo("Cardio");
     }
@@ -131,7 +136,8 @@ public class TrainingMapperTest {
         entity.setTrainingName(null);
         entity.setTrainingDuration(null);
         TrainerEntity trainer = new TrainerEntity();
-        trainer.setUsername("Doe");
+        mockUserEntity.setUsername("Doe");
+        trainer.setUser(mockUserEntity);
         entity.setTrainer(trainer);
         entity.setTrainee(null);
         entity.setTrainingDate(LocalDateTime.parse("2000-01-01T00:00:00"));

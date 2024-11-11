@@ -1,5 +1,6 @@
 package org.example.gym.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.example.gym.dto.request.UpdateTraineeRequestDto;
 import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
@@ -27,22 +29,27 @@ public class TraineeService {
     private final TrainerService trainerService;
     private final ValidationUtils validationUtils;
     private final UserUtils userUtils;
+    private final UserService userService;
+
 
     /**
-     * Constructs a new {@link TraineeService} instance, injecting the necessary dependencies for managing trainee operations.
-     * This constructor uses Spring's `@Lazy` annotation for injecting {@link TrainerService} to avoid circular dependencies.
+     * Constructs a new {@code TraineeService} instance with dependencies injected for managing trainees.
      *
-     * @param trainerService    the {@link TrainerService} instance used for managing trainers, injected lazily to prevent circular dependency issues
-     * @param traineeRepository the {@link TraineeRepository} used for CRUD operations on {@link TraineeEntity} objects
-     * @param validationUtils   a utility class {@link ValidationUtils} used for performing validation checks on trainee data
-     * @param userUtils         a utility class {@link UserUtils} used for handling user-related helper methods, such as user generation or formatting
+     * @param trainerService   a {@link TrainerService} instance for handling trainer-related operations.
+     *                         The {@code @Lazy} annotation is used to avoid circular dependency issues.
+     * @param traineeRepository a {@link TraineeRepository} instance for accessing and managing {@code Trainee} entities.
+     * @param validationUtils   a {@link ValidationUtils} instance for performing validation checks on input data.
+     * @param userUtils         a {@link UserUtils} instance for generating usernames and passwords for trainees.
+     * @param userService       a {@link UserService} instance for managing user-related operations.
+     *                         The {@code @Lazy} annotation is used to avoid circular dependency issues.
      */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
-                          ValidationUtils validationUtils, UserUtils userUtils) {
+                          ValidationUtils validationUtils, UserUtils userUtils, @Lazy UserService userService) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
         this.validationUtils = validationUtils;
         this.userUtils = userUtils;
+        this.userService = userService;
     }
 
     /**
@@ -54,14 +61,10 @@ public class TraineeService {
     @Transactional
     public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
-
-        String generatedUsername = userUtils.generateUsername(trainee.getFirstName(), trainee.getLastName());
-        trainee.setUsername(generatedUsername);
-        trainee.setPassword(userUtils.generatePassword());
-
+        UserEntity user = trainee.getUser();
+        userService.save(user);
         traineeRepository.save(trainee);
-        log.info("Trainee profile created successfully for {}", trainee.getUsername());
-
+        log.info("Trainee profile created successfully for {}", trainee.getUser().getUsername());
         return trainee;
     }
 
@@ -74,7 +77,10 @@ public class TraineeService {
     public void toggleTraineeStatus(ActivateRequestDto requestDto) {
         log.info("Toggling trainee status for {}", requestDto.getUsername());
         TraineeEntity trainee = getTrainee(requestDto.getUsername());
-        trainee.setIsActive(requestDto.isActive());
+        UserEntity user = trainee.getUser();
+        user.setIsActive(requestDto.isActive());
+        UserEntity save = userService.save(user);
+        trainee.setUser(save);
         traineeRepository.save(trainee);
         log.info("Trainee status toggled successfully for {}", requestDto.getUsername());
     }
@@ -89,7 +95,7 @@ public class TraineeService {
     public List<TrainerEntity> getUnassignedTrainers(String traineeUsername) {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
 
-        TraineeEntity trainee = traineeRepository.findByUsername(traineeUsername)
+        TraineeEntity trainee = traineeRepository.findByUser_Username(traineeUsername)
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
                         + traineeUsername));
 
@@ -111,15 +117,20 @@ public class TraineeService {
     public TraineeEntity updateTraineeTrainerList(UpdateTraineeTrainerListRequestDto requestDto) {
         log.info("Updating trainer list for trainee: {}", requestDto.getTraineeUsername());
 
-        TraineeEntity trainee = traineeRepository.findByUsername(requestDto.getTraineeUsername())
+        TraineeEntity trainee = traineeRepository.findByUser_Username(requestDto.getTraineeUsername())
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found"));
 
-        List<TrainerEntity> trainers = trainerService.findByUsernames(requestDto.getTrainerUsername());
-        validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
+        List<TrainerEntity> trainers = new ArrayList<>();
+        List<String> trainerUsername = requestDto.getTrainerUsername();
+        for (String s : trainerUsername) {
+            TrainerEntity trainer = trainerService.getTrainer(s);
+            trainers.add(trainer);
+        }
         trainee.setTrainers(new HashSet<>(trainers));
 
+        validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
         traineeRepository.save(trainee);
-        log.info("Updated trainer list for trainee: {}", trainee.getUsername());
+        log.info("Updated trainer list for trainee: {}", trainee.getUser().getUsername());
 
         return trainee;
     }
@@ -140,14 +151,17 @@ public class TraineeService {
         if (requestDto.getAddress() != null) {
             trainee.setAddress(requestDto.getAddress());
         }
-        trainee.setUsername(requestDto.getUsername());
-        trainee.setLastName(requestDto.getLastName());
-        trainee.setFirstName(requestDto.getFirstName());
-        trainee.setIsActive(requestDto.isPublic());
+        UserEntity user = trainee.getUser();
+        user.setUsername(requestDto.getUsername());
+        user.setLastName(requestDto.getLastName());
+        user.setFirstName(requestDto.getFirstName());
+        user.setIsActive(requestDto.isPublic());
+        UserEntity save = userService.save(user);
+        trainee.setUser(save);
         validationUtils.validateUpdateTrainee(trainee);
         traineeRepository.save(trainee);
 
-        log.info("Trainee profile updated successfully for {}", trainee.getUsername());
+        log.info("Trainee profile updated successfully for {}", save.getUsername());
         return trainee;
     }
 
@@ -159,7 +173,7 @@ public class TraineeService {
     @Transactional
     public void deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username: {}", username);
-        TraineeEntity trainee = traineeRepository.findByUsername(username)
+        TraineeEntity trainee = traineeRepository.findByUser_Username(username)
                 .orElseThrow(() -> new TraineeNotFoundException("TraineeEntity not found"));
         traineeRepository.delete(trainee);
         log.info("Trainee deleted successfully with username: {}", username);
@@ -174,7 +188,7 @@ public class TraineeService {
     @Transactional
     public TraineeEntity getTrainee(String username) {
         log.info("Retrieving trainee by username: {}", username);
-        return traineeRepository.findByUsername(username)
+        return traineeRepository.findByUser_Username(username)
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
                         + username));
     }

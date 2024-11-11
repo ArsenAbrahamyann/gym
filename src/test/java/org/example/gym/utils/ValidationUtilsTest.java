@@ -11,6 +11,7 @@ import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,19 +22,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ValidationUtilsTest {
 
     private ValidationUtils validationUtils;
+    private UserEntity user;
 
     @BeforeEach
     public void setUp() {
         validationUtils = new ValidationUtils();
+        user = new UserEntity();
     }
 
     @Test
     public void testValidateTrainee_ValidTrainee_NoException() {
         TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("validUsername");
-        trainee.setPassword("validPassword");
+        user.setUsername("validUsername");
+        user.setPassword("validPassword");
         trainee.setAddress("validAddress");
-        trainee.setIsActive(true);
+        user.setIsActive(true);
+        trainee.setUser(user);
 
         validationUtils.validateTrainee(trainee);
     }
@@ -41,10 +45,11 @@ public class ValidationUtilsTest {
     @Test
     public void testValidateTrainee_EmptyUsername_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("");
-        trainee.setPassword("validPassword");
+        user.setUsername("");
+        user.setPassword("validPassword");
         trainee.setAddress("validAddress");
-        trainee.setIsActive(true);
+        user.setIsActive(true);
+        trainee.setUser(user);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validationUtils.validateTrainee(trainee);
@@ -55,10 +60,11 @@ public class ValidationUtilsTest {
     @Test
     public void testValidateTrainee_NullPassword_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("validUsername");
-        trainee.setPassword(null);
+        user.setUsername("validUsername");
+        user.setPassword(null);
         trainee.setAddress("validAddress");
-        trainee.setIsActive(true);
+        user.setIsActive(true);
+        trainee.setUser(user);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validationUtils.validateTrainee(trainee);
@@ -69,10 +75,11 @@ public class ValidationUtilsTest {
     @Test
     public void testValidateTrainer_ValidTrainer_NoException() {
         TrainerEntity trainer = new TrainerEntity();
-        trainer.setUsername("validTrainer");
-        trainer.setPassword("password");
+        user.setUsername("validTrainer");
+        user.setPassword("password");
         trainer.setSpecialization(new TrainingTypeEntity());
-        trainer.setIsActive(true);
+        user.setIsActive(true);
+        trainer.setUser(user);
 
         validationUtils.validateTrainer(trainer);
     }
@@ -80,10 +87,11 @@ public class ValidationUtilsTest {
     @Test
     public void testValidateTrainer_EmptySpecialization_ExceptionThrown() {
         TrainerEntity trainer = new TrainerEntity();
-        trainer.setUsername("validTrainer");
-        trainer.setPassword("password");
+        user.setUsername("validTrainer");
+        user.setPassword("password");
         trainer.setSpecialization(null);
-        trainer.setIsActive(true);
+        user.setIsActive(true);
+        trainer.setUser(user);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validationUtils.validateTrainer(trainer);
@@ -124,10 +132,11 @@ public class ValidationUtilsTest {
     public void testValidateUpdateTrainer_ValidTrainer_NoException() {
         TrainerEntity trainer = new TrainerEntity();
         trainer.setId(1L);
-        trainer.setUsername("validTrainer");
-        trainer.setPassword("password");
+        user.setUsername("validTrainer");
+        user.setPassword("password");
         trainer.setSpecialization(new TrainingTypeEntity());
-        trainer.setIsActive(true);
+        user.setIsActive(true);
+        trainer.setUser(user);
 
         validationUtils.validateUpdateTrainer(trainer);
     }
@@ -135,10 +144,11 @@ public class ValidationUtilsTest {
     @Test
     public void testValidateUpdateTrainee_MissingId_ExceptionThrown() {
         TraineeEntity trainee = new TraineeEntity();
-        trainee.setUsername("validUsername");
-        trainee.setPassword("validPassword");
+        user.setUsername("validUsername");
+        user.setPassword("validPassword");
         trainee.setAddress("validAddress");
-        trainee.setIsActive(true);
+        user.setIsActive(true);
+        trainee.setUser(user);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validationUtils.validateUpdateTrainee(trainee);
@@ -181,14 +191,6 @@ public class ValidationUtilsTest {
     public void testValidateDateFormat_ValidFormat_NoException() {
         LocalDateTime validDate = LocalDateTime.now();
         validationUtils.validateDateFormat(validDate, "Valid date");
-    }
-
-    @Test
-    public void testValidateTrainee_NullTrainee_ExceptionThrown() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            validationUtils.validateTrainee(null);
-        });
-        assertEquals("Trainee not found", exception.getMessage());
     }
 
     @Test

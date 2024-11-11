@@ -6,6 +6,7 @@ import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TrainerService {
     private final TrainerRepository trainerRepository;
     private final TrainingTypeService trainingTypeService;
-    private final UserUtils userUtils;
+    private final UserService userService;
     private final ValidationUtils validationUtils;
 
     /**
@@ -33,14 +34,14 @@ public class TrainerService {
      * @param trainerRepository   the {@link TrainerRepository} used for CRUD operations on {@link TrainerEntity} objects
      * @param trainingTypeService the {@link TrainingTypeService} instance, injected lazily to manage training types and avoid circular dependencies
      * @param validationUtils     a utility class {@link ValidationUtils} used for performing validation checks on trainer data
-     * @param userUtils           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
+     * @param userService           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
      */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingTypeService trainingTypeService,
-                          ValidationUtils validationUtils, UserUtils userUtils) {
+                          ValidationUtils validationUtils, @Lazy UserService userService) {
         this.trainerRepository = trainerRepository;
         this.trainingTypeService = trainingTypeService;
         this.validationUtils = validationUtils;
-        this.userUtils = userUtils;
+        this.userService = userService;
     }
 
     /**
@@ -53,12 +54,8 @@ public class TrainerService {
     public TrainerEntity createTrainerProfile(TrainerEntity trainer) {
         log.info("Creating trainer profile ");
 
-        String generateUsername = userUtils.generateUsername(trainer.getFirstName(), trainer.getLastName());
-        trainer.setUsername(generateUsername);
-
-        String generatePassword = userUtils.generatePassword();
-        trainer.setPassword(generatePassword);
-
+        UserEntity user = trainer.getUser();
+        userService.save(user);
         trainerRepository.save(trainer);
 
         log.debug("Trainer profile created: {}", trainer);
@@ -74,7 +71,10 @@ public class TrainerService {
     public void toggleTrainerStatus(ActivateRequestDto requestDto) {
         log.info("Toggling trainer status for {}", requestDto.getUsername());
         TrainerEntity trainer = getTrainer(requestDto.getUsername());
-        trainer.setIsActive(requestDto.isActive());
+        UserEntity user = trainer.getUser();
+        user.setIsActive(requestDto.isActive());
+        UserEntity save = userService.save(user);
+        trainer.setUser(save);
         trainerRepository.save(trainer);
         log.info("Trainer status toggled successfully for {}", requestDto.getUsername());
     }
@@ -89,16 +89,19 @@ public class TrainerService {
     public TrainerEntity updateTrainerProfile(UpdateTrainerRequestDto requestDto) {
         log.info("Updating trainer profile for {}", requestDto.getUsername());
         TrainerEntity trainer = getTrainer(requestDto.getUsername());
-        trainer.setUsername(requestDto.getUsername());
-        trainer.setFirstName(requestDto.getFirstName());
-        trainer.setLastName(requestDto.getLastName());
-        trainer.setIsActive(requestDto.isPublic());
+        UserEntity user = trainer.getUser();
+        user.setUsername(requestDto.getUsername());
+        user.setFirstName(requestDto.getFirstName());
+        user.setLastName(requestDto.getLastName());
+        user.setIsActive(requestDto.isPublic());
         TrainingTypeEntity trainingType = trainingTypeService.findById(requestDto.getTrainingTypeId());
         trainer.setSpecialization(trainingType);
+        UserEntity save = userService.save(user);
+        trainer.setUser(save);
         validationUtils.validateUpdateTrainer(trainer);
-        TrainerEntity save = trainerRepository.save(trainer);
-        log.info("Trainee profile updated successfully for {}", save.getUsername());
-        return save;
+        TrainerEntity updateTrainer = trainerRepository.save(trainer);
+        log.info("Trainee profile updated successfully for {}", user.getUsername());
+        return updateTrainer;
     }
 
     /**
@@ -134,21 +137,12 @@ public class TrainerService {
     @Transactional
     public TrainerEntity getTrainer(String trainerUsername) {
         log.info("Retrieving trainer by username {}", trainerUsername);
-        return trainerRepository.findTrainerByUsername(trainerUsername)
+        return trainerRepository.findByUser_Username(trainerUsername)
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username: {}", trainerUsername);
                     return new TrainerNotFoundException("Trainer not found with username: " + trainerUsername);
                 });
     }
 
-    /**
-     * Finds trainers by a list of usernames.
-     *
-     * @param trainerUsernames the list of usernames of trainers to find.
-     * @return a list of {@link TrainerEntity} records corresponding to the provided usernames.
-     */
-    public List<TrainerEntity> findByUsernames(List<String> trainerUsernames) {
-        log.info("Finding trainers by usernames: {}", trainerUsernames);
-        return trainerRepository.findAllByUsernameIn(trainerUsernames);
-    }
+
 }

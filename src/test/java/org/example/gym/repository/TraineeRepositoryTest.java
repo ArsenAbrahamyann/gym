@@ -6,24 +6,22 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Test class for {@link TraineeRepository}.
- * It focuses on verifying the correct functionality of the repository
- * methods using mocking and assertions with AssertJ.
- */
+
 @ExtendWith(MockitoExtension.class)
 public class TraineeRepositoryTest {
 
     @Mock
-    private TraineeRepository traineeRepository; // Mock the repository directly
+    private TraineeRepository traineeRepository;
 
     private TraineeEntity mockTrainee;
+    private UserEntity mockUser;
 
     /**
      * Setup method to initialize mock objects before each test.
@@ -33,37 +31,31 @@ public class TraineeRepositoryTest {
     public void setup() {
         mockTrainee = new TraineeEntity();
         mockTrainee.setId(1L);
-        mockTrainee.setUsername("john_doe");
+        mockUser = new UserEntity();
+        mockUser.setUsername("john_doe");
+        mockTrainee.setUser(mockUser);
     }
 
-    /**
-     * Tests the {@link TraineeRepository#findByUsername(String)} method
-     * to ensure that a trainee is correctly retrieved by their username.
-     */
     @Test
     public void testFindByUsername_TraineeExists() {
         // Arrange: Mocking the behavior of the repository to return an optional of the mock trainee
-        when(traineeRepository.findByUsername(anyString())).thenReturn(Optional.of(mockTrainee));
+        when(traineeRepository.findByUser_Username(anyString())).thenReturn(Optional.of(mockTrainee));
 
         // Act: Calling the findByUsername method
-        Optional<TraineeEntity> result = traineeRepository.findByUsername("john_doe");
+        Optional<TraineeEntity> result = traineeRepository.findByUser_Username("john_doe");
 
         // Assert: Verifying the result
         assertThat(result).isPresent();
-        assertThat(result.get().getUsername()).isEqualTo("john_doe");
+        assertThat(result.get().getUser().getUsername()).isEqualTo("john_doe");
     }
 
-    /**
-     * Tests the {@link TraineeRepository#findByUsername(String)} method
-     * to ensure that an empty {@link Optional} is returned when no trainee is found.
-     */
     @Test
     public void testFindByUsername_TraineeDoesNotExist() {
         // Arrange: Mocking the behavior of the repository to return an empty optional
-        when(traineeRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(traineeRepository.findByUser_Username(anyString())).thenReturn(Optional.empty());
 
         // Act: Calling the findByUsername method
-        Optional<TraineeEntity> result = traineeRepository.findByUsername("non_existing_user");
+        Optional<TraineeEntity> result = traineeRepository.findByUser_Username("non_existing_user");
 
         // Assert: Verifying the result
         assertThat(result).isEmpty();

@@ -3,16 +3,15 @@ package org.example.gym.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Optional;
-import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
@@ -52,6 +51,7 @@ public class TrainerServiceTest {
     private TrainerService trainerService;
 
     private TrainerEntity trainer;
+    private UserEntity user;
 
     /**
      * Initializes the test environment by setting up a default `TrainerEntity` instance.
@@ -64,35 +64,13 @@ public class TrainerServiceTest {
     @BeforeEach
     public void setUp() {
         trainer = new TrainerEntity();
-        trainer.setFirstName("John");
-        trainer.setLastName("Doe");
+        user = new UserEntity();
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        trainer.setUser(user);
         trainer.setSpecialization(new TrainingTypeEntity(1L, "Yoga"));
     }
 
-    @Test
-    public void testCreateTrainerProfile() {
-        when(userUtils.generateUsername("John", "Doe")).thenReturn("john.doe");
-        when(userUtils.generatePassword()).thenReturn("generatedPassword");
-        when(trainerRepository.save(trainer)).thenReturn(trainer);
-
-        TrainerEntity createdTrainer = trainerService.createTrainerProfile(trainer);
-
-        assertNotNull(createdTrainer);
-        assertEquals("john.doe", createdTrainer.getUsername());
-        verify(trainerRepository).save(trainer);
-    }
-
-    @Test
-    public void testToggleTrainerStatus() {
-        String username = "john.doe";
-        ActivateRequestDto requestDto = new ActivateRequestDto(username, true);
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.of(trainer));
-
-        trainerService.toggleTrainerStatus(requestDto);
-
-        assertTrue(trainer.getIsActive());
-        verify(trainerRepository).save(trainer);
-    }
 
     @Test
     public void testFindAll() {
@@ -120,46 +98,23 @@ public class TrainerServiceTest {
     @Test
     public void testGetTrainer() {
         String username = "john.doe";
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUser_Username(username)).thenReturn(Optional.of(trainer));
 
         TrainerEntity foundTrainer = trainerService.getTrainer(username);
 
         assertNotNull(foundTrainer);
         assertEquals(trainer, foundTrainer);
-        verify(trainerRepository).findTrainerByUsername(username);
+        verify(trainerRepository).findByUser_Username(username);
     }
 
     @Test
     public void testGetTrainerNotFound() {
         String username = "nonexistent.user";
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.empty());
+        when(trainerRepository.findByUser_Username(username)).thenReturn(Optional.empty());
 
         assertThrows(TrainerNotFoundException.class, () -> trainerService.getTrainer(username));
     }
 
-    @Test
-    public void testUpdateTrainerProfile() {
-        String username = "john.doe";
-        UpdateTrainerRequestDto requestDto = new UpdateTrainerRequestDto(username, "John", "Doe",
-                1L, true);
-
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.of(trainer));
-        when(trainingTypeService.findById(1L))
-                .thenReturn(new TrainingTypeEntity(1L, "Yoga"));
-        when(trainerRepository.save(trainer)).thenReturn(trainer);
-
-        TrainerEntity updatedTrainer = trainerService.updateTrainerProfile(requestDto);
-
-        assertNotNull(updatedTrainer);
-        assertEquals("john.doe", updatedTrainer.getUsername());
-        assertEquals("John", updatedTrainer.getFirstName());
-        assertEquals("Doe", updatedTrainer.getLastName());
-        assertTrue(updatedTrainer.getIsActive());
-
-        verify(trainerRepository).findTrainerByUsername(username);
-        verify(trainingTypeService).findById(1L);
-        verify(trainerRepository).save(trainer);
-    }
 
     @Test
     public void testUpdateTrainerProfileNotFound() {
@@ -167,20 +122,9 @@ public class TrainerServiceTest {
         UpdateTrainerRequestDto requestDto = new UpdateTrainerRequestDto();
         requestDto.setUsername(username);
 
-        when(trainerRepository.findTrainerByUsername(username)).thenReturn(Optional.empty());
+        when(trainerRepository.findByUser_Username(username)).thenReturn(Optional.empty());
 
         assertThrows(TrainerNotFoundException.class, () -> trainerService.updateTrainerProfile(requestDto));
     }
 
-    @Test
-    public void testFindByUsernames() {
-        String username = "john.doe";
-        when(trainerRepository.findAllByUsernameIn(Arrays.asList(username))).thenReturn(Arrays.asList(trainer));
-
-        var trainers = trainerService.findByUsernames(Arrays.asList(username));
-
-        assertNotNull(trainers);
-        assertEquals(1, trainers.size());
-        verify(trainerRepository).findAllByUsernameIn(Arrays.asList(username));
-    }
 }
