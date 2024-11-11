@@ -13,6 +13,8 @@ import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
+import org.example.gym.utils.UserUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TrainerMapper {
 
+    private final UserUtils userUtils;
+
     /**
      * Maps a TrainerRegistrationRequestDto to a TrainerEntity.
      *
@@ -32,12 +36,19 @@ public class TrainerMapper {
     public TrainerEntity trainerRegistrationMapToEntity(TrainerRegistrationRequestDto registrationDto) {
         log.debug("Mapping TrainerRegistrationRequestDto to TrainerEntity: {}", registrationDto);
         TrainerEntity trainer = new TrainerEntity();
+        UserEntity user = new UserEntity();
         TrainingTypeEntity trainingType = new TrainingTypeEntity();
         trainingType.setId(registrationDto.getTrainingTypeId());
         trainer.setSpecialization(trainingType);
-        trainer.setIsActive(true);
-        trainer.setFirstName(registrationDto.getFirstName());
-        trainer.setLastName(registrationDto.getLastName());
+        user.setIsActive(true);
+        user.setFirstName(registrationDto.getFirstName());
+        user.setLastName(registrationDto.getLastName());
+        String username = userUtils.generateUsername(registrationDto.getFirstName(),
+                registrationDto.getLastName());
+        String password = userUtils.generatePassword();
+        user.setUsername(username);
+        user.setPassword(password);
+        trainer.setUser(user);
         log.info("Mapped TrainerEntity: {}", trainer);
         return trainer;
     }
@@ -53,12 +64,14 @@ public class TrainerMapper {
         Set<TraineeEntity> trainees = trainer.getTrainees();
         List<TraineeListResponseDto> traineeList = new ArrayList<>();
         for (TraineeEntity entity : trainees) {
+            UserEntity user = entity.getUser();
             TraineeListResponseDto responseDto = new TraineeListResponseDto(
-                    entity.getUsername(), entity.getLastName(), entity.getFirstName());
+                    user.getUsername(), user.getLastName(), user.getFirstName());
             traineeList.add(responseDto);
         }
-        GetTrainerProfileResponseDto responseDto = new GetTrainerProfileResponseDto(trainer.getFirstName(),
-                trainer.getLastName(), trainer.getSpecialization().getId(), trainer.getIsActive(),
+        UserEntity user = trainer.getUser();
+        GetTrainerProfileResponseDto responseDto = new GetTrainerProfileResponseDto(user.getFirstName(),
+                user.getLastName(), trainer.getSpecialization().getId(), user.getIsActive(),
                 traineeList);
         log.info("Mapped GetTrainerProfileResponseDto: {}", responseDto);
         return responseDto;
@@ -68,21 +81,23 @@ public class TrainerMapper {
     /**
      * Maps a TrainerEntity to an UpdateTrainerProfileResponseDto.
      *
-     * @param entity the TrainerEntity to map
+     * @param trainer the TrainerEntity to map
      * @return the mapped UpdateTrainerProfileResponseDto
      */
-    public UpdateTrainerProfileResponseDto updateTrainerProfileMapToResponseDto(TrainerEntity entity) {
-        log.debug("Mapping TrainerEntity to UpdateTrainerProfileResponseDto: {}", entity);
-        Set<TraineeEntity> trainees = entity.getTrainees();
+    public UpdateTrainerProfileResponseDto updateTrainerProfileMapToResponseDto(TrainerEntity trainer) {
+        log.debug("Mapping TrainerEntity to UpdateTrainerProfileResponseDto: {}", trainer);
+        Set<TraineeEntity> trainees = trainer.getTrainees();
         List<TraineeListResponseDto> responseDtos = new ArrayList<>();
         for (TraineeEntity trainee : trainees) {
-            TraineeListResponseDto responseDto = new TraineeListResponseDto(trainee.getUsername(),
-                    trainee.getLastName(), trainee.getFirstName());
+            UserEntity user = trainee.getUser();
+            TraineeListResponseDto responseDto = new TraineeListResponseDto(user.getUsername(),
+                    user.getLastName(), user.getFirstName());
             responseDtos.add(responseDto);
         }
-        UpdateTrainerProfileResponseDto responseDto = new UpdateTrainerProfileResponseDto(entity.getUsername(),
-                entity.getFirstName(), entity.getLastName(), entity.getSpecialization().getId(),
-                entity.getIsActive(), responseDtos);
+        UserEntity user = trainer.getUser();
+        UpdateTrainerProfileResponseDto responseDto = new UpdateTrainerProfileResponseDto(user.getUsername(),
+                user.getFirstName(), user.getLastName(), trainer.getSpecialization().getId(),
+                user.getIsActive(), responseDtos);
         log.info("Mapped UpdateTrainerProfileResponseDto: {}", responseDto);
         return responseDto;
     }
@@ -90,13 +105,15 @@ public class TrainerMapper {
     /**
      * Maps a TrainerEntity to a RegistrationResponseDto.
      *
-     * @param savedTrainer the TrainerEntity to map
+     * @param trainer the TrainerEntity to map
      * @return the mapped RegistrationResponseDto
      */
-    public RegistrationResponseDto trainerMapToResponse(TrainerEntity savedTrainer) {
-        log.debug("Mapping TrainerEntity to RegistrationResponseDto for username: {}", savedTrainer.getUsername());
-        RegistrationResponseDto responseDto = new RegistrationResponseDto(savedTrainer.getUsername(),
-                savedTrainer.getPassword());
+    public RegistrationResponseDto trainerMapToResponse(TrainerEntity trainer) {
+        log.debug("Mapping TrainerEntity to RegistrationResponseDto for username: {}",
+                trainer.getUser().getUsername());
+        UserEntity user = trainer.getUser();
+        RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(),
+                user.getPassword());
         log.info("Mapped RegistrationResponseDto: {}", responseDto);
         return responseDto;
     }

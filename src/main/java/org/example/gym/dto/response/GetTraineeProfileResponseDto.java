@@ -1,5 +1,6 @@
 package org.example.gym.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ public class GetTraineeProfileResponseDto {
 
     private String firstName;
     private String lastName;
-    private String dateOfBride;
+    private LocalDateTime dateOfBride;
     private String address;
     private boolean isActive;
     private Set<TrainerListResponseDto> trainerList;

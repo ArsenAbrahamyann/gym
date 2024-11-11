@@ -10,6 +10,7 @@ import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ public class TrainingRepositoryTest {
     private TraineeEntity trainee;
     private TrainerEntity trainer;
     private TrainingTypeEntity trainingType;
+    private UserEntity user;
 
     /**
      * Sets up the test environment before each test method.
@@ -45,12 +47,15 @@ public class TrainingRepositoryTest {
     @BeforeEach
     public void setUp() {
         trainee = new TraineeEntity();
+        user = new UserEntity();
         trainee.setId(1L);
-        trainee.setUsername("traineeUser");
+        user.setUsername("traineeUser");
+        trainee.setUser(user);
 
         trainer = new TrainerEntity();
         trainer.setId(1L);
-        trainer.setUsername("trainerUser");
+        user.setUsername("trainerUser");
+        trainer.setUser(user);
 
         trainingType = new TrainingTypeEntity();
         trainingType.setId(1L);
@@ -69,12 +74,12 @@ public class TrainingRepositoryTest {
 
         // Mock
         when(trainingRepository.findTrainingsForTrainee(
-                trainee.getUsername(), fromDate, toDate, null, null))
+                trainee.getUser().getUsername(), fromDate, toDate, null, null))
                 .thenReturn(List.of(training));
 
         // Call
         List<TrainingEntity> result = trainingRepository.findTrainingsForTrainee(
-                trainee.getUsername(), fromDate, toDate, null, null);
+                trainee.getUser().getUsername(), fromDate, toDate, null, null);
 
         // Verify
         assertNotNull(result);
@@ -96,12 +101,12 @@ public class TrainingRepositoryTest {
 
         // Mock
         when(trainingRepository.findTrainingsForTrainer(
-                trainer.getUsername(), fromDate, toDate, "traineeUser"))
+                trainer.getUser().getUsername(), fromDate, toDate, "traineeUser"))
                 .thenReturn(List.of(training));
 
         // Call
         List<TrainingEntity> result = trainingRepository.findTrainingsForTrainer(
-                trainer.getUsername(), fromDate, toDate, "traineeUser");
+                trainer.getUser().getUsername(), fromDate, toDate, "traineeUser");
 
         // Verify
         assertNotNull(result);

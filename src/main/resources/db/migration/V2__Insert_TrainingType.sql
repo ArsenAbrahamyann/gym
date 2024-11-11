@@ -11,4 +11,3 @@ VALUES
     ('Flexibility Exercise'),
     ('Bodyweight Training'),
     ('Powerlifting')
-ON CONFLICT (training_type_name) DO NOTHING;

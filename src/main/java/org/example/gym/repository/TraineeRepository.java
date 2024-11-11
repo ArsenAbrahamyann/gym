@@ -19,5 +19,5 @@ public interface TraineeRepository extends JpaRepository<TraineeEntity, Long> {
      * @return an {@link Optional} containing the found {@link TraineeEntity},
      *         or empty if not found
      */
-    Optional<TraineeEntity> findByUsername(String username);
+    Optional<TraineeEntity> findByUser_Username(String username);
 }

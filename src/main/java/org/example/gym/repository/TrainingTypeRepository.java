@@ -12,14 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface TrainingTypeRepository extends JpaRepository<TrainingTypeEntity, Long> {
 
     /**
-     * Finds a {@link TrainingTypeEntity} by its ID.
-     *
-     * @param trainingTypeId the ID of the training type to find
-     * @return an {@link Optional} containing the matching {@link TrainingTypeEntity}, or empty if none found
-     */
-    Optional<TrainingTypeEntity> findById(Long trainingTypeId);
-
-    /**
      * Finds a {@link TrainingTypeEntity} by its training name.
      *
      * @param trainingTypeName the name of the training

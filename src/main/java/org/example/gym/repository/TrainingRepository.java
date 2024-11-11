@@ -24,10 +24,10 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
      * @param trainingType the type of training (optional)
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
-    @Query("SELECT t FROM TrainingEntity t WHERE t.trainee.username = :traineeName "
+    @Query("SELECT t FROM TrainingEntity t WHERE t.trainee.user.username = :traineeName "
             + "AND t.trainingDate >= COALESCE(:fromDate, t.trainingDate) "
             + "AND t.trainingDate <= COALESCE(:toDate, t.trainingDate) "
-            + "AND (:trainerName IS NULL OR t.trainer.username = :trainerName) "
+            + "AND (:trainerName IS NULL OR t.trainer.user.username = :trainerName) "
             + "AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)")
     List<TrainingEntity> findTrainingsForTrainee(@Param("traineeName") String traineeName,
                                                  @Param("fromDate") LocalDateTime fromDate,
@@ -44,10 +44,10 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
      * @param traineeName the name of the trainee (optional)
      * @return a list of matching {@link TrainingEntity}, or empty if none found
      */
-    @Query("SELECT t FROM TrainingEntity t WHERE t.trainer.username = :trainerName "
+    @Query("SELECT t FROM TrainingEntity t WHERE t.trainer.user.username = :trainerName "
             + "AND t.trainingDate >= COALESCE(:fromDate, t.trainingDate) "
             + "AND t.trainingDate <= COALESCE(:toDate, t.trainingDate) "
-            + "AND (:traineeName IS NULL OR t.trainee.username = :traineeName)")
+            + "AND (:traineeName IS NULL OR t.trainee.user.username = :traineeName)")
     List<TrainingEntity> findTrainingsForTrainer(@Param("trainerName") String trainerName,
                                                  @Param("fromDate") LocalDateTime fromDate,
                                                  @Param("toDate") LocalDateTime toDate,

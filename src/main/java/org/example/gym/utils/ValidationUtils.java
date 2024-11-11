@@ -9,6 +9,7 @@ import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.ValidationException;
 import org.springframework.stereotype.Component;
 
@@ -29,16 +30,17 @@ public class ValidationUtils {
      * @throws ValidationException if any required fields are missing or invalid.
      */
     public void validateTrainee(TraineeEntity trainee) {
+        UserEntity user = trainee.getUser();
 
         if (trainee == null) {
             throw new ValidationException("Trainee not found");
         }
 
-        if (trainee.getPassword() == null || trainee.getPassword().isEmpty()) {
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new ValidationException("Trainee password is required.");
         }
 
-        if (trainee.getUsername() == null || trainee.getUsername().isEmpty()) {
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new ValidationException("Trainee username is required.");
         }
 
@@ -46,7 +48,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainee address is required.");
         }
 
-        if (trainee.getIsActive() == null) {
+        if (user.getIsActive() == null) {
             throw new ValidationException("Trainee active state (IsActive) must be provided.");
         }
     }
@@ -59,14 +61,16 @@ public class ValidationUtils {
      */
     public void validateTrainer(TrainerEntity trainer) {
 
+        UserEntity user = trainer.getUser();
+
         if (trainer == null) {
             throw new ValidationException("trainer not found");
         }
-        if (trainer.getUsername() == null || trainer.getUsername().isEmpty()) {
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new ValidationException("Trainer username is required.");
         }
 
-        if (trainer.getPassword() == null || trainer.getPassword().isEmpty()) {
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new ValidationException("Trainer password is required.");
         }
 
@@ -74,7 +78,7 @@ public class ValidationUtils {
             throw new ValidationException("Trainer specialization is required.");
         }
 
-        if (trainer.getIsActive() == null) {
+        if (user.getIsActive() == null) {
             throw new ValidationException("Trainer active state (IsActive) must be provided.");
         }
     }
