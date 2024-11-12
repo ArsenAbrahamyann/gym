@@ -36,7 +36,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:9.6.0'
     implementation 'org.postgresql:postgresql:42.6.0'
 
-    implementation("io.micrometer:micrometer-core:1.11.0")
+    implementation 'io.micrometer:micrometer-core:1.11.0'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 
 
     implementation("org.apache.logging.log4j:log4j-api:2.19.0")
