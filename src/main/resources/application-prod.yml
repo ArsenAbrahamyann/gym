@@ -4,11 +4,11 @@ spring:
     url: jdbc:postgresql://localhost:5435/gym_crm_prod
     username: postgres
     password: postgres
-
   flyway:
-    url: jdbc:postgresql://localhost:5435/gym_crm_prod
-    user: postgres
-    password: postgres
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    validate-on-migrate: false
 logging:
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] [%X{transactionId}] %-5level %logger{36} - %msg%n"

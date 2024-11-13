@@ -4,11 +4,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/gym_crm_local
     username: postgres
     password: postgres
-
   flyway:
-    url: jdbc:postgresql://localhost:5432/gym_crm_local
-    user: postgres
-    password: postgres
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
 logging:
   level:
       root: debug
