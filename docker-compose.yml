@@ -2,64 +2,22 @@ version: '3.8'
 name: gym_app
 
 services:
-  db_local:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gym_crm_local
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data_local:/var/lib/postgresql/data
-    networks:
-      - gym_network
-
-  db_dev:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gym_crm_dev
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
-    networks:
-      - gym_network
-
-  db_stg:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gym_crm_stg
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_data_stg:/var/lib/postgresql/data
-    networks:
-      - gym_network
-
-  db_prod:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gym_crm_prod
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-    networks:
-      - gym_network
+    postgres:
+      image: postgres:latest
+      container_name: multi_database_postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+#        POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
+      volumes:
+        - postgres_data:/var/lib/postgresql/gym/data01
+        - ./init:/docker-entrypoint-initdb.d
+      ports:
+        - "5432:5432"
 
 networks:
   gym_network:
     driver: bridge
 
 volumes:
-  postgres_data_local:
-  postgres_data_dev:
-  postgres_data_stg:
-  postgres_data_prod:
+  postgres_data:

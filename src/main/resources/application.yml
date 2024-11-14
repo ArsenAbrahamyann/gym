@@ -1,7 +1,5 @@
 
 spring:
-  profiles:
-    active: prod
   jpa:
     hibernate:
       ddl-auto: none
@@ -17,7 +15,7 @@ spring:
     locations: classpath:db/migration
     schemas: ${DB_SCHEMA:public}
     table: flyway_schema_history
-    baseline-on-migrate: true
+    baseline-on-migrate: false
     placeholders:
       schema: ${DB_SCHEMA:public}
     validate-on-migrate: true
