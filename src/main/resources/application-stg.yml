@@ -1,10 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5434/gym_crm_stg
+    url: jdbc:postgresql://localhost:5432/gym_crm_stg
     username: postgres
     password: postgres
-
   flyway:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
