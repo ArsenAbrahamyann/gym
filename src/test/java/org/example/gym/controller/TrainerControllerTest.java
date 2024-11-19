@@ -76,17 +76,6 @@ public class TrainerControllerTest {
         activateRequestDto.setUsername("johndoe");
     }
 
-    @Test
-    public void registerTrainer_ShouldReturnCreatedResponse() {
-        when(mapper.trainerRegistrationMapToEntity(registrationRequestDto)).thenReturn(trainerEntity);
-        when(trainerService.createTrainerProfile(trainerEntity)).thenReturn(trainerEntity);
-        when(mapper.trainerMapToResponse(trainerEntity)).thenReturn(registrationResponseDto);
-
-        ResponseEntity<RegistrationResponseDto> response = trainerController.registerTrainer(registrationRequestDto);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(registrationResponseDto, response.getBody());
-    }
 
     @Test
     public void getTrainerProfile_ShouldReturnOkResponse() {

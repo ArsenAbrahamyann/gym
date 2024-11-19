@@ -10,4 +10,4 @@ spring:
     password: ${spring.datasource.password}
 logging:
   level:
-      root: info
+      root: debug

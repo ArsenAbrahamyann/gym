@@ -56,9 +56,9 @@ public class TraineeMapper {
      * @param traineeEntity the TraineeEntity to map
      * @return the mapped RegistrationResponseDto
      */
-    public RegistrationResponseDto traineeEntityMapToResponseDto(TraineeEntity traineeEntity) {
+    public RegistrationResponseDto traineeEntityMapToResponseDto(TraineeEntity traineeEntity, String password) {
         UserEntity user = traineeEntity.getUser();
-        RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(), user.getPassword());
+        RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(), password);
         log.info("Mapped TraineeEntity to RegistrationResponseDto: {}", responseDto);
         return responseDto;
     }

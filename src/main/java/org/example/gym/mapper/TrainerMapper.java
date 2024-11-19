@@ -108,12 +108,12 @@ public class TrainerMapper {
      * @param trainer the TrainerEntity to map
      * @return the mapped RegistrationResponseDto
      */
-    public RegistrationResponseDto trainerMapToResponse(TrainerEntity trainer) {
+    public RegistrationResponseDto trainerMapToResponse(TrainerEntity trainer, String password) {
         log.debug("Mapping TrainerEntity to RegistrationResponseDto for username: {}",
                 trainer.getUser().getUsername());
         UserEntity user = trainer.getUser();
         RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(),
-                user.getPassword());
+                password);
         log.info("Mapped RegistrationResponseDto: {}", responseDto);
         return responseDto;
     }

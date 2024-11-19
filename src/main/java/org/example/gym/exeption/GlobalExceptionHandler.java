@@ -1,13 +1,11 @@
 package org.example.gym.exeption;
 
 import java.security.NoSuchAlgorithmException;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -62,27 +60,60 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
+    /**
+     * Handles the LockedException when a user is blocked due to multiple failed login attempts.
+     * Logs the warning and returns a standardized error response with a 401 Unauthorized status.
+     *
+     * @param ex the exception thrown when a user is blocked
+     * @param request the current web request
+     * @return a ResponseEntity containing the error details and status code
+     */
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ErrorResponse> handleLockedException(LockedException ex, WebRequest request) {
         log.warn("User is blocked for 5 minutes due to multiple failed login attempts: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
+    /**
+     * Handles the ResponseStatusException when the response status is set to a specific status code,
+     * typically indicating invalid credentials or other authorization issues.
+     * Logs the warning and returns a standardized error response with a 401 Unauthorized status.
+     *
+     * @param ex the exception thrown due to invalid status or authorization issue
+     * @param request the current web request
+     * @return a ResponseEntity containing the error details and status code
+     */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex, WebRequest request) {
         log.warn("Invalid credentials: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
-
+    /**
+     * Handles the BadCredentialsException when invalid credentials are provided during authentication.
+     * Logs the warning and returns a standardized error response with a 401 Unauthorized status.
+     *
+     * @param ex the exception thrown when invalid credentials are provided
+     * @param request the current web request
+     * @return a ResponseEntity containing the error details and status code
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex, WebRequest request) {
         log.warn("Invalid credentials: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
+    /**
+     * Handles the NoSuchAlgorithmException when an unsupported algorithm is used for encryption or hashing.
+     * Logs the warning and returns a standardized error response with a 400 Bad Request status.
+     *
+     * @param ex the exception thrown when the algorithm is not found
+     * @param request the current web request
+     * @return a ResponseEntity containing the error details and status code
+     */
     @ExceptionHandler(NoSuchAlgorithmException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchAlgorithmException(NoSuchAlgorithmException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleNoSuchAlgorithmException(NoSuchAlgorithmException ex,
+                                                                        WebRequest request) {
         log.warn("No Algorithm: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
     }
@@ -120,7 +151,6 @@ public class GlobalExceptionHandler {
      * @param request The {@link WebRequest} information for the current request.
      * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a 404 status code.
      */
-    @SneakyThrows
     @ExceptionHandler(TrainingNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTrainingNotFound(TrainingNotFoundException ex, WebRequest request) {
         log.error("Training not found: {}", ex.getMessage());

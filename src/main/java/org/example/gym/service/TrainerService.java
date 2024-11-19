@@ -2,19 +2,18 @@ package org.example.gym.service;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.jsse.PEMFile;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
+import org.example.gym.entity.enums.ERole;
 import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +38,7 @@ public class TrainerService {
      * @param trainingTypeService the {@link TrainingTypeService} instance, injected lazily to manage training types and avoid circular dependencies
      * @param validationUtils     a utility class {@link ValidationUtils} used for performing validation checks on trainer data
      * @param userService           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
-//     * @param passwordEncoder   a utility class {@link BCryptPasswordEncoder} used for encode password users
+     * @param passwordEncoder   a utility class {@link BCryptPasswordEncoder} used for encode password users
      */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingTypeService trainingTypeService,
                           ValidationUtils validationUtils, @Lazy UserService userService,
@@ -66,6 +65,7 @@ public class TrainerService {
         String password = user.getPassword();
         String encode = passwordEncoder.encode(password);
         user.setPassword(encode);
+        user.setRole(ERole.ROLE_TRAINER);
         userService.save(user);
         trainerRepository.save(trainer);
 
@@ -154,6 +154,4 @@ public class TrainerService {
                     return new TrainerNotFoundException("Trainer not found with username: " + trainerUsername);
                 });
     }
-
-
 }

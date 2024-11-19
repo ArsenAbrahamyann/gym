@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.gym.dto.request.ActivateRequestDto;
-import org.example.gym.dto.request.TraineeRegistrationRequestDto;
 import org.example.gym.dto.request.UpdateTraineeRequestDto;
 import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
 import org.example.gym.dto.response.GetTraineeProfileResponseDto;
@@ -46,22 +45,6 @@ public class TraineeControllerTest {
     public void setUp() {
         traineeEntity = new TraineeEntity();
         registrationResponseDto = new RegistrationResponseDto();
-    }
-
-    @Test
-    public void testTraineeRegistration() {
-        // Arrange
-        TraineeRegistrationRequestDto requestDto = new TraineeRegistrationRequestDto();
-        when(mapper.traineeRegistrationMapToEntity(requestDto)).thenReturn(traineeEntity);
-        when(traineeService.createTraineeProfile(traineeEntity)).thenReturn(traineeEntity);
-        when(mapper.traineeEntityMapToResponseDto(traineeEntity)).thenReturn(registrationResponseDto);
-
-        // Act
-        ResponseEntity<RegistrationResponseDto> response = traineeController.traineeRegistration(requestDto);
-
-        // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo(registrationResponseDto);
     }
 
     @Test

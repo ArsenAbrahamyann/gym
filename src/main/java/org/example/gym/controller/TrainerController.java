@@ -59,9 +59,10 @@ public class TrainerController {
         log.info("Registering trainer: {} {}", requestDto.getFirstName(), requestDto.getLastName());
 
         TrainerEntity trainerEntity = mapper.trainerRegistrationMapToEntity(requestDto);
+        String generatedPassword = trainerEntity.getUser().getPassword();
         TrainerEntity savedTrainer = trainerService.createTrainerProfile(trainerEntity);
 
-        RegistrationResponseDto responseDto = mapper.trainerMapToResponse(savedTrainer);
+        RegistrationResponseDto responseDto = mapper.trainerMapToResponse(savedTrainer, generatedPassword);
         log.info("Controller: Trainer registration successful, Response: {}", responseDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
