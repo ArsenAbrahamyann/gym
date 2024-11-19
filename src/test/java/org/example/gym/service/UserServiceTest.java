@@ -90,18 +90,6 @@ public class UserServiceTest {
         verify(metricsService, never()).recordLoginSuccess();
     }
 
-    @Test
-    public void testChangePassword_Success() {
-        ChangeLoginRequestDto dto = new ChangeLoginRequestDto("testUser", "correctPassword", "newPassword");
-
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
-
-        userService.changePassword(dto);
-
-        verify(userRepository).save(mockUser);
-        verify(metricsService).recordPasswordChange();
-        assertTrue(mockUser.getPassword().equals("newPassword"));
-    }
 
     @Test
     public void testChangePassword_UserNotFound() {

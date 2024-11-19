@@ -65,9 +65,10 @@ public class TraineeController {
         log.info("Controller: Trainee registration request received");
 
         TraineeEntity trainee = mapper.traineeRegistrationMapToEntity(requestDto);
+        String generatedPassword = trainee.getUser().getPassword();
         TraineeEntity traineeEntity = traineeService.createTraineeProfile(trainee);
 
-        RegistrationResponseDto responseDto = mapper.traineeEntityMapToResponseDto(traineeEntity);
+        RegistrationResponseDto responseDto = mapper.traineeEntityMapToResponseDto(traineeEntity, generatedPassword);
         log.info(" Controller: Trainee registration successful, Response: {}", responseDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

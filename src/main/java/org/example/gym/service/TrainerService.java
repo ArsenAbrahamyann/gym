@@ -7,11 +7,13 @@ import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
+import org.example.gym.entity.enums.ERole;
 import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class TrainerService {
     private final TrainingTypeService trainingTypeService;
     private final UserService userService;
     private final ValidationUtils validationUtils;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     /**
      * Constructs a new {@link TrainerService} instance, injecting the necessary dependencies for managing trainer operations.
@@ -35,13 +38,17 @@ public class TrainerService {
      * @param trainingTypeService the {@link TrainingTypeService} instance, injected lazily to manage training types and avoid circular dependencies
      * @param validationUtils     a utility class {@link ValidationUtils} used for performing validation checks on trainer data
      * @param userService           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
+     * @param passwordEncoder   a utility class {@link BCryptPasswordEncoder} used for encode password users
      */
     public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingTypeService trainingTypeService,
-                          ValidationUtils validationUtils, @Lazy UserService userService) {
+                          ValidationUtils validationUtils, @Lazy UserService userService,
+                          BCryptPasswordEncoder passwordEncoder
+    ) {
         this.trainerRepository = trainerRepository;
         this.trainingTypeService = trainingTypeService;
         this.validationUtils = validationUtils;
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -55,6 +62,10 @@ public class TrainerService {
         log.info("Creating trainer profile ");
 
         UserEntity user = trainer.getUser();
+        String password = user.getPassword();
+        String encode = passwordEncoder.encode(password);
+        user.setPassword(encode);
+        user.setRole(ERole.ROLE_TRAINER);
         userService.save(user);
         trainerRepository.save(trainer);
 
@@ -143,6 +154,4 @@ public class TrainerService {
                     return new TrainerNotFoundException("Trainer not found with username: " + trainerUsername);
                 });
     }
-
-
 }

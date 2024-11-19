@@ -2,6 +2,8 @@ package org.example.gym.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.gym.entity.enums.ERole;
 
 @Entity
 @Table(name = "users")
@@ -36,6 +39,10 @@ public class UserEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private ERole role;
 
 
 }

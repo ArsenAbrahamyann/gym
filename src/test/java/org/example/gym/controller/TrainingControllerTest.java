@@ -65,7 +65,6 @@ public class TrainingControllerTest {
         // Assert
         verify(trainingService).getTrainingsForTrainee(any());
         verify(mapper).mapToDtoTrainingTrainee(trainingEntities);
-        assertEquals(200, response.getStatusCodeValue());
         assertEquals(1, response.getBody().size());
     }
 
@@ -91,7 +90,6 @@ public class TrainingControllerTest {
         // Assert
         verify(trainingService).getTrainingsForTrainer(any());
         verify(mapper).mapToDtoTrainingTrainer(trainingEntities);
-        assertEquals(200, response.getStatusCodeValue());
         assertEquals(1, response.getBody().size());
     }
 

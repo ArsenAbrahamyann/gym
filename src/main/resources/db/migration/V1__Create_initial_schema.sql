@@ -5,7 +5,8 @@ CREATE TABLE users (
                        last_name VARCHAR(255) NOT NULL,
                        username VARCHAR(255) NOT NULL UNIQUE,
                        password VARCHAR(255) NOT NULL,
-                       is_active BOOLEAN NOT NULL
+                       is_active BOOLEAN NOT NULL,
+                       role VARCHAR(255) NOT NULL CHECK (role IN ('ROLE_TRAINEE', 'ROLE_TRAINER'))
 );
 
 CREATE TABLE training_types (
