@@ -40,6 +40,7 @@ public class TrainerController {
     private final TrainerService trainerService;
     private final TrainerMapper mapper;
 
+
     /**
      * Registers a new trainer.
      *

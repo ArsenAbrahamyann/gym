@@ -15,6 +15,8 @@ import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,7 @@ public class TraineeService {
     private final TraineeRepository traineeRepository;
     private final TrainerService trainerService;
     private final ValidationUtils validationUtils;
-    private final UserUtils userUtils;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
 
 
@@ -39,16 +41,18 @@ public class TraineeService {
      *                         The {@code @Lazy} annotation is used to avoid circular dependency issues.
      * @param traineeRepository a {@link TraineeRepository} instance for accessing and managing {@code Trainee} entities.
      * @param validationUtils   a {@link ValidationUtils} instance for performing validation checks on input data.
-     * @param userUtils         a {@link UserUtils} instance for generating usernames and passwords for trainees.
+//     * @param passwordEncoder   a {@link PasswordEncoder} instance for encode passwords for trainees.
      * @param userService       a {@link UserService} instance for managing user-related operations.
      *                         The {@code @Lazy} annotation is used to avoid circular dependency issues.
      */
     public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
-                          ValidationUtils validationUtils, UserUtils userUtils, @Lazy UserService userService) {
+                          ValidationUtils validationUtils,
+                          BCryptPasswordEncoder passwordEncoder,
+                          @Lazy UserService userService) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
         this.validationUtils = validationUtils;
-        this.userUtils = userUtils;
+        this.passwordEncoder = passwordEncoder;
         this.userService = userService;
     }
 
@@ -62,6 +66,9 @@ public class TraineeService {
     public TraineeEntity createTraineeProfile(TraineeEntity trainee) {
         log.info("Creating trainee profile");
         UserEntity user = trainee.getUser();
+        String password = user.getPassword();
+        String encode = passwordEncoder.encode(password);
+        user.setPassword(encode);
         userService.save(user);
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUser().getUsername());

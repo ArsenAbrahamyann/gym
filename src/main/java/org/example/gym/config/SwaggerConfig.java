@@ -3,6 +3,7 @@ package org.example.gym.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import java.security.SecureRandom;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -32,5 +33,10 @@ public class SwaggerConfig {
                         new Info().title("Gym CRM")
                 );
 
+    }
+
+    @Bean
+    public SecureRandom getSecureRandom() {
+        return new SecureRandom();
     }
 }
