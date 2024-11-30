@@ -1,8 +1,12 @@
 package org.example.gym.security;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,7 +16,10 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -25,11 +32,41 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint entryPoint;
-    private final JwtAuthenticationFilter jwtFilter;
+    private final CustomLoginFilter customLoginFilter;
+    private final CustomLogoutHandler customLogoutHandler;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthenticationEntryPoint entryPoint,
+                          @Lazy CustomLoginFilter customLoginFilter, @Lazy CustomLogoutHandler customLogoutHandler,
+                          @Lazy CustomLogoutSuccessHandler customLogoutSuccessHandler) {
+        this.userDetailsService = userDetailsService;
+        this.entryPoint = entryPoint;
+        this.customLoginFilter = customLoginFilter;
+        this.customLogoutHandler = customLogoutHandler;
+        this.customLogoutSuccessHandler = customLogoutSuccessHandler;
+    }
+
+    //    private final JwtAuthenticationFilter jwtFilter;
+
+//    @BeanSecurityFilterChain
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.cors(cors -> cors.configurationSource(securityConfig.corsConfigurationSource())).csrf(
+//                AbstractHttpConfigurer::disable).authorizeHttpRequests(
+//                authorize -> authorize.requestMatchers(HttpMethod.POST, "/trainees",
+//                        "/trainers").permitAll().requestMatchers(
+//                        "/auth/**").permitAll().anyRequest().authenticated()).sessionManagement(
+//                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(
+//                authenticationProvider).formLogin(
+//                login -> login.permitAll().successHandler(authenticationSuccessHandler).failureHandler(
+//                        authenticationFailureHandler)).exceptionHandling(
+//                e -> e.authenticationEntryPoint(authenticationEntryPoint)).logout(
+//                logout -> logout.permitAll().addLogoutHandler(logoutHandler).logoutSuccessHandler(
+//                        logoutSuccessHandler)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//        return http.build();
+//    }
 
     /**
      * Configures the security filter chain for HTTP requests.
@@ -56,9 +93,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/trainer/registration",
-                                "/trainee/registration",
-                                "/user/login",
-                                "/user/logout")
+                                "/trainee/registration")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/trainee/**", "/trainer/**")
                         .hasAnyRole("TRAINER", "TRAINEE")
@@ -67,15 +102,39 @@ public class SecurityConfig {
                         .requestMatchers("/trainee/**")
                         .hasRole("TRAINEE")
                         .anyRequest().authenticated())
+                .addFilterBefore(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/user/logout")
+                        .addLogoutHandler(customLogoutHandler)
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"))
                 .httpBasic(Customizer.withDefaults())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(entryPoint))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
 
 
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            // Extract roles or authorities from claims (e.g., "roles" field in the JWT)
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            List<String> roles = jwt.getClaimAsStringList("roles");
+            if (roles != null) {
+                roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+            }
+            return authorities;
+        });
+        return converter;
     }
 
     /**
@@ -104,9 +163,13 @@ public class SecurityConfig {
      * @return the configured {@link AuthenticationManager} bean
      * @throws Exception if an error occurs while getting the authentication manager
      */
+//    @Bean
+//    public AuthenticationManager authManager(AuthenticationConfiguration configuration) throws Exception {
+//        return configuration.getAuthenticationManager();
+//    }
     @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public AuthenticationManager authManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     /**
