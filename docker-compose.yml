@@ -8,7 +8,7 @@ services:
       environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
-#        POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
+        POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
       volumes:
         - postgres_data:/var/lib/postgresql/gym/data01
         - ./init:/docker-entrypoint-initdb.d
