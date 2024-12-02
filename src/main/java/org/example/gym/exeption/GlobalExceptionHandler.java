@@ -46,6 +46,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+
     /**
      * Handles unauthorized access exceptions, which occur when a user attempts to access
      * a resource without proper authorization.
@@ -58,6 +59,25 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         log.warn("Unauthorized access attempt: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+
+    /**
+     * Handles GymAuthenticationException by logging the error and returning an appropriate error response.
+     *
+     * <p>This method is invoked when a {@link GymAuthenticationException} is thrown during the authentication process.
+     * It logs the details of the unauthorized access attempt and returns a response with the specified error message
+     * and the HTTP status code.</p>
+     *
+     * @param ex the exception that was thrown
+     * @param request the request during which the exception occurred
+     * @return a {@link ResponseEntity} containing an error response with the exception details and HTTP status
+     */
+    @ExceptionHandler(GymAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleGymAuthenticationException(GymAuthenticationException ex,
+                                                                          WebRequest request) {
+        log.error("Authentication error: Unauthorized access attempt. Message: {}", ex.getMessage(), ex);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN, request);
     }
 
     /**

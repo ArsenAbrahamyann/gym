@@ -1,7 +1,9 @@
-package org.example.gym.security;
+package org.example.gym.config.security;
 
 import org.example.gym.entity.UserEntity;
 import org.example.gym.repository.UserRepository;
+import org.example.gym.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,15 +20,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    @Lazy
+    private final UserService userService;
 
     /**
      * Constructs a {@link CustomUserDetailsService} with the provided {@link UserRepository}.
      *
-     * @param userRepository the {@link UserRepository} used to load user data from the database
+     * @param userService the {@link UserRepository} used to load user data from the database
      */
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(@Lazy UserService userService) {
+        this.userService = userService;
     }
 
     /**
@@ -42,8 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        UserEntity userEntity = userService.findByUsername(username);
 
         return new UserPrincipal(userEntity);
     }

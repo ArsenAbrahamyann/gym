@@ -1,4 +1,4 @@
-package org.example.gym.security;
+package org.example.gym.config.security;
 
 import java.util.Collection;
 import java.util.Collections;

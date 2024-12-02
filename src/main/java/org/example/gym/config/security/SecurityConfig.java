@@ -1,9 +1,10 @@
-package org.example.gym.security;
+package org.example.gym.config.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.gym.exeption.GymAuthenticationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -19,9 +20,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Security configuration class for setting up authentication, authorization, and JWT-based security.
@@ -32,41 +38,36 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfig {
+
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint entryPoint;
+    @Lazy
     private final CustomLoginFilter customLoginFilter;
     private final CustomLogoutHandler customLogoutHandler;
-    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+    private final JwtUtils jwtUtils;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthenticationEntryPoint entryPoint,
-                          @Lazy CustomLoginFilter customLoginFilter, @Lazy CustomLogoutHandler customLogoutHandler,
-                          @Lazy CustomLogoutSuccessHandler customLogoutSuccessHandler) {
+    /**
+     * Constructs a SecurityConfig object to initialize the necessary services for security configuration.
+     *
+     * @param userDetailsService the custom user details service
+     * @param entryPoint the JWT authentication entry point
+     * @param customLoginFilter the custom login filter for authentication
+     * @param customLogoutHandler the custom logout handler for handling logout operations
+     * @param jwtUtils utility class for handling JWT operations
+     */
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          JwtAuthenticationEntryPoint entryPoint,
+                          @Lazy CustomLoginFilter customLoginFilter,
+                          @Lazy CustomLogoutHandler customLogoutHandler,
+                          @Lazy JwtUtils jwtUtils) {
         this.userDetailsService = userDetailsService;
         this.entryPoint = entryPoint;
         this.customLoginFilter = customLoginFilter;
         this.customLogoutHandler = customLogoutHandler;
-        this.customLogoutSuccessHandler = customLogoutSuccessHandler;
+        this.jwtUtils = jwtUtils;
     }
-
-    //    private final JwtAuthenticationFilter jwtFilter;
-
-//    @BeanSecurityFilterChain
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.cors(cors -> cors.configurationSource(securityConfig.corsConfigurationSource())).csrf(
-//                AbstractHttpConfigurer::disable).authorizeHttpRequests(
-//                authorize -> authorize.requestMatchers(HttpMethod.POST, "/trainees",
-//                        "/trainers").permitAll().requestMatchers(
-//                        "/auth/**").permitAll().anyRequest().authenticated()).sessionManagement(
-//                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(
-//                authenticationProvider).formLogin(
-//                login -> login.permitAll().successHandler(authenticationSuccessHandler).failureHandler(
-//                        authenticationFailureHandler)).exceptionHandling(
-//                e -> e.authenticationEntryPoint(authenticationEntryPoint)).logout(
-//                logout -> logout.permitAll().addLogoutHandler(logoutHandler).logoutSuccessHandler(
-//                        logoutSuccessHandler)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
 
     /**
      * Configures the security filter chain for HTTP requests.
@@ -82,17 +83,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.addAllowedOriginPattern("*");
-                    corsConfig.addAllowedMethod("*");
-                    corsConfig.addAllowedHeader("*");
-                    corsConfig.setAllowCredentials(true);
-                    return corsConfig;
-                }))
+                .cors(Customizer.withDefaults())
                 .csrf(customizer -> customizer.disable())
+                .oauth2ResourceServer(configurer -> configurer
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/trainer/registration",
+                                "/user/login",
                                 "/trainee/registration")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/trainee/**", "/trainer/**")
@@ -106,31 +106,46 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/user/logout")
                         .addLogoutHandler(customLogoutHandler)
-                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .clearAuthentication(true)
+                        .logoutSuccessHandler(new CustomLogoutSuccessHandler())
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"))
-                .httpBasic(Customizer.withDefaults())
+                        .deleteCookies("JSESSIONID")
+                )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(entryPoint))
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .exceptionHandling(Customizer.withDefaults())
                 .build();
 
 
     }
 
+    /**
+     * Creates a JwtAuthenticationConverter for converting JWT tokens into authentication objects.
+     *
+     * <p>This converter extracts roles from the JWT and maps them to {@link GrantedAuthority} objects.
+     * It also checks if the token is revoked using the {@link JwtUtils#isTokenRevoked} method.</p>
+     *
+     * @return the configured JwtAuthenticationConverter
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            // Extract roles or authorities from claims (e.g., "roles" field in the JWT)
+
             Collection<GrantedAuthority> authorities = new ArrayList<>();
-            List<String> roles = jwt.getClaimAsStringList("roles");
+            List<String> roles = jwt.getClaimAsStringList(SecurityConstants.ROLES);
+            log.debug("JWT roles: {}", roles);
+
+            if (jwtUtils.isTokenRevoked(jwt.getTokenValue())) {
+                log.debug("TokenEntity is revoked.");
+                throw new GymAuthenticationException("Authentication failed.");
+            }
+
             if (roles != null) {
-                roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                roles.forEach(role -> {
+                    log.debug("Adding role: {}", role);
+                    authorities.add(new SimpleGrantedAuthority(role));
+                });
             }
             return authorities;
         });
@@ -138,12 +153,42 @@ public class SecurityConfig {
     }
 
     /**
+     * Configures a JwtDecoder for decoding JWT tokens using a secret key.
+     *
+     * @return the configured JwtDecoder
+     */
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withSecretKey(jwtUtils.getKey()).build();
+    }
+
+    /**
+     * Configures a CORS configuration source for handling cross-origin requests.
+     *
+     * <p>This method defines allowed origins, methods, and headers for CORS requests.</p>
+     *
+     * @return the configured CorsConfigurationSource
+     */
+    @Bean
+    public CorsConfigurationSource configurationSource() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:8082"));
+        corsConfiguration.setAllowedMethods(List.of("OPTIONS", "GET", "PUT", "PATCH", "POST", "HEAD", "DELETE"));
+        corsConfiguration.setAllowedHeaders(List.of(SecurityConstants.HEADER_STRING));
+        UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
+        configurationSource.registerCorsConfiguration("/**", corsConfiguration);
+        return configurationSource;
+    }
+
+
+
+    /**
      * Defines the authentication provider that Spring Security uses for authenticating users.
      *
      * <p>This provider uses {@link BCryptPasswordEncoder} for password encoding and a custom
      * {@link CustomUserDetailsService} to load user details from a data source.</p>
      *
-     * @return the configured {@link AuthenticationProvider} bean
+     * @return the configured AuthenticationProvider bean
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -159,14 +204,10 @@ public class SecurityConfig {
      *
      * <p>This bean is necessary for Spring Security's authentication mechanism.</p>
      *
-     * @param configuration the authentication configuration
-     * @return the configured {@link AuthenticationManager} bean
+     * @param authenticationConfiguration the authentication configuration
+     * @return the configured AuthenticationManager bean
      * @throws Exception if an error occurs while getting the authentication manager
      */
-//    @Bean
-//    public AuthenticationManager authManager(AuthenticationConfiguration configuration) throws Exception {
-//        return configuration.getAuthenticationManager();
-//    }
     @Bean
     public AuthenticationManager authManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -177,7 +218,7 @@ public class SecurityConfig {
      *
      * <p>This method returns a {@link BCryptPasswordEncoder} that uses a strength of 12 for hashing passwords.</p>
      *
-     * @return the configured {@link BCryptPasswordEncoder} bean
+     * @return the configured BCryptPasswordEncoder bean
      */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -185,3 +226,5 @@ public class SecurityConfig {
     }
 
 }
+
+

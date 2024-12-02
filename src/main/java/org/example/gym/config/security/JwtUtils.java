@@ -1,16 +1,20 @@
-package org.example.gym.security;
+package org.example.gym.config.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import lombok.extern.slf4j.Slf4j;
+import org.example.gym.entity.TokenEntity;
+import org.example.gym.entity.UserEntity;
+import org.example.gym.service.TokenService;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,21 +26,26 @@ import org.springframework.stereotype.Component;
  * user information from tokens and to invalidate tokens by adding them to a blacklist.</p>
  *
  * <p>The class uses a securely generated secret key for signing and verifying tokens,
- * and it supports automatic expiration and invalidation of tokens.</p>
+ * and it supports automatic expiration and invalidation of tokens. The secret key is generated
+ * using a secure algorithm and is encoded in Base64 format.</p>
  */
 @Component
+@Slf4j
 public class JwtUtils {
 
     private final String secretKey;
-    private final ConcurrentHashMap<String, Long> tokenBlacklist = new ConcurrentHashMap<>();
+    private final TokenService tokenService;
 
     /**
      * Constructs a JwtUtils object, generating a secret key for signing JWT tokens.
      *
      * <p>The secret key is generated using the specified algorithm in the {@link SecurityConstants#KEY_GEN}
-     * constant and encoded in Base64 format.</p>
+     * constant and encoded in Base64 format. The key is securely generated using {@link KeyGenerator}.</p>
+     *
+     * @param tokenService The TokenService used to manage tokens.
      */
-    public JwtUtils() {
+    public JwtUtils(TokenService tokenService) {
+        this.tokenService = tokenService;
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance(SecurityConstants.KEY_GEN);
             SecretKey sk = keyGen.generateKey();
@@ -50,14 +59,18 @@ public class JwtUtils {
      * Generates a JWT token for the given user details.
      *
      * <p>The generated token includes the username (subject), the issued date, and an expiration
-     * date set according to {@link SecurityConstants#EXPIRATION_TIME}.</p>
+     * date set according to {@link SecurityConstants#EXPIRATION_TIME}. The token is signed using
+     * the securely generated secret key.</p>
      *
-     * @param userDetails the user details for whom the token is to be generated
-     * @return the generated JWT token as a string
+     * @param userDetails the user details for whom the token is to be generated.
+     * @return the generated JWT token as a string.
      */
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim(SecurityConstants.ROLES, userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(getKey())
@@ -65,88 +78,49 @@ public class JwtUtils {
     }
 
     /**
-     * Validates the provided JWT token.
+     * Checks if a given JWT token has been revoked.
      *
-     * <p>The token is considered valid if it has not expired, is not blacklisted, and the username
-     * in the token matches the provided user details.</p>
+     * <p>This method queries the TokenService to check if the token is revoked by looking it up in
+     * the repository. If the token is found and marked as revoked, it returns true. If not found,
+     * it assumes the token is revoked.</p>
      *
-     * @param token the JWT token to be validated
-     * @param userDetails the user details to be checked against the token
-     * @return true if the token is valid, otherwise false
+     * @param token the JWT token to check.
+     * @return true if the token is revoked, false otherwise.
      */
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token) && isTokenBlacklisted(token);
+    public boolean isTokenRevoked(String token) {
+        return tokenService.getTokenByTokenString(token)
+                .map(TokenEntity::isRevoked)
+                .orElse(true);
     }
 
 
     /**
-     * Checks if the JWT token is blacklisted.
+     * Retrieves the secret key used for signing and verifying JWT tokens.
      *
-     * <p>A token is considered blacklisted if it has been explicitly added to the blacklist.</p>
+     * <p>This method decodes the Base64 encoded secret key into a {@link SecretKey} that is used
+     * for signing JWT tokens.</p>
      *
-     * @param jwt the JWT token to check
-     * @return true if the token is not blacklisted, otherwise false
+     * @return the {@link SecretKey} used for JWT signing and verification.
      */
-    public boolean isTokenBlacklisted(String jwt) {
-        return ! tokenBlacklist.containsKey(jwt);
-    }
-
-
-    /**
-     * Retrieves the signing key used to sign and verify JWT tokens.
-     *
-     * @return the signing key used to sign and verify JWT tokens
-     */
-    public Key getKey() {
+    public SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-
     /**
-     * Invalidates a given JWT token by adding it to the blacklist.
+     * Revokes all tokens associated with the given user.
      *
-     * <p>The token will be marked as expired, and its expiration time will be recorded in the blacklist.</p>
+     * <p>This method retrieves all tokens belonging to the specified user and marks them as revoked.
+     * It updates the revoked status of each token and saves the changes to the database.</p>
      *
-     * @param jwt the JWT token to invalidate
+     * @param user the {@link UserEntity} whose tokens are to be revoked.
      */
-    public void invalidateToken(String jwt) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(jwt).getBody();
-        long expiration = claims.getExpiration().getTime();
-        tokenBlacklist.put(jwt, expiration);
-    }
-
-    /**
-     * Extracts the username (subject) from the JWT token.
-     *
-     * @param token the JWT token from which the username is extracted
-     * @return the username (subject) of the token
-     */
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    /**
-     * Checks if the JWT token has expired.
-     *
-     * <p>A token is considered expired if the current date is after the expiration date of the token.</p>
-     *
-     * @param token the JWT token to check
-     * @return true if the token is expired, otherwise false
-     */
-    public boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+    public void revokeAllUserTokens(UserEntity user) {
+        List<TokenEntity> userTokenEntities = tokenService.getTokensByUser(user);
+        for (TokenEntity tokenEntity : userTokenEntities) {
+            tokenEntity.setRevoked(true);
+            tokenService.addToken(tokenEntity);
+        }
+        log.debug("All tokens for user {} have been revoked.", user.getUsername());
     }
 }
