@@ -1,4 +1,4 @@
-package org.example.gym.security;
+package org.example.gym.config.security;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;

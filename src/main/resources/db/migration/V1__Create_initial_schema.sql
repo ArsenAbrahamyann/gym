@@ -50,3 +50,12 @@ CREATE TABLE trainee_trainer (
                                  FOREIGN KEY (trainee_id) REFERENCES trainee(id) ON DELETE CASCADE ON UPDATE CASCADE,
                                  FOREIGN KEY (trainer_id) REFERENCES trainer(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE tokens (
+                       id SERIAL PRIMARY KEY,
+                       token VARCHAR(512) NOT NULL,
+                       token_type VARCHAR(50) NOT NULL CHECK (token_type IN ('BEARER')),
+                       revoked BOOLEAN NOT NULL DEFAULT FALSE,
+                       user_id BIGINT NOT NULL,
+                       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);

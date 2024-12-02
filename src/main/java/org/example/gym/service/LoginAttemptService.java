@@ -3,7 +3,7 @@ package org.example.gym.service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.example.gym.security.SecurityConstants;
+import org.example.gym.config.security.SecurityConstants;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,6 +36,22 @@ public class LoginAttemptService {
             blockTime.put(username, System.currentTimeMillis());
         }
     }
+
+    /**
+     * Resets the failed login attempts and block time for a specified user.
+     *
+     * <p>This method removes the user's failed login attempt count and any block time
+     * associated with the given username. It is typically used when a user successfully
+     * logs in or after a certain condition that resets the user's login status.</p>
+     *
+     * @param username the username of the user whose login attempts and block time
+     *                 should be reset
+     */
+    public void resetAttempts(String username) {
+        failedAttempts.remove(username);
+        blockTime.remove(username);
+    }
+
 
     /**
      * Checks if the user is currently blocked due to excessive failed login attempts.
