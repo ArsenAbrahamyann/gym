@@ -73,6 +73,24 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testAuthenticateUser_NullPassword() {
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+
+        assertThrows(UnauthorizedException.class, () -> userService.authenticateUser("testUser", null));
+        verify(metricsService).recordLoginFailure();
+    }
+
+    @Test
+    public void testCountByUsernameStartingWith() {
+        when(userRepository.countByUsernameStartingWith("test")).thenReturn(2);
+
+        int count = userService.countByUsernameStartingWith("test");
+
+        assertTrue(count == 2);
+        verify(userRepository).countByUsernameStartingWith("test");
+    }
+
+    @Test
     public void testAuthenticateUser_UserNotFound() {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
