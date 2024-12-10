@@ -28,10 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      *
      * @param userService the {@link UserRepository} used to load user data from the database
      */
-    @Autowired
-    public CustomUserDetailsService(
-            @Lazy
-            UserService userService) {
+    public CustomUserDetailsService(@Lazy UserService userService) {
         this.userService = userService;
     }
 
