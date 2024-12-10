@@ -24,7 +24,12 @@ spring:
     allow-bean-definition-overriding: true
   application:
     name: GymCRM
-
+  security:
+    oauth2:
+      resource:
+        server:
+          jwt:
+            public-key-location: "bXlTZWNyZXRLZXk=gfgskfsdgyerwGKSgfrmfdlqKFSNFDMDZCXMSD"
 management:
   endpoints:
     web:
@@ -53,4 +58,3 @@ user:
   password:
     length: 12
     characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()"
-

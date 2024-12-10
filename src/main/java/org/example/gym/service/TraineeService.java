@@ -10,11 +10,10 @@ import org.example.gym.dto.request.UpdateTraineeTrainerListRequestDto;
 import org.example.gym.entity.TraineeEntity;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.entity.enums.ERole;
+import org.example.gym.entity.enums.Role;
 import org.example.gym.exeption.TraineeNotFoundException;
 import org.example.gym.repository.TraineeRepository;
 import org.example.gym.utils.ValidationUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,10 +44,10 @@ public class TraineeService {
      * @param userService       a {@link UserService} instance for managing user-related operations.
      *                         The {@code @Lazy} annotation is used to avoid circular dependency issues.
      */
-    public TraineeService(@Lazy TrainerService trainerService, TraineeRepository traineeRepository,
+    public TraineeService(TrainerService trainerService, TraineeRepository traineeRepository,
                           ValidationUtils validationUtils,
                           BCryptPasswordEncoder passwordEncoder,
-                          @Lazy UserService userService) {
+                          UserService userService) {
         this.trainerService = trainerService;
         this.traineeRepository = traineeRepository;
         this.validationUtils = validationUtils;
@@ -69,7 +68,7 @@ public class TraineeService {
         String password = user.getPassword();
         String encode = passwordEncoder.encode(password);
         user.setPassword(encode);
-        user.setRole(ERole.ROLE_TRAINEE);
+        user.setRole(Role.ROLE_TRAINEE);
         userService.save(user);
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUser().getUsername());

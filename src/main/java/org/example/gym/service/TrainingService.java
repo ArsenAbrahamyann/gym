@@ -12,7 +12,6 @@ import org.example.gym.exeption.TrainingNotFoundException;
 import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-@Lazy
 public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeService traineeService;
@@ -40,8 +38,8 @@ public class TrainingService {
      *                            dependency.
      * @param validationUtils     the {@link ValidationUtils} used for performing validation tasks on training data.
      */
-    public TrainingService(TrainingRepository trainingRepository, @Lazy TraineeService traineeService,
-                            @Lazy TrainerService trainerService, ValidationUtils validationUtils,
+    public TrainingService(TrainingRepository trainingRepository, TraineeService traineeService,
+                           TrainerService trainerService, ValidationUtils validationUtils,
                            TrainingMapper trainingMapper) {
         this.trainingMapper = trainingMapper;
         this.trainingRepository = trainingRepository;

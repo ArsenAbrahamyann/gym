@@ -7,12 +7,11 @@ import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
-import org.example.gym.entity.enums.ERole;
+import org.example.gym.entity.enums.Role;
 import org.example.gym.exeption.TrainerNotFoundException;
 import org.example.gym.repository.TrainerRepository;
 import org.example.gym.utils.UserUtils;
 import org.example.gym.utils.ValidationUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-@Lazy
 public class TrainerService {
     private final TrainerRepository trainerRepository;
     private final TrainingTypeService trainingTypeService;
@@ -40,8 +38,10 @@ public class TrainerService {
      * @param userService           a utility class {@link UserUtils} used for user-related helper methods, such as user generation or formatting
      * @param passwordEncoder   a utility class {@link BCryptPasswordEncoder} used for encode password users
      */
-    public TrainerService(TrainerRepository trainerRepository, @Lazy TrainingTypeService trainingTypeService,
-                          ValidationUtils validationUtils, @Lazy UserService userService,
+    public TrainerService(TrainerRepository trainerRepository,
+                          TrainingTypeService trainingTypeService,
+                          ValidationUtils validationUtils,
+                          UserService userService,
                           BCryptPasswordEncoder passwordEncoder
     ) {
         this.trainerRepository = trainerRepository;
@@ -65,7 +65,7 @@ public class TrainerService {
         String password = user.getPassword();
         String encode = passwordEncoder.encode(password);
         user.setPassword(encode);
-        user.setRole(ERole.ROLE_TRAINER);
+        user.setRole(Role.ROLE_TRAINER);
         userService.save(user);
         trainerRepository.save(trainer);
 

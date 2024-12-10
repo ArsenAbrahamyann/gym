@@ -3,10 +3,7 @@ package org.example.gym.config.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -14,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.service.TokenService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -33,7 +31,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtUtils {
 
-    private final String secretKey;
+    @Value("${spring.security.oauth2.resource.server.jwt.public-key-location}")
+    private String secretKey;
     private final TokenService tokenService;
 
     /**
@@ -46,13 +45,6 @@ public class JwtUtils {
      */
     public JwtUtils(TokenService tokenService) {
         this.tokenService = tokenService;
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(SecurityConstants.KEY_GEN);
-            SecretKey sk = keyGen.generateKey();
-            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -115,12 +107,11 @@ public class JwtUtils {
      *
      * @param user the {@link UserEntity} whose tokens are to be revoked.
      */
-    public void revokeAllUserTokens(UserEntity user) {
-        List<TokenEntity> userTokenEntities = tokenService.getTokensByUser(user);
-        for (TokenEntity tokenEntity : userTokenEntities) {
-            tokenEntity.setRevoked(true);
-            tokenService.addToken(tokenEntity);
-        }
-        log.debug("All tokens for user {} have been revoked.", user.getUsername());
+    public void revokeUserToken(UserEntity user) {
+        TokenEntity tokenByUser = tokenService.getTokenByUser(user);
+        tokenByUser.setRevoked(true);
+        tokenService.save(tokenByUser);
+        log.debug("token for user {} have been revoked.", user.getUsername());
     }
+
 }

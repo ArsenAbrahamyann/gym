@@ -49,5 +49,5 @@ public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
      * @param user the user whose tokens are to be retrieved
      * @return a list of {@link TokenEntity} objects associated with the specified user
      */
-    List<TokenEntity> findByUser(UserEntity user);
+    Optional<TokenEntity> findByUser(UserEntity user);
 }

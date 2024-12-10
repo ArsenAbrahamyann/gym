@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.gym.entity.enums.ERole;
+import org.example.gym.entity.enums.Role;
 
 @Entity
 @Table(name = "users")
@@ -44,7 +44,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private ERole role;
+    private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<TokenEntity> tokenEntities;
