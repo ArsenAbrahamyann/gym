@@ -67,7 +67,7 @@ public class CustomLogoutHandler implements LogoutHandler {
         }
         String username = jwt.getClaim(SecurityConstants.SUB);
         UserEntity user = userService.findByUsername(username);
-        jwtUtils.revokeAllUserTokens(user);
+        jwtUtils.revokeUserToken(user);
         log.debug("Successfully logged out and invalidated users tokens.");
     }
 }

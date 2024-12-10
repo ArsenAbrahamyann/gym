@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.LoginRequestDto;
 import org.example.gym.dto.response.JwtResponse;
@@ -14,7 +15,7 @@ import org.example.gym.entity.enums.TokenType;
 import org.example.gym.service.LoginAttemptService;
 import org.example.gym.service.TokenService;
 import org.example.gym.service.UserService;
-import org.flywaydb.core.internal.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,23 +40,27 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final LoginAttemptService loginAttemptService;
     private final TokenService tokenService;
     private final UserService userService;
-    private static final ThreadLocal<LoginRequestDto> loginRequestHolder = new ThreadLocal<>();
+    private final ObjectMapper objectMapper;
 
     /**
      * Constructs a {@link CustomLoginFilter} with necessary dependencies.
      *
      * @param authenticationManager the {@link AuthenticationManager} used to authenticate the user
-     * @param jwtUtils the utility class responsible for generating JWT tokens
-     * @param loginAttemptService service to handle login attempts and block logic
-     * @param tokenService repository to manage JWT tokens
-     * @param userService service to manage user entities
+     * @param jwtUtils              the utility class responsible for generating JWT tokens
+     * @param loginAttemptService   service to handle login attempts and block logic
+     * @param tokenService          repository to manage JWT tokens
+     * @param userService           service to manage user entities
      */
-    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
+    @Autowired
+    public CustomLoginFilter(AuthenticationManager authenticationManager,
+                             JwtUtils jwtUtils,
                              LoginAttemptService loginAttemptService,
                              TokenService tokenService,
-                             UserService userService) {
+                             UserService userService, ObjectMapper objectMapper
+    ) {
         this.tokenService = tokenService;
         this.userService = userService;
+        this.objectMapper = objectMapper;
         super.setAuthenticationManager(authenticationManager);
         this.jwtUtils = jwtUtils;
         this.loginAttemptService = loginAttemptService;
@@ -68,29 +73,50 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
      * <p>This method parses the {@link LoginRequestDto} from the request, checks if the user is blocked
      * due to too many failed login attempts, and authenticates the user using the {@link AuthenticationManager}.</p>
      *
-     * @param request the HTTP request containing the login details
+     * @param request  the HTTP request containing the login details
      * @param response the HTTP response
      * @return the {@link Authentication} token if successful, or null if blocked
      * @throws RuntimeException if an error occurs while reading the login request
      */
     @Override
+    @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            LoginRequestDto loginRequest = new ObjectMapper().readValue(request.getInputStream(),
-                    LoginRequestDto.class);
-            loginRequestHolder.set(loginRequest);
-            if (loginAttemptService.isBlocked(loginRequest.getUsername())) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        String ipAddress = request.getRemoteAddr();
+
+        if (loginAttemptService.isBlocked(ipAddress)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(SecurityConstants.CONTENT_TYPE);
+            response.getWriter().write(objectMapper.writeValueAsString("IP address is temporarily blocked"));
+            return null;
+        }
+
+        String username = request.getHeader("username");
+        String password = request.getHeader("password");
+
+        if (username.isEmpty() || password.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(SecurityConstants.CONTENT_TYPE);
+            response.getWriter().write("Username and password are required");
+            return null;
+        }
+
+        UserEntity user = userService.findByUsername(username);
+        if (user != null) {
+            boolean hasValidToken = tokenService.getAllValidTokensByUser(user.getId())
+                    .stream()
+                    .anyMatch(tokenEntity -> !tokenEntity.isRevoked());
+
+            if (hasValidToken) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
                 response.setContentType(SecurityConstants.CONTENT_TYPE);
-                response.getWriter().write(new ObjectMapper().writeValueAsString("User is temporarily blocked"));
+                response.getWriter().write("User is already logged in with an active session");
                 return null;
             }
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
-            return getAuthenticationManager().authenticate(authToken);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse login request", e);
         }
+
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(username, password);
+        return getAuthenticationManager().authenticate(authToken);
     }
 
     /**
@@ -100,9 +126,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
      * revokes any previously issued tokens, and saves the new token to the database. It also resets the failed
      * login attempt count.</p>
      *
-     * @param request the HTTP request
-     * @param response the HTTP response
-     * @param chain the filter chain
+     * @param request    the HTTP request
+     * @param response   the HTTP response
+     * @param chain      the filter chain
      * @param authResult the authentication result containing user details
      * @throws IOException if an error occurs while writing the response
      */
@@ -114,29 +140,18 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         UserEntity user = userService.findByUsername(userDetails.getUsername());
 
-        tokenService.getAllValidTokensByUser(user.getId())
-                .forEach(tokenEntity -> {
-                    tokenEntity.setRevoked(true);
-                    tokenService.addToken(tokenEntity);
-                });
-
         TokenEntity tokenEntity = TokenEntity.builder()
                 .token(jwt)
                 .tokenType(TokenType.BEARER)
                 .revoked(false)
                 .user(user)
                 .build();
-        tokenService.addToken(tokenEntity);
+        tokenService.save(tokenEntity);
 
         response.setContentType(SecurityConstants.CONTENT_TYPE);
-        response.getWriter().write(new ObjectMapper().writeValueAsString(new JwtResponse(jwt)));
+        response.getWriter().write(objectMapper.writeValueAsString(new JwtResponse(jwt)));
 
-        LoginRequestDto loginRequest = loginRequestHolder.get();
-        if (loginRequest != null && StringUtils.hasText(loginRequest.getUsername())) {
-            loginAttemptService.resetAttempts(loginRequest.getUsername());
-        }
-
-        loginRequestHolder.remove();
+        loginAttemptService.resetAttemptsByIp(userDetails.getUsername());
     }
 
     /**
@@ -145,23 +160,20 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
      * <p>If authentication fails, this method responds with an unauthorized status and message.
      * It also increments the failed login attempts for the user.</p>
      *
-     * @param request the HTTP request
+     * @param request  the HTTP request
      * @param response the HTTP response
-     * @param failed the exception thrown during authentication
+     * @param failed   the exception thrown during authentication
      * @throws IOException if an error occurs while writing the response
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException {
+        String ipAddress = request.getRemoteAddr();
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(SecurityConstants.CONTENT_TYPE);
-        response.getWriter().write(new ObjectMapper().writeValueAsString("Invalid username or password"));
+        response.getWriter().write(objectMapper.writeValueAsString("Invalid username or password"));
 
-        LoginRequestDto loginRequest = loginRequestHolder.get();
-        if (loginRequest != null && StringUtils.hasText(loginRequest.getUsername())) {
-            loginAttemptService.registerFailedAttempt(loginRequest.getUsername());
-        }
-
-        loginRequestHolder.remove();
+        loginAttemptService.registerFailedAttemptByIp(ipAddress);
     }
 }

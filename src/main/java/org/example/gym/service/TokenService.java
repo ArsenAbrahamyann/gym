@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
+import org.example.gym.exeption.UserNotFoundException;
 import org.example.gym.repository.TokenRepository;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +41,8 @@ public class TokenService {
      * @param user The user entity whose tokens are being retrieved.
      * @return A list of tokens associated with the user.
      */
-    public List<TokenEntity> getTokensByUser(UserEntity user) {
-        return tokenRepository.findByUser(user);
+    public TokenEntity getTokenByUser(UserEntity user) {
+        return tokenRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("Token not found"));
     }
 
     /**
@@ -50,11 +51,9 @@ public class TokenService {
      * @param user The user whose tokens should be revoked.
      */
     public void revokeAllTokensForUser(UserEntity user) {
-        List<TokenEntity> tokens = getTokensByUser(user);
-        tokens.forEach(token -> {
-            token.setRevoked(true);
-            tokenRepository.save(token);
-        });
+        TokenEntity tokens = getTokenByUser(user);
+        tokens.setRevoked(true);
+        tokenRepository.save(tokens);
     }
 
     /**
@@ -63,7 +62,7 @@ public class TokenService {
      * @param token The token to be added.
      * @return The added token.
      */
-    public TokenEntity addToken(TokenEntity token) {
+    public TokenEntity save(TokenEntity token) {
         return tokenRepository.save(token);
     }
 

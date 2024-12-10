@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.exeption.GymAuthenticationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -43,9 +42,9 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint entryPoint;
-    @Lazy
     private final CustomLoginFilter customLoginFilter;
     private final CustomLogoutHandler customLogoutHandler;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
     private final JwtUtils jwtUtils;
 
     /**
@@ -61,11 +60,13 @@ public class SecurityConfig {
                           JwtAuthenticationEntryPoint entryPoint,
                           @Lazy CustomLoginFilter customLoginFilter,
                           @Lazy CustomLogoutHandler customLogoutHandler,
-                          @Lazy JwtUtils jwtUtils) {
+                          CustomLogoutSuccessHandler customLogoutSuccessHandler,
+                          JwtUtils jwtUtils) {
         this.userDetailsService = userDetailsService;
         this.entryPoint = entryPoint;
         this.customLoginFilter = customLoginFilter;
         this.customLogoutHandler = customLogoutHandler;
+        this.customLogoutSuccessHandler = customLogoutSuccessHandler;
         this.jwtUtils = jwtUtils;
     }
 
@@ -107,9 +108,8 @@ public class SecurityConfig {
                         .logoutUrl("/user/logout")
                         .addLogoutHandler(customLogoutHandler)
                         .clearAuthentication(true)
-                        .logoutSuccessHandler(new CustomLogoutSuccessHandler())
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(entryPoint))
@@ -136,11 +136,6 @@ public class SecurityConfig {
             List<String> roles = jwt.getClaimAsStringList(SecurityConstants.ROLES);
             log.debug("JWT roles: {}", roles);
 
-            if (jwtUtils.isTokenRevoked(jwt.getTokenValue())) {
-                log.debug("TokenEntity is revoked.");
-                throw new GymAuthenticationException("Authentication failed.");
-            }
-
             if (roles != null) {
                 roles.forEach(role -> {
                     log.debug("Adding role: {}", role);
@@ -152,6 +147,7 @@ public class SecurityConfig {
         return converter;
     }
 
+
     /**
      * Configures a JwtDecoder for decoding JWT tokens using a secret key.
      *
@@ -159,7 +155,8 @@ public class SecurityConfig {
      */
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(jwtUtils.getKey()).build();
+        NimbusJwtDecoder build = NimbusJwtDecoder.withSecretKey(jwtUtils.getKey()).build();
+        return new CustomJwtDecoder(build, jwtUtils);
     }
 
     /**

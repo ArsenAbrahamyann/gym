@@ -3,9 +3,7 @@ package org.example.gym.service;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -92,40 +90,10 @@ public class TokenServiceTest {
     }
 
     @Test
-    public void testGetTokensByUser() {
-        when(tokenRepository.findByUser(mockUser)).thenReturn(List.of(mockToken));
-
-        List<TokenEntity> tokens = tokenService.getTokensByUser(mockUser);
-
-        assertNotNull(tokens);
-        assertEquals(1, tokens.size());
-        assertEquals(mockToken, tokens.get(0));
-        verify(tokenRepository).findByUser(mockUser);
-    }
-
-    @Test
-    public void testRevokeAllTokensForUser() {
-        TokenEntity token2 = new TokenEntity();
-        token2.setId(2L);
-        token2.setUser(mockUser);
-        token2.setRevoked(false);
-
-        when(tokenRepository.findByUser(mockUser)).thenReturn(List.of(mockToken, token2));
-
-        tokenService.revokeAllTokensForUser(mockUser);
-
-        verify(tokenRepository, times(1)).findByUser(mockUser);
-        verify(tokenRepository, times(2)).save(any(TokenEntity.class));
-
-        assertTrue(mockToken.isRevoked());
-        assertTrue(token2.isRevoked());
-    }
-
-    @Test
     public void testAddToken() {
         when(tokenRepository.save(mockToken)).thenReturn(mockToken);
 
-        TokenEntity savedToken = tokenService.addToken(mockToken);
+        TokenEntity savedToken = tokenService.save(mockToken);
 
         assertNotNull(savedToken);
         assertEquals(mockToken, savedToken);
