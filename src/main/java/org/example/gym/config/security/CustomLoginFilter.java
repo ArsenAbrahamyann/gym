@@ -51,7 +51,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
      * @param tokenService          repository to manage JWT tokens
      * @param userService           service to manage user entities
      */
-    @Autowired
     public CustomLoginFilter(AuthenticationManager authenticationManager,
                              JwtUtils jwtUtils,
                              LoginAttemptService loginAttemptService,
