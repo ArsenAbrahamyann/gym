@@ -6,6 +6,7 @@ import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository interface for performing CRUD operations on {@link TokenEntity} objects.
@@ -49,5 +50,6 @@ public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
      * @param user the user whose tokens are to be retrieved
      * @return a list of {@link TokenEntity} objects associated with the specified user
      */
-    Optional<TokenEntity> findByUser(UserEntity user);
+    @Query("SELECT t FROM TokenEntity t WHERE t.user = :user AND t.revoked = false")
+    TokenEntity findByUser(@Param("user") UserEntity user);
 }

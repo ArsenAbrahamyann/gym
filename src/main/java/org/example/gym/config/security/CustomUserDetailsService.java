@@ -4,7 +4,6 @@ import java.util.Collections;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.repository.UserRepository;
 import org.example.gym.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

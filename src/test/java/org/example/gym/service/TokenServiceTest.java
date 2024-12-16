@@ -72,7 +72,7 @@ public class TokenServiceTest {
     public void testGetTokenByTokenString_Found() {
         when(tokenRepository.findByToken("sampleToken")).thenReturn(Optional.of(mockToken));
 
-        Optional<TokenEntity> token = tokenService.getTokenByTokenString("sampleToken");
+        Optional<TokenEntity> token = tokenService.getByToken("sampleToken");
 
         assertTrue(token.isPresent());
         assertEquals(mockToken, token.get());
@@ -83,7 +83,7 @@ public class TokenServiceTest {
     public void testGetTokenByTokenString_NotFound() {
         when(tokenRepository.findByToken("invalidToken")).thenReturn(Optional.empty());
 
-        Optional<TokenEntity> token = tokenService.getTokenByTokenString("invalidToken");
+        Optional<TokenEntity> token = tokenService.getByToken("invalidToken");
 
         assertTrue(token.isEmpty());
         verify(tokenRepository).findByToken("invalidToken");
