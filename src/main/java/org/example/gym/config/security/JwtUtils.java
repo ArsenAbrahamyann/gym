@@ -80,7 +80,7 @@ public class JwtUtils {
      * @return true if the token is revoked, false otherwise.
      */
     public boolean isTokenRevoked(String token) {
-        return tokenService.getTokenByTokenString(token)
+        return tokenService.getByToken(token)
                 .map(TokenEntity::isRevoked)
                 .orElse(true);
     }

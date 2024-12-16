@@ -15,7 +15,6 @@ import org.example.gym.entity.enums.TokenType;
 import org.example.gym.service.LoginAttemptService;
 import org.example.gym.service.TokenService;
 import org.example.gym.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
