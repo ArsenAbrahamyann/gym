@@ -1,0 +1,23 @@
+version: '3.8'
+name: gym_app
+
+services:
+    postgres:
+      image: postgres:latest
+      container_name: multi_database_postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
+      volumes:
+        - postgres_data:/var/lib/postgresql/gym/data01
+        - ./init:/docker-entrypoint-initdb.d
+      ports:
+        - "5432:5432"
+
+networks:
+  gym_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
