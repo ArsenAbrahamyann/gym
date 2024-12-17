@@ -66,6 +66,25 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     /**
+     * Override to accept only GET requests for login.
+     */
+    @Override
+    @SneakyThrows
+    public boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        // Check if the request path is for login
+        if ("/user/login".equals(request.getRequestURI())) {
+            // Ensure only GET requests are allowed for the login path
+            if (!"GET".equalsIgnoreCase(request.getMethod())) {
+                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                response.setContentType(SecurityConstants.CONTENT_TYPE);
+                response.getWriter().write("{\"error\": \"Only GET requests are allowed for login.\"}");
+                return false;
+            }
+        }
+        return super.requiresAuthentication(request, response);
+    }
+
+    /**
      * Attempts to authenticate the user based on the provided login request.
      *
      * <p>This method parses the {@link LoginRequestDto} from the request, checks if the user is blocked
@@ -102,7 +121,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         if (user != null) {
             boolean hasValidToken = tokenService.getAllValidTokensByUser(user.getId())
                     .stream()
-                    .anyMatch(tokenEntity -> !tokenEntity.isRevoked());
+                    .anyMatch(tokenEntity -> ! tokenEntity.isRevoked());
 
             if (hasValidToken) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);

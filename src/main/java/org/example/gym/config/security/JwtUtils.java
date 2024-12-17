@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtUtils {
 
-    @Value("${spring.security.oauth2.resource.server.jwt.public-key-location}")
+    @Value("${spring.jwt.secret}")
     private String secretKey;
     private final TokenService tokenService;
 
@@ -46,6 +46,8 @@ public class JwtUtils {
     public JwtUtils(TokenService tokenService) {
         this.tokenService = tokenService;
     }
+
+
 
     /**
      * Generates a JWT token for the given user details.
