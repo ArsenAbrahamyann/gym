@@ -94,7 +94,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/trainer/registration",
                                 "/user/login",
-                                "/trainee/registration")
+                                "/trainee/registration",
+                                "/actuator/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/trainee/**", "/trainer/**")
                         .hasAnyRole("TRAINER", "TRAINEE")
