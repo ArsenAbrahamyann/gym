@@ -1,6 +1,5 @@
 package org.example.gym.service;
 
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.gym.entity.TokenEntity;
@@ -13,16 +12,6 @@ import org.springframework.stereotype.Service;
 public class TokenService {
     
     private final TokenRepository tokenRepository;
-
-    /**
-     * Retrieves all valid tokens for a given user.
-     *
-     * @param userId The user ID to fetch valid tokens for.
-     * @return A list of valid tokens for the specified user.
-     */
-    public List<TokenEntity> getAllValidTokensByUser(Long userId) {
-        return tokenRepository.findAllValidTokensByUser(userId);
-    }
 
     /**
      * Retrieves a token by its token string.

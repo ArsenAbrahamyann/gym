@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
@@ -54,18 +53,6 @@ public class TokenServiceTest {
         mockToken.setToken("sampleToken");
         mockToken.setUser(mockUser);
         mockToken.setRevoked(false);
-    }
-
-    @Test
-    public void testGetAllValidTokensByUser() {
-        when(tokenRepository.findAllValidTokensByUser(1L)).thenReturn(List.of(mockToken));
-
-        List<TokenEntity> tokens = tokenService.getAllValidTokensByUser(1L);
-
-        assertNotNull(tokens);
-        assertEquals(1, tokens.size());
-        assertEquals(mockToken, tokens.get(0));
-        verify(tokenRepository).findAllValidTokensByUser(1L);
     }
 
     @Test
