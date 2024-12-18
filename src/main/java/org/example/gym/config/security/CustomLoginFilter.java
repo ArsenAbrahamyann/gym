@@ -117,16 +117,16 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             return null;
         }
 
-        UserEntity user = userService.findByUsername(username);
-        if (user != null) {
-            boolean hasValidToken = tokenService.getAllValidTokensByUser(user.getId())
-                    .stream()
-                    .anyMatch(tokenEntity -> ! tokenEntity.isRevoked());
+        log.debug("Checking if the user is already logged in.");
+        String jwtToken = request.getHeader(SecurityConstants.HEADER_STRING);
 
-            if (hasValidToken) {
+
+        if (jwtToken != null && jwtToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            if (!jwtUtils.isTokenRevoked(jwtToken.substring(7))) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
                 response.setContentType(SecurityConstants.CONTENT_TYPE);
-                response.getWriter().write("User is already logged in with an active session");
+                response.getWriter().write("User is already logged in. Please use your "
+                        + "valid token or log out before logging in again.");
                 return null;
             }
         }
