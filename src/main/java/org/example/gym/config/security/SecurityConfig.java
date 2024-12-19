@@ -130,6 +130,9 @@ public class SecurityConfig {
      *
      * @return the configured JwtAuthenticationConverter
      */
+
+    // TODO: Consider creating a separate JwtConverter class. I think that way 
+    // the code would be cleaner.
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
