@@ -50,12 +50,16 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
      * @param tokenService          repository to manage JWT tokens
      * @param userService           service to manage user entities
      */
+
+    // TODO: Consider calling the constructor of the UsernamePasswordAuthenticationFilter
+    // which can get the following arguments: the ant matcher, which contains the url and method
+    // and the authentication manager. In my opinion, this way it would be cleaner.
     public CustomLoginFilter(AuthenticationManager authenticationManager,
                              JwtUtils jwtUtils,
                              LoginAttemptService loginAttemptService,
                              TokenService tokenService,
                              UserService userService, ObjectMapper objectMapper
-    ) {
+    ) { // TODO: Stylistically, I think it would be better if the ) { were on the previous line
         this.tokenService = tokenService;
         this.userService = userService;
         this.objectMapper = objectMapper;
@@ -65,6 +69,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         setFilterProcessesUrl("/user/login");
     }
 
+    // TODO: This method is redundant if the superclass constructor is called with the
+    // appropriate arguments
     /**
      * Override to accept only GET requests for login.
      */
@@ -110,6 +116,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = request.getHeader("username");
         String password = request.getHeader("password");
 
+        // I am not sure, but I think that this check is redundant - if the credentials are
+        // missing, then the authentication manager will fail to authenticate, 
+        // and the unsuccessfulAuthentication() method will be called.
         if (username.isEmpty() || password.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(SecurityConstants.CONTENT_TYPE);
@@ -165,7 +174,12 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .build();
         tokenService.save(tokenEntity);
 
+        // TODO: Consider implementing a custom authentication success handler and move 
+        // response.setContentType() into that handler.
         response.setContentType(SecurityConstants.CONTENT_TYPE);
+
+        // TODO: I doubt that there should be any response body as a result of authentication,
+        // according to the task description. I think only giving a response code is enough.
         response.getWriter().write(objectMapper.writeValueAsString(new JwtResponse(jwt)));
 
         loginAttemptService.resetAttemptsByIp(userDetails.getUsername());
@@ -187,6 +201,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
                                               AuthenticationException failed) throws IOException {
         String ipAddress = request.getRemoteAddr();
 
+        // consider implementing a custom authentication failure handler and moving the 
+        // response.setStatus(), response.setContentType() methods into that handler.
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(SecurityConstants.CONTENT_TYPE);
         response.getWriter().write(objectMapper.writeValueAsString("Invalid username or password"));
