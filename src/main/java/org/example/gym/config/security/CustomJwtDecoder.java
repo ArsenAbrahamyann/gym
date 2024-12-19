@@ -6,6 +6,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
+// TODO: In my opinion, config package should only contatin
+// classes annotated with @Configuration. This class is not
+// a configuration, so I would recommend to 
+// move it to a separate package. For instance, you could
+// create a security package outside the config package.
+
 /**
  * CustomJwtDecoder decorates the JwtDecoder to add token revocation checks
  * before delegating the actual decoding process.
