@@ -56,6 +56,9 @@ public class CustomLogoutHandler implements LogoutHandler {
         log.debug("Running logout handler.");
         String authHeader = request.getHeader(SecurityConstants.HEADER_STRING);
         log.debug(authHeader);
+        
+        // I think that the validations of the jwt token can be placed in a separate bean,
+        // for instance CustomJwtValidator.
         if (authHeader == null || ! authHeader.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             log.debug("No token provided.");
             throw new GymAuthenticationException("Authentication failed.");
