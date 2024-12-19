@@ -74,6 +74,9 @@ public class Config implements WebMvcConfigurer {
                 .addPathPatterns("/**");
     }
 
+    // TODO: I think that it would be better to move this bean
+    // to the SecurityConfig class, as it is more related to that
+    // rather than the MVC.
     @Bean
     public LogoutHandler logoutHandler() {
         return new SecurityContextLogoutHandler();
