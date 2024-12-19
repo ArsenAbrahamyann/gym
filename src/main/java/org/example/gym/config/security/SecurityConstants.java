@@ -1,5 +1,8 @@
 package org.example.gym.config.security;
 
+// TODO: I think that it would be cleaner to place
+// the values of these constants in the application.yml
+
 public class SecurityConstants {
 
     public static final String KEY_GEN = "HmacSHA256";
