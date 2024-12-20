@@ -74,8 +74,5 @@ public class Config implements WebMvcConfigurer {
                 .addPathPatterns("/**");
     }
 
-    @Bean
-    public LogoutHandler logoutHandler() {
-        return new SecurityContextLogoutHandler();
-    }
+
 }
