@@ -24,6 +24,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -160,6 +162,16 @@ public class SecurityConfig {
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder build = NimbusJwtDecoder.withSecretKey(jwtUtils.getKey()).build();
         return new CustomJwtDecoder(build, jwtUtils);
+    }
+
+    /**
+     * Configures a logoutHandler for logout.
+     *
+     * @return the SecurityContextLogoutHandler
+     */
+    @Bean
+    public LogoutHandler logoutHandler() {
+        return new SecurityContextLogoutHandler();
     }
 
     /**

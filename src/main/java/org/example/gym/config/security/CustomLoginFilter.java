@@ -5,8 +5,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.example.gym.dto.request.LoginRequestDto;
 import org.example.gym.dto.response.JwtResponse;
 import org.example.gym.entity.TokenEntity;
@@ -65,15 +67,14 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         setFilterProcessesUrl("/user/login");
     }
 
+
     /**
      * Override to accept only GET requests for login.
      */
     @Override
     @SneakyThrows
     public boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        // Check if the request path is for login
         if ("/user/login".equals(request.getRequestURI())) {
-            // Ensure only GET requests are allowed for the login path
             if (!"GET".equalsIgnoreCase(request.getMethod())) {
                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                 response.setContentType(SecurityConstants.CONTENT_TYPE);
