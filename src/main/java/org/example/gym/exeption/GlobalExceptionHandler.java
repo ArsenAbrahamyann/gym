@@ -1,11 +1,13 @@
 package org.example.gym.exeption;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -41,8 +43,7 @@ public class GlobalExceptionHandler {
      * @return Response entity containing the formatted error response.
      */
     private ResponseEntity<ErrorResponse> buildErrorResponse(String message, HttpStatus status, WebRequest request) {
-        String path = request.getDescription(false).replace("uri=", "");
-        ErrorResponse errorResponse = new ErrorResponse(message, status, path);
+        ErrorResponse errorResponse = new ErrorResponse(message, status);
         return new ResponseEntity<>(errorResponse, status);
     }
 
@@ -91,6 +92,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ErrorResponse> handleLockedException(LockedException ex, WebRequest request) {
         log.warn("User is blocked for 5 minutes due to multiple failed login attempts: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex, WebRequest request) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
     }
 
