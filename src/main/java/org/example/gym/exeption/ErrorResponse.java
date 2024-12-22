@@ -15,7 +15,6 @@ public class ErrorResponse {
     private String message;
     private HttpStatus status;
     private LocalDateTime timestamp;
-    private String path;
 
     /**
      * Constructs an ErrorResponse with specified details.
@@ -24,10 +23,9 @@ public class ErrorResponse {
      * @param status  The HTTP status of the error.
      * @param path    The request path where the error occurred.
      */
-    public ErrorResponse(String message, HttpStatus status, String path) {
+    public ErrorResponse(String message, HttpStatus status) {
         this.message = message;
         this.status = status;
         this.timestamp = LocalDateTime.now();
-        this.path = path;
     }
 }

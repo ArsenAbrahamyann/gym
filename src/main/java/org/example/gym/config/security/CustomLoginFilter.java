@@ -24,6 +24,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * Custom login filter that extends {@link UsernamePasswordAuthenticationFilter} to handle user login authentication.
@@ -37,6 +39,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Slf4j
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
+    private static final RequestMatcher LOGIN_REQUEST = new AntPathRequestMatcher("/user/login", "GET");
     private final JwtUtils jwtUtils;
     private final LoginAttemptService loginAttemptService;
     private final TokenService tokenService;
@@ -62,28 +65,11 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         this.userService = userService;
         this.objectMapper = objectMapper;
         super.setAuthenticationManager(authenticationManager);
+        super.setRequiresAuthenticationRequestMatcher(LOGIN_REQUEST);
         this.jwtUtils = jwtUtils;
         this.loginAttemptService = loginAttemptService;
-        setFilterProcessesUrl("/user/login");
     }
 
-
-    /**
-     * Override to accept only GET requests for login.
-     */
-    @Override
-    @SneakyThrows
-    public boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        if ("/user/login".equals(request.getRequestURI())) {
-            if (!"GET".equalsIgnoreCase(request.getMethod())) {
-                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                response.setContentType(SecurityConstants.CONTENT_TYPE);
-                response.getWriter().write("{\"error\": \"Only GET requests are allowed for login.\"}");
-                return false;
-            }
-        }
-        return super.requiresAuthentication(request, response);
-    }
 
     /**
      * Attempts to authenticate the user based on the provided login request.
