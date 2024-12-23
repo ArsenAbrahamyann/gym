@@ -1,13 +1,17 @@
 package org.example.gym.config.security;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.response.InvalidLoginResponse;
+import org.example.gym.exeption.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +24,11 @@ import org.springframework.stereotype.Component;
  * an authentication exception is thrown.</p>
  */
 @Component
+@Slf4j
+@RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
 
     /**
      * Called when an authentication exception is thrown (i.e., when the user is not authenticated).
@@ -38,10 +46,20 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
                          AuthenticationException e) throws IOException, ServletException {
-        InvalidLoginResponse loginResponse = new InvalidLoginResponse();
-        String jsonLoginResponse = new Gson().toJson(loginResponse);
+        log.debug("Authentication entry point.");
+        log.debug("Authentication failed: {}", e.getMessage());
+        ErrorResponse responseDto;
+        httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         httpServletResponse.setContentType(SecurityConstants.CONTENT_TYPE);
-        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-        httpServletResponse.getWriter().println(jsonLoginResponse);
+        Throwable authExceptionCause = e.getCause();
+        if (authExceptionCause instanceof JwtValidationException) {
+            log.debug("JwtValidationException: Invalid jwt was sent.");
+            responseDto = new ErrorResponse("Authentication failed: The provided JWT token is invalid",
+                    HttpStatus.BAD_REQUEST);
+            objectMapper.writeValue(httpServletResponse.getWriter(), responseDto);
+            return;
+        }
+        responseDto = new ErrorResponse("Access denied!", HttpStatus.BAD_REQUEST);
+        objectMapper.writeValue(httpServletResponse.getWriter(), responseDto);
     }
 }

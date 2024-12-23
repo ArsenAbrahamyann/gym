@@ -21,7 +21,6 @@ public class ErrorResponse {
      *
      * @param message The error message.
      * @param status  The HTTP status of the error.
-     * @param path    The request path where the error occurred.
      */
     public ErrorResponse(String message, HttpStatus status) {
         this.message = message;
