@@ -5,19 +5,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.example.gym.dto.request.LoginRequestDto;
 import org.example.gym.dto.response.JwtResponse;
 import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.entity.enums.TokenType;
+import org.example.gym.exeption.ErrorResponse;
 import org.example.gym.service.LoginAttemptService;
 import org.example.gym.service.TokenService;
 import org.example.gym.service.UserService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -86,11 +86,14 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         String ipAddress = request.getRemoteAddr();
-
+        ErrorResponse responseDto;
         if (loginAttemptService.isBlocked(ipAddress)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType(SecurityConstants.CONTENT_TYPE);
-            response.getWriter().write(objectMapper.writeValueAsString("IP address is temporarily blocked"));
+            responseDto = new ErrorResponse("User is blocked for 5 minutes"
+                    + " due to multiple failed login attempts",
+                    HttpStatus.BAD_REQUEST);
+            objectMapper.writeValue(response.getWriter(), responseDto);
             return null;
         }
 
@@ -100,7 +103,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         if (username.isEmpty() || password.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(SecurityConstants.CONTENT_TYPE);
-            response.getWriter().write("Username and password are required");
+            responseDto = new ErrorResponse("Username and password are required",
+                    HttpStatus.BAD_REQUEST);
+            objectMapper.writeValue(response.getWriter(), responseDto);
             return null;
         }
 
@@ -112,8 +117,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             if (!jwtUtils.isTokenRevoked(jwtToken.substring(7))) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
                 response.setContentType(SecurityConstants.CONTENT_TYPE);
-                response.getWriter().write("User is already logged in. Please use your "
-                        + "valid token or log out before logging in again.");
+                responseDto = new ErrorResponse("User is already logged in. Please use your "
+                        + "valid token or log out before logging in again.",
+                        HttpStatus.CONFLICT);
+                objectMapper.writeValue(response.getWriter(), responseDto);
                 return null;
             }
         }
@@ -173,11 +180,12 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException {
         String ipAddress = request.getRemoteAddr();
-
+        ErrorResponse responseDto;
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(SecurityConstants.CONTENT_TYPE);
-        response.getWriter().write(objectMapper.writeValueAsString("Invalid username or password"));
-
+        responseDto = new ErrorResponse("Invalid username or password",
+                HttpStatus.BAD_REQUEST);
+        objectMapper.writeValue(response.getWriter(), responseDto);
         loginAttemptService.registerFailedAttemptByIp(ipAddress);
     }
 }
