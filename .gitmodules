@@ -1,0 +1,3 @@
+[submodule "trainerService"]
+	path = trainerService
+	url = https://github.com/ArsenAbrahamyann/trainerService
