@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * Centralized exception handler for handling exceptions globally in the application.
  * Provides consistent error response formatting for various exception types.
@@ -23,7 +22,7 @@ public class GlobalExceptionHandler {
     /**
      * Handles ValidationException and returns an appropriate response.
      *
-     * @param e       The exception that occurred.
+     * @param e The exception that occurred.
      * @return Response entity containing the error response.
      */
     @ExceptionHandler(ValidationException.class)
@@ -44,7 +43,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-
     /**
      * Handles unauthorized access exceptions, which occur when a user attempts to access
      * a resource without proper authorization.
@@ -57,7 +55,6 @@ public class GlobalExceptionHandler {
         log.warn("Unauthorized access attempt: {}", ex.getMessage());
         return buildErrorResponse("Unauthorized access attempt", HttpStatus.UNAUTHORIZED);
     }
-
 
     /**
      * Handles GymAuthenticationException by logging the error and returning an appropriate error response.
@@ -173,6 +170,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles exceptions arising from failures during workload updates.
+     *
+     * @param ex The {@link WorkloadUpdateException} encapsulating details of what went wrong during
+     *           a workload update attempt.
+     * @return A {@link ResponseEntity} containing a detailed ErrorResponse indicating the failure.
+     */
+    @ExceptionHandler(WorkloadUpdateException.class)
+    public ResponseEntity<ErrorResponse> handleWorkloadUpdateException(WorkloadUpdateException ex) {
+        log.error("Workload update failed - Status: {}, Details: {}", ex.getHttpStatus(), ex.getMessage());
+        return buildErrorResponse("Failed to update workload: "
+                + ex.getMessage(), ex.getHttpStatus());
+    }
+
+    /**
      * Handles cases where a specific user cannot be found in the system.
      *
      * @param ex The {@link UserNotFoundException} representing a missing user.
@@ -183,7 +194,6 @@ public class GlobalExceptionHandler {
         log.error("User not found: {}", ex.getMessage());
         return buildErrorResponse("User not found", HttpStatus.NOT_FOUND);
     }
-
 
     /**
      * Handles general application-level exceptions, providing a consistent response format.

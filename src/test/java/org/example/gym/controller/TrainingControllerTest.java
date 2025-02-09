@@ -1,7 +1,11 @@
 package org.example.gym.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +71,38 @@ public class TrainingControllerTest {
         verify(trainingService).getTrainingsForTrainee(any());
         verify(mapper).mapToDtoTrainingTrainee(trainingEntities);
         assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    public void deleteTraining_Successful() {
+        Long trainingId = 1L;
+
+        // Set up conditions and responses
+        doNothing().when(trainingService).deleteTraining(trainingId);
+
+        // Perform the method call
+        ResponseEntity<Void> response = trainingController.deleteTraining(trainingId);
+
+        // Verification
+        verify(trainingService, times(1)).deleteTraining(trainingId);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void deleteTraining_NotFound() {
+        Long trainingId = 2L;
+
+        // Setup to throw an exception when the training is not found
+        doThrow(new RuntimeException("Training not found")).when(trainingService).deleteTraining(trainingId);
+
+        // Expecting the controller to handle it and convert to a suitable HTTP status
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            trainingController.deleteTraining(trainingId);
+        });
+
+        // Perform verification
+        assertEquals("Training not found", exception.getMessage());
+        verify(trainingService, times(1)).deleteTraining(trainingId);
     }
 
     @Test

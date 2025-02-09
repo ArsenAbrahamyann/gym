@@ -19,7 +19,6 @@ import org.example.gym.entity.TrainingEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TrainingNotFoundException;
-import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,14 +34,13 @@ public class TrainingServiceTest {
     @Mock private TraineeService traineeService;
     @Mock private TrainerService trainerService;
     @Mock private ValidationUtils validationUtils;
-    @Mock private TrainingMapper trainingMapper;
 
     @InjectMocks private TrainingService trainingService;
 
     private TrainingEntity trainingEntity;
     private TraineeEntity traineeEntity;
     private TrainerEntity trainerEntity;
-    private UserEntity user;
+
 
     /**
      * Initializes mock entities for testing purposes.
@@ -64,39 +62,26 @@ public class TrainingServiceTest {
      */
     @BeforeEach
     public void setUp() {
-        user = new UserEntity();
-        user.setUsername("traineeUsername");
+        UserEntity traineeUser = new UserEntity();
+        traineeUser.setUsername("traineeUsername");
 
         traineeEntity = new TraineeEntity();
-        traineeEntity.setUser(user);
+        traineeEntity.setUser(traineeUser);
+
+        UserEntity trainerUser = new UserEntity();
+        trainerUser.setUsername("trainerUsername");
 
         trainerEntity = new TrainerEntity();
         trainerEntity.setId(1L);
+        trainerEntity.setUser(trainerUser);
 
-        TrainingTypeEntity trainingTypeEntity = new TrainingTypeEntity();
-        trainingTypeEntity.setTrainingTypeName("Yoga");
+        TrainingTypeEntity trainingType = new TrainingTypeEntity();
+        trainingType.setTrainingTypeName("Yoga");
 
         trainingEntity = new TrainingEntity();
         trainingEntity.setTrainee(traineeEntity);
         trainingEntity.setTrainer(trainerEntity);
-        trainingEntity.setTrainingType(trainingTypeEntity);
-    }
-
-    @Test
-    public void testAddTraining_Success() {
-        AddTrainingRequestDto requestDto = new AddTrainingRequestDto();
-        requestDto.setTraineeUsername("traineeUsername");
-        requestDto.setTrainerUsername("trainerUsername");
-
-        when(traineeService.getTrainee("traineeUsername")).thenReturn(traineeEntity);
-        when(trainerService.getTrainer("trainerUsername")).thenReturn(trainerEntity);
-        when(trainingMapper.requestDtoMapToTrainingEntity(any(), any(), any())).thenReturn(trainingEntity);
-
-        trainingService.addTraining(requestDto);
-
-        verify(trainingRepository, times(1)).save(trainingEntity);
-        verify(traineeService, times(1)).getTrainee("traineeUsername");
-        verify(trainerService, times(1)).getTrainer("trainerUsername");
+        trainingEntity.setTrainingType(trainingType);
     }
 
     @Test

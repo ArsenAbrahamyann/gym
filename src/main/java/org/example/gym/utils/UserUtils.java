@@ -35,9 +35,14 @@ public class UserUtils {
      * @return a unique username
      */
     public String generateUsername(String firstName, String lastName) {
-        String baseUsername = firstName + "." + lastName;
-        Integer i = userService.countByUsernameStartingWith(baseUsername);
-        return baseUsername + (i == 0 ? "" : i);
+        StringBuilder baseUsername = new StringBuilder(firstName.trim());
+        baseUsername.append(".").append(lastName.trim());
+        Integer usernameCount = userService.countByUsernameStartingWith(baseUsername.toString());
+        if (usernameCount > 0) {
+            baseUsername.append(usernameCount);
+        }
+
+        return baseUsername.toString();
     }
 
     /**

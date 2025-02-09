@@ -2,18 +2,57 @@ version: '3.8'
 name: gym_app
 
 services:
-    postgres:
-      image: postgres:latest
-      container_name: multi_database_postgres
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
-      volumes:
-        - postgres_data:/var/lib/postgresql/gym/data01
-        - ./init:/docker-entrypoint-initdb.d
+  postgres:
+    image: postgres:latest
+    container_name: multi_database_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: gym_crm_local,gym_crm_dev,gym_crm_stg,gym_crm_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/gym/data01
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - gym_network
+
+  eureka-server:
+    image: steeltoeoss/eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_SERVER_ENABLESELFPRESERVATION: "false"
+      EUREKA_CLIENT_REGISTERWITHEUREKA: "false"
+      EUREKA_CLIENT_FETCHREGISTRY: "false"
+    networks:
+      - gym_network
+
+  trainer-service:
+      image: arsenabrahamyan/trainerservice:latest
       ports:
-        - "5432:5432"
+        - "8081:8081"
+      environment:
+        - SPRING_APPLICATION_NAME=trainer-service
+        - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      depends_on:
+        - eureka-server
+      networks:
+        - gym_network
+  rest-gym:
+      image: arsenabrahamyan/restgym:latest
+      ports:
+        - "8080:8080"
+      environment:
+        - SPRING_APPLICATION_NAME=rest-gym
+        - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+        - SPRING_PROFILES_ACTIVE=local
+        - JWT_SECRET=fslmkdksmfkdsmkcmlxzmckdsffewtovmcnirefdgsdfwefw
+      depends_on:
+        - eureka-server
+        - postgres
+      networks:
+        - gym_network
 
 networks:
   gym_network:
@@ -21,3 +60,4 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
