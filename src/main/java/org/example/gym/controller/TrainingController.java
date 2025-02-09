@@ -132,12 +132,7 @@ public class TrainingController {
         @ApiResponse(responseCode = "404", description = "Trainee or Trainer not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> addTraining(
-            @RequestBody AddTrainingRequestDto requestDto) {
-
-        log.info("Adding training for trainee: {} with trainer: {}", requestDto.getTraineeUsername(),
-                requestDto.getTrainerUsername());
-
+    public ResponseEntity<Void> addTraining(@RequestBody AddTrainingRequestDto requestDto) {
         trainingService.addTraining(requestDto);
         log.info("Training added successfully");
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -160,7 +155,6 @@ public class TrainingController {
     })
     public ResponseEntity<Void> deleteTraining(@PathVariable Long trainingId) {
         log.info("Deleting training with ID: {}", trainingId);
-
         trainingService.deleteTraining(trainingId);
 
         log.info("Training with ID {} deleted successfully", trainingId);

@@ -73,6 +73,8 @@ public class TraineeService {
         traineeRepository.save(trainee);
         log.info("Trainee profile created successfully for {}", trainee.getUser().getUsername());
         return trainee;
+
+
     }
 
     /**

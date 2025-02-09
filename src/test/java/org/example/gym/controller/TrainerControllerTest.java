@@ -37,59 +37,72 @@ public class TrainerControllerTest {
     @InjectMocks
     private TrainerController trainerController;
 
-    private TrainerRegistrationRequestDto registrationRequestDto;
-    private TrainerEntity trainerEntity;
-    private UserEntity user;
-    private RegistrationResponseDto registrationResponseDto;
-    private GetTrainerProfileResponseDto getTrainerProfileResponseDto;
-    private UpdateTrainerRequestDto updateTrainerRequestDto;
-    private UpdateTrainerProfileResponseDto updateTrainerProfileResponseDto;
-    private ActivateRequestDto activateRequestDto;
+    private final TrainerRegistrationRequestDto registrationRequestDto = new TrainerRegistrationRequestDto();
+    private final TrainerEntity trainerEntity = new TrainerEntity();
+    private final UserEntity user = new UserEntity();
+    private final RegistrationResponseDto registrationResponseDto = new RegistrationResponseDto();
+    private final GetTrainerProfileResponseDto getTrainerProfileResponseDto = new GetTrainerProfileResponseDto();
+    private final UpdateTrainerRequestDto updateTrainerRequestDto = new UpdateTrainerRequestDto();
+    private final UpdateTrainerProfileResponseDto updateTrainerProfileResponseDto = new UpdateTrainerProfileResponseDto();
+    private final ActivateRequestDto activateRequestDto = new ActivateRequestDto();
 
     /**
-     * Sets up the test environment by initializing the test data used in the tests.
+     * Sets up test data before each test execution.
+     * Initializes various DTOs and entities with default values to be used in the tests.
      */
     @BeforeEach
     public void setUp() {
-        registrationRequestDto = new TrainerRegistrationRequestDto();
         registrationRequestDto.setFirstName("John");
         registrationRequestDto.setLastName("Doe");
 
-        trainerEntity = new TrainerEntity();
-        user = new UserEntity();
         user.setUsername("johndoe");
+        user.setPassword("123456");
         trainerEntity.setUser(user);
 
-        registrationResponseDto = new RegistrationResponseDto();
         registrationResponseDto.setUsername("johndoe");
 
-        getTrainerProfileResponseDto = new GetTrainerProfileResponseDto();
-        getTrainerProfileResponseDto.setFirstName("johndoe");
-
-        updateTrainerRequestDto = new UpdateTrainerRequestDto();
         updateTrainerRequestDto.setUsername("johndoe");
 
-        updateTrainerProfileResponseDto = new UpdateTrainerProfileResponseDto();
-        updateTrainerProfileResponseDto.setUsername("johndoe");
-
-        activateRequestDto = new ActivateRequestDto();
         activateRequestDto.setUsername("johndoe");
     }
 
+    @Test
+    public void registerTrainer_ShouldReturnCreatedResponse() {
+        when(mapper.trainerRegistrationMapToEntity(registrationRequestDto)).thenReturn(trainerEntity);
+        when(trainerService.createTrainerProfile(trainerEntity)).thenReturn(trainerEntity);
+        when(mapper.trainerMapToResponse(trainerEntity, "123456")).thenReturn(registrationResponseDto);
+
+        ResponseEntity<RegistrationResponseDto> response = trainerController.registerTrainer(registrationRequestDto);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(registrationResponseDto, response.getBody());
+        verify(trainerService, times(1)).createTrainerProfile(trainerEntity);
+    }
 
     @Test
-    public void getTrainerProfile_ShouldReturnOkResponse() {
-        when(trainerService.getTrainer("johndoe")).thenReturn(trainerEntity);
+    public void getTrainerProfile_ShouldReturnCorrectProfile() {
+        when(trainerService.getTrainer(user.getUsername())).thenReturn(trainerEntity);
         when(mapper.trainerEntityMapToGetResponse(trainerEntity)).thenReturn(getTrainerProfileResponseDto);
 
-        ResponseEntity<GetTrainerProfileResponseDto> response = trainerController.getTrainerProfile("johndoe");
+        ResponseEntity<GetTrainerProfileResponseDto> response = trainerController.getTrainerProfile(user.getUsername());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(getTrainerProfileResponseDto, response.getBody());
     }
 
     @Test
-    public void activateTrainer_ShouldReturnOkResponse() {
+    public void updateTrainerProfile_ShouldReturnUpdatedProfile() {
+        when(trainerService.updateTrainerProfile(updateTrainerRequestDto)).thenReturn(trainerEntity);
+        when(mapper.updateTrainerProfileMapToResponseDto(trainerEntity)).thenReturn(updateTrainerProfileResponseDto);
+
+        ResponseEntity<UpdateTrainerProfileResponseDto> response = trainerController.updateTrainerProfile(updateTrainerRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updateTrainerProfileResponseDto, response.getBody());
+    }
+
+    @Test
+    public void toggleTrainerStatus_ShouldReturnNoContent() {
         doNothing().when(trainerService).toggleTrainerStatus(activateRequestDto);
 
         ResponseEntity<Void> response = trainerController.toggleTrainerStatus(activateRequestDto);

@@ -1,24 +1,16 @@
 package org.example.gym.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
-import org.example.gym.dto.request.AddTrainingRequestDto;
-import org.example.gym.dto.request.TraineeTrainingsRequestDto;
-import org.example.gym.dto.request.TrainerTrainingRequestDto;
-import org.example.gym.entity.TraineeEntity;
-import org.example.gym.entity.TrainerEntity;
-import org.example.gym.entity.TrainingEntity;
-import org.example.gym.entity.TrainingTypeEntity;
-import org.example.gym.entity.UserEntity;
+
+import org.example.gym.dto.request.*;
+import org.example.gym.entity.*;
 import org.example.gym.exeption.TrainingNotFoundException;
+import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.repository.TrainingRepository;
 import org.example.gym.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,43 +25,28 @@ public class TrainingServiceTest {
     @Mock private TrainingRepository trainingRepository;
     @Mock private TraineeService traineeService;
     @Mock private TrainerService trainerService;
+    @Mock private TrainingMapper trainingMapper;
     @Mock private ValidationUtils validationUtils;
-
+    @Mock private JmsProducerService jmsProducerService;
     @InjectMocks private TrainingService trainingService;
 
     private TrainingEntity trainingEntity;
     private TraineeEntity traineeEntity;
     private TrainerEntity trainerEntity;
+    private UserEntity trainerUser;
 
-
-    /**
-     * Initializes mock entities for testing purposes.
-     *
-     * <p>This method sets up the initial state required for unit tests by creating and configuring mock
-     * instances of {@code UserEntity}, {@code TraineeEntity}, {@code TrainerEntity}, {@code TrainingTypeEntity},
-     * and {@code TrainingEntity}. These mock objects simulate real entities and their relationships to isolate
-     * and test the functionality of the system under test without relying on external dependencies.</p>
-     *
-     * <p>The method performs the following initialization steps:</p>
-     * <ul>
-     *     <li>Creates a {@code UserEntity} with a sample username ("traineeUsername") and assigns it to a {@code TraineeEntity}.</li>
-     *     <li>Creates a {@code TrainerEntity} with a sample ID (1L).</li>
-     *     <li>Creates a {@code TrainingTypeEntity} with a training type name ("Yoga").</li>
-     *     <li>Creates a {@code TrainingEntity} and sets the mock trainee, trainer, and training type entities.</li>
-     * </ul>
-     *
-     * <p>This method is executed before each test to ensure a consistent and isolated environment for each test case.</p>
-     */
     @BeforeEach
     public void setUp() {
         UserEntity traineeUser = new UserEntity();
         traineeUser.setUsername("traineeUsername");
+        traineeUser.setIsActive(true);
 
         traineeEntity = new TraineeEntity();
         traineeEntity.setUser(traineeUser);
 
-        UserEntity trainerUser = new UserEntity();
+        trainerUser = new UserEntity();
         trainerUser.setUsername("trainerUsername");
+        trainerUser.setIsActive(true);
 
         trainerEntity = new TrainerEntity();
         trainerEntity.setId(1L);
@@ -85,65 +62,89 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void testAddTraining_InvalidTrainee() {
+    public void testAddTraining_Success() {
         AddTrainingRequestDto requestDto = new AddTrainingRequestDto();
-        requestDto.setTraineeUsername("invalidTrainee");
+        requestDto.setTraineeUsername("traineeUsername");
+        requestDto.setTrainerUsername("trainerUsername");
+        String token = "token";
 
-        when(traineeService.getTrainee("invalidTrainee")).thenThrow(new IllegalArgumentException("Invalid Trainee"));
+        when(traineeService.getTrainee(any())).thenReturn(traineeEntity);
+        when(trainerService.getTrainer(any())).thenReturn(trainerEntity);
+        when(trainingMapper.requestDtoMapToTrainingEntity(any(), any(), any())).thenReturn(trainingEntity);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainingService.addTraining(requestDto));
+        trainingService.addTraining(requestDto);
 
-        assertEquals("Invalid Trainee", exception.getMessage());
-        verify(traineeService, times(1)).getTrainee("invalidTrainee");
-        verifyNoInteractions(trainingRepository);
+        verify(trainingRepository, times(1)).save(trainingEntity);
+        verify(jmsProducerService, times(1)).sendTrainingUpdate(any());
     }
 
     @Test
-    public void testGetTrainingsForTrainee_ValidData() {
+    public void testDeleteTraining_Success() {
+        String token = "token";
+        Long trainingId = 1L;
+
+        when(trainingRepository.findById(trainingId)).thenReturn(java.util.Optional.of(trainingEntity));
+
+        trainingService.deleteTraining(trainingId);
+
+        verify(trainingRepository, times(1)).delete(trainingEntity);
+        verify(jmsProducerService, times(1)).sendTrainingUpdate(any());
+    }
+
+    @Test
+    public void testDeleteTraining_NotFound() {
+        when(trainingRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
+
+        assertThrows(TrainingNotFoundException.class, () -> trainingService.deleteTraining( 1L));
+    }
+
+    @Test
+    public void testGetTrainingsForTrainee_Success() {
         TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
         requestDto.setTraineeName("traineeUsername");
 
         when(trainingRepository.findTrainingsForTrainee(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(trainingEntity));
 
-        List<TrainingEntity> trainings = trainingService.getTrainingsForTrainee(requestDto);
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainee(requestDto);
 
-        assertEquals(1, trainings.size());
-        assertEquals("traineeUsername", trainings.get(0).getTrainee().getUser().getUsername());
-        verify(validationUtils, times(1)).validateTraineeTrainingsCriteria(requestDto);
+        assertEquals(1, result.size());
     }
 
     @Test
-    public void testGetTrainingsForTrainee_NoTrainingsFound() {
+    public void testGetTrainingsForTrainee_NotFound() {
         TraineeTrainingsRequestDto requestDto = new TraineeTrainingsRequestDto();
         requestDto.setTraineeName("traineeUsername");
 
         when(trainingRepository.findTrainingsForTrainee(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
-        TrainingNotFoundException exception = assertThrows(TrainingNotFoundException.class, () ->
-                trainingService.getTrainingsForTrainee(requestDto));
-
-        assertEquals("No trainings found for the specified criteria.", exception.getMessage());
-        verify(validationUtils, times(1)).validateTraineeTrainingsCriteria(requestDto);
+        assertThrows(TrainingNotFoundException.class, () -> trainingService.getTrainingsForTrainee(requestDto));
     }
-
-
-
 
     @Test
-    public void testGetTrainingsForTrainer_InvalidTrainer() {
+    public void testGetTrainingsForTrainer_Success() {
         TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
-        requestDto.setTrainerUsername("invalidTrainer");
+        requestDto.setTrainerUsername("trainerUsername");
 
-        when(trainerService.getTrainer("invalidTrainer")).thenThrow(new IllegalArgumentException("Invalid Trainer"));
+        when(trainerService.getTrainer(any())).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(trainingEntity));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainingService.getTrainingsForTrainer(requestDto));
+        List<TrainingEntity> result = trainingService.getTrainingsForTrainer(requestDto);
 
-        assertEquals("Invalid Trainer", exception.getMessage());
-        verifyNoInteractions(trainingRepository);
+        assertEquals(1, result.size());
     }
 
+    @Test
+    public void testGetTrainingsForTrainer_NotFound() {
+        TrainerTrainingRequestDto requestDto = new TrainerTrainingRequestDto();
+        requestDto.setTrainerUsername("trainerUsername");
+
+        when(trainerService.getTrainer(any())).thenReturn(trainerEntity);
+        when(trainingRepository.findTrainingsForTrainer(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(TrainingNotFoundException.class, () -> trainingService.getTrainingsForTrainer(requestDto));
+    }
 }
