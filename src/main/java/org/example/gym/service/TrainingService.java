@@ -109,7 +109,7 @@ public class TrainingService {
     @Transactional
     public List<TrainingEntity> getTrainingsForTrainee(TraineeTrainingsRequestDto requestDto) {
 
-        log.info("Fetching trainings for trainee: {}", requestDto.getTraineeName());
+        log.info("Fetching trainings for traineeName!");
 
         validationUtils.validateTraineeTrainingsCriteria(requestDto);
 

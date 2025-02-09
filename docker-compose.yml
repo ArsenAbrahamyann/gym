@@ -57,10 +57,9 @@ services:
   activemq:
     image: rmohr/activemq
     ports:
-      - "61616:61616"  # JMS Port
-      - "8161:8161"    # Web Console
-#      - "127.0.0.1:61616:61616"
-#      - "127.0.0.1:8161:8161"
+      - "61616:61616"
+      - "8161:8161"
+
     networks:
       - gym_network
 

@@ -1,14 +1,23 @@
 package org.example.gym.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.example.gym.dto.request.*;
-import org.example.gym.entity.*;
+import org.example.gym.dto.request.AddTrainingRequestDto;
+import org.example.gym.dto.request.TraineeTrainingsRequestDto;
+import org.example.gym.dto.request.TrainerTrainingRequestDto;
+import org.example.gym.entity.TraineeEntity;
+import org.example.gym.entity.TrainerEntity;
+import org.example.gym.entity.TrainingEntity;
+import org.example.gym.entity.TrainingTypeEntity;
+import org.example.gym.entity.UserEntity;
 import org.example.gym.exeption.TrainingNotFoundException;
 import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.repository.TrainingRepository;
@@ -35,6 +44,11 @@ public class TrainingServiceTest {
     private TrainerEntity trainerEntity;
     private UserEntity trainerUser;
 
+    /**
+     * Initializes entities for the test environment before each test case.
+     * This setup creates and configures multiple related entity instances
+     * including trainers, trainees, and training types.
+     */
     @BeforeEach
     public void setUp() {
         UserEntity traineeUser = new UserEntity();
@@ -95,7 +109,7 @@ public class TrainingServiceTest {
     public void testDeleteTraining_NotFound() {
         when(trainingRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
-        assertThrows(TrainingNotFoundException.class, () -> trainingService.deleteTraining( 1L));
+        assertThrows(TrainingNotFoundException.class, () -> trainingService.deleteTraining(1L));
     }
 
     @Test

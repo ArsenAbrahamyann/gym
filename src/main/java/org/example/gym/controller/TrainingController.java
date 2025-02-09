@@ -133,6 +133,7 @@ public class TrainingController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> addTraining(@RequestBody AddTrainingRequestDto requestDto) {
+        log.debug("Received training date: {}", requestDto.getTrainingDate());
         trainingService.addTraining(requestDto);
         log.info("Training added successfully");
         return ResponseEntity.status(HttpStatus.CREATED).build();

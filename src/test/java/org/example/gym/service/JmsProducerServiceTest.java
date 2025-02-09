@@ -1,7 +1,9 @@
 package org.example.gym.service;
 
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gym.dto.request.TrainerWorkloadRequestDto;
@@ -12,9 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.JmsException;
-
-import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 public class JmsProducerServiceTest {
@@ -31,6 +30,12 @@ public class JmsProducerServiceTest {
     private TrainerWorkloadRequestDto request;
     private final String jsonMessage = "{\"username\":\"john.doe\"}";
 
+    /**
+     * Sets up the necessary preconditions before each test execution.
+     * Initializes request objects and configures mock behavior.
+     *
+     * @throws Exception if there is any issue during the setup.
+     */
     @BeforeEach
     public void setUp() throws Exception {
         request = new TrainerWorkloadRequestDto();

@@ -15,11 +15,11 @@ import org.springframework.jms.core.JmsTemplate;
 public class JmsConfig {
 
     @Value("${spring.activemq.broker-url}")
-    String BROKER_URL;
+    String brokerUrl;
     @Value("${spring.activemq.user}")
-    String BROKER_USERNAME;
+    String brokerUsername;
     @Value("${spring.activemq.password}")
-    String BROKER_PASSWORD;
+    String brokerPassword;
 
     /**
      * Creates and configures a {@link ConnectionFactory} using ActiveMQ settings.
@@ -29,9 +29,9 @@ public class JmsConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
-        connectionFactory.setBrokerURL(BROKER_URL);
-        connectionFactory.setPassword(BROKER_USERNAME);
-        connectionFactory.setUserName(BROKER_PASSWORD);
+        connectionFactory.setBrokerURL(brokerUrl);
+        connectionFactory.setPassword(brokerUsername);
+        connectionFactory.setUserName(brokerPassword);
         return connectionFactory;
     }
 

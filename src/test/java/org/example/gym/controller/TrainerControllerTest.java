@@ -43,7 +43,8 @@ public class TrainerControllerTest {
     private final RegistrationResponseDto registrationResponseDto = new RegistrationResponseDto();
     private final GetTrainerProfileResponseDto getTrainerProfileResponseDto = new GetTrainerProfileResponseDto();
     private final UpdateTrainerRequestDto updateTrainerRequestDto = new UpdateTrainerRequestDto();
-    private final UpdateTrainerProfileResponseDto updateTrainerProfileResponseDto = new UpdateTrainerProfileResponseDto();
+    private final UpdateTrainerProfileResponseDto updateTrainerProfileResponseDto
+            = new UpdateTrainerProfileResponseDto();
     private final ActivateRequestDto activateRequestDto = new ActivateRequestDto();
 
     /**
@@ -95,7 +96,8 @@ public class TrainerControllerTest {
         when(trainerService.updateTrainerProfile(updateTrainerRequestDto)).thenReturn(trainerEntity);
         when(mapper.updateTrainerProfileMapToResponseDto(trainerEntity)).thenReturn(updateTrainerProfileResponseDto);
 
-        ResponseEntity<UpdateTrainerProfileResponseDto> response = trainerController.updateTrainerProfile(updateTrainerRequestDto);
+        ResponseEntity<UpdateTrainerProfileResponseDto> response =
+                trainerController.updateTrainerProfile(updateTrainerRequestDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateTrainerProfileResponseDto, response.getBody());
