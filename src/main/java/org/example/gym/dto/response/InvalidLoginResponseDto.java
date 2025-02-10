@@ -3,12 +3,12 @@ package org.example.gym.dto.response;
 import lombok.Getter;
 
 @Getter
-public class InvalidLoginResponse {
+public class InvalidLoginResponseDto {
 
     private String username;
     private String password;
 
-    public InvalidLoginResponse() {
+    public InvalidLoginResponseDto() {
         this.username = "Invalid Username";
         this.password = "Invalid Password";
     }

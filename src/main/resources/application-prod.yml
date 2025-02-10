@@ -18,13 +18,16 @@ resilience4j:
   circuitbreaker:
     instances:
       trainerWorkloadService:
-        failure-rate-threshold: 40
-        slow-call-rate-threshold: 40
-        slow-call-duration-threshold: 1500
-        minimum-number-of-calls: 10
-        sliding-window-size: 20
-        permitted-number-of-calls-in-half-open-state: 5
-        wait-duration-in-open-state: 10000
+        registerHealthIndicator: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpClientErrorException
+        ignoreExceptions:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] [%X{transactionId}] %-5level %logger{36} - %msg%n"

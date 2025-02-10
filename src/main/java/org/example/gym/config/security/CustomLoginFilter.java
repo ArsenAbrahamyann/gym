@@ -8,7 +8,7 @@ import java.io.IOException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.LoginRequestDto;
-import org.example.gym.dto.response.JwtResponse;
+import org.example.gym.dto.response.JwtResponseDto;
 import org.example.gym.entity.TokenEntity;
 import org.example.gym.entity.UserEntity;
 import org.example.gym.entity.enums.TokenType;
@@ -160,7 +160,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         tokenService.save(tokenEntity);
 
         response.setContentType(SecurityConstants.CONTENT_TYPE);
-        response.getWriter().write(objectMapper.writeValueAsString(new JwtResponse(jwt)));
+        response.getWriter().write(objectMapper.writeValueAsString(new JwtResponseDto(jwt)));
 
         loginAttemptService.resetAttemptsByIp(userDetails.getUsername());
     }

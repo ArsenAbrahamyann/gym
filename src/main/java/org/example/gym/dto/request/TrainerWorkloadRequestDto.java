@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrainerWorkloadRequest {
+public class TrainerWorkloadRequestDto {
 
     private String trainerUsername;
     private String firstName;

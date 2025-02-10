@@ -36,7 +36,7 @@ public class UserController {
      * @param requestDto the request containing the user's username and new password
      * @return a ResponseEntity indicating the success of the password change
      */
-    @PutMapping("/change/password")
+    @PutMapping("/password/change")
     @Operation(summary = "Change user password", description = "Allows a user to change their password.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Password changed successfully"),
