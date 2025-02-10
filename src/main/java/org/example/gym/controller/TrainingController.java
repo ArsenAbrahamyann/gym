@@ -20,7 +20,9 @@ import org.example.gym.mapper.TrainingMapper;
 import org.example.gym.service.TrainingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -130,14 +132,33 @@ public class TrainingController {
         @ApiResponse(responseCode = "404", description = "Trainee or Trainer not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> addTraining(
-            @RequestBody AddTrainingRequestDto requestDto) {
-
-        log.info("Adding training for trainee: {} with trainer: {}", requestDto.getTraineeUsername(),
-                requestDto.getTrainerUsername());
-
+    public ResponseEntity<Void> addTraining(@RequestBody AddTrainingRequestDto requestDto) {
+        log.debug("Received training date: {}", requestDto.getTrainingDate());
         trainingService.addTraining(requestDto);
         log.info("Training added successfully");
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Deletes a training session specified by the ID.
+     * It logs the action of deleting the training with the given ID and then calls the
+     * service to perform the deletion.
+     *
+     * @param trainingId The ID of the training session to be deleted.
+     * @return {@link ResponseEntity} indicating the outcome (success or failure).
+     */
+    @DeleteMapping("/{trainingId}")
+    @Operation(summary = "Delete a training", description = "Deletes a training session by ID.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Training deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Training not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> deleteTraining(@PathVariable Long trainingId) {
+        log.info("Deleting training with ID: {}", trainingId);
+        trainingService.deleteTraining(trainingId);
+
+        log.info("Training with ID {} deleted successfully", trainingId);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,13 +1,33 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/gym_crm_prod
+    url: jdbc:postgresql://postgres:5432/gym_crm_prod
     username: postgres
     password: postgres
   flyway:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    preferIpAddress: true
+resilience4j:
+  circuitbreaker:
+    instances:
+      trainerWorkloadService:
+        registerHealthIndicator: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpClientErrorException
+        ignoreExceptions:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] [%X{transactionId}] %-5level %logger{36} - %msg%n"

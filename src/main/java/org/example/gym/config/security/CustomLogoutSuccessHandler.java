@@ -1,9 +1,13 @@
 package org.example.gym.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.example.gym.exeption.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -16,7 +20,10 @@ import org.springframework.stereotype.Component;
  * indicating the logout was successful.
  */
 @Component
+@RequiredArgsConstructor
 public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
+
+    private final ObjectMapper objectMapper;
 
     /**
      * Handles the actions to take after a successful logout.
@@ -31,9 +38,13 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
+        ErrorResponse responseDto;
         SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("Successfully logged out");
+        response.setContentType(SecurityConstants.CONTENT_TYPE);
+        responseDto = new ErrorResponse("Successfully logged out", HttpStatus.OK);
+        objectMapper.writeValue(response.getWriter(), responseDto);
+
     }
 }
 

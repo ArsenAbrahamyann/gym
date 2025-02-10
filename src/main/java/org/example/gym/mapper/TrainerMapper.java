@@ -114,7 +114,7 @@ public class TrainerMapper {
         UserEntity user = trainer.getUser();
         RegistrationResponseDto responseDto = new RegistrationResponseDto(user.getUsername(),
                 password);
-        log.info("Mapped RegistrationResponseDto: {}", responseDto);
+        log.info("Mapped RegistrationResponseDto!");
         return responseDto;
     }
 }

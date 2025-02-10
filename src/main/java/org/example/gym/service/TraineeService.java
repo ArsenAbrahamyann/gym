@@ -71,8 +71,10 @@ public class TraineeService {
         user.setRole(Role.ROLE_TRAINEE);
         userService.save(user);
         traineeRepository.save(trainee);
-        log.info("Trainee profile created successfully for {}", trainee.getUser().getUsername());
+        log.info("Trainee profile created successfully for traineeID {}", trainee.getId());
         return trainee;
+
+
     }
 
     /**
@@ -82,14 +84,14 @@ public class TraineeService {
      */
     @Transactional
     public void toggleTraineeStatus(ActivateRequestDto requestDto) {
-        log.info("Toggling trainee status for {}", requestDto.getUsername());
+        log.info("Toggling trainee status!");
         TraineeEntity trainee = getTrainee(requestDto.getUsername());
         UserEntity user = trainee.getUser();
         user.setIsActive(requestDto.isActive());
         UserEntity save = userService.save(user);
         trainee.setUser(save);
         traineeRepository.save(trainee);
-        log.info("Trainee status toggled successfully for {}", requestDto.getUsername());
+        log.info("Trainee status toggled successfully for traineeID {}", trainee.getId());
     }
 
     /**
@@ -100,7 +102,7 @@ public class TraineeService {
      */
     @Transactional
     public List<TrainerEntity> getUnassignedTrainers(String traineeUsername) {
-        log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
+        log.info("Fetching unassigned trainers!");
 
         TraineeEntity trainee = traineeRepository.findByUser_Username(traineeUsername)
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
@@ -122,7 +124,7 @@ public class TraineeService {
      */
     @Transactional
     public TraineeEntity updateTraineeTrainerList(UpdateTraineeTrainerListRequestDto requestDto) {
-        log.info("Updating trainer list for trainee: {}", requestDto.getTraineeUsername());
+        log.info("Updating trainer list!");
 
         TraineeEntity trainee = traineeRepository.findByUser_Username(requestDto.getTraineeUsername())
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found"));
@@ -137,7 +139,7 @@ public class TraineeService {
 
         validationUtils.validateUpdateTraineeTrainerList(trainee, trainers);
         traineeRepository.save(trainee);
-        log.info("Updated trainer list for trainee: {}", trainee.getUser().getUsername());
+        log.info("Updated trainer list for trainee ID: {}", trainee.getId());
 
         return trainee;
     }
@@ -150,7 +152,7 @@ public class TraineeService {
      */
     @Transactional
     public TraineeEntity updateTraineeProfile(UpdateTraineeRequestDto requestDto) {
-        log.info("Updating trainee profile for {}", requestDto.getUsername());
+        log.info("Updating trainee profile!");
         TraineeEntity trainee = getTrainee(requestDto.getUsername());
         if (requestDto.getDateOfBirth() != null) {
             trainee.setDateOfBirth(requestDto.getDateOfBirth());
@@ -168,7 +170,7 @@ public class TraineeService {
         validationUtils.validateUpdateTrainee(trainee);
         traineeRepository.save(trainee);
 
-        log.info("Trainee profile updated successfully for {}", save.getUsername());
+        log.info("Trainee profile updated successfully for traineeID {}", save.getId());
         return trainee;
     }
 
@@ -179,11 +181,11 @@ public class TraineeService {
      */
     @Transactional
     public void deleteTraineeByUsername(String username) {
-        log.info("Deleting trainee with username: {}", username);
+        log.info("Deleting trainee!");
         TraineeEntity trainee = traineeRepository.findByUser_Username(username)
                 .orElseThrow(() -> new TraineeNotFoundException("TraineeEntity not found"));
         traineeRepository.delete(trainee);
-        log.info("Trainee deleted successfully with username: {}", username);
+        log.info("Trainee deleted successfully with id: {}", trainee.getId());
     }
 
     /**
@@ -194,7 +196,7 @@ public class TraineeService {
      */
     @Transactional
     public TraineeEntity getTrainee(String username) {
-        log.info("Retrieving trainee by username: {}", username);
+        log.info("Retrieving trainee!");
         return traineeRepository.findByUser_Username(username)
                 .orElseThrow(() -> new TraineeNotFoundException("Trainee not found for username: "
                         + username));
