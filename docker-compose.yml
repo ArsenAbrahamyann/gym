@@ -35,6 +35,8 @@ services:
       environment:
         - SPRING_APPLICATION_NAME=trainer-service
         - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      env_file:
+        - .env
       depends_on:
         - eureka-server
       networks:
