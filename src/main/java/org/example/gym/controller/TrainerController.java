@@ -12,6 +12,7 @@ import org.example.gym.dto.request.TrainerRegistrationRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
 import org.example.gym.dto.response.GetTrainerProfileResponseDto;
 import org.example.gym.dto.response.RegistrationResponseDto;
+import org.example.gym.dto.response.TrainerWorkloadResponseDto;
 import org.example.gym.dto.response.UpdateTrainerProfileResponseDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.mapper.TrainerMapper;
@@ -113,6 +114,33 @@ public class TrainerController {
         UpdateTrainerProfileResponseDto responseDto = mapper.updateTrainerProfileMapToResponseDto(savedTrainer);
         log.info("Controller: Trainer profile updated successfully, Response: {}", responseDto);
         return ResponseEntity.ok(responseDto);
+    }
+
+    /**
+     * Retrieves the training hours for the specified trainer.
+     *
+     * @param trainerUsername the identifier for the trainer.
+     * @return Map containing training hours data.
+     */
+    @GetMapping("/{trainerUsername}/{month}")
+    @Operation(summary = "Retrieving workload summary for trainer")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trainer retrieving successfully", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Trainer not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<TrainerWorkloadResponseDto> getTrainerWorkload(@PathVariable String trainerUsername,
+                                                                         @PathVariable Integer month) {
+        log.info("Retrieving workload summary for trainer: {}", trainerUsername);
+        TrainerWorkloadResponseDto response = trainerService.getTrainingHours(trainerUsername, month);
+
+        if (response == null) {
+            log.info("No workload summary found for trainer: {}", trainerUsername);
+            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(null);
+        }
+
+        log.info("Successfully retrieved workload summary for trainer: {}", trainerUsername);
+        return ResponseEntity.ok(response);
     }
 
     /**

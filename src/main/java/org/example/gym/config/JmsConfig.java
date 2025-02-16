@@ -1,10 +1,11 @@
 package org.example.gym.config;
 
 import javax.jms.ConnectionFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
@@ -12,14 +13,12 @@ import org.springframework.jms.core.JmsTemplate;
  * Utilizes ActiveMQ as the message broker.
  */
 @Configuration
+@Slf4j
 public class JmsConfig {
 
-    @Value("${spring.activemq.broker-url}")
-    String brokerUrl;
-    @Value("${spring.activemq.user}")
-    String brokerUsername;
-    @Value("${spring.activemq.password}")
-    String brokerPassword;
+    String brokerUrl = System.getenv("ACTIVEMQ_BROKER_URL");
+    String brokerUsername = System.getenv("ACTIVEMQ_USERNAME");
+    String brokerPassword = System.getenv("ACTIVEMQ_PASSWORD");
 
     /**
      * Creates and configures a {@link ConnectionFactory} using ActiveMQ settings.
@@ -47,5 +46,20 @@ public class JmsConfig {
         return new JmsTemplate(connectionFactory);
     }
 
-
+    /**
+     * Creates and configures a {@link DefaultJmsListenerContainerFactory} that will be used to create JMS Listener Containers.
+     * The factory is set up with a connection factory and an error handler that logs to the standard error stream upon any error.
+     * Note: This configuration is intended for Point-to-Point messaging model as indicated by 'setPubSubDomain' set to 'false'.
+     *
+     * @return the listener container factory configured for standard JMS queues.
+     */
+    @Bean
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
+            ConnectionFactory connectionFactory) {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setConcurrency("5-10");  // Horizontal scaling
+        factory.setErrorHandler(t -> log.error("JMS Error", t));
+        return factory;
+    }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.dto.request.ActivateRequestDto;
 import org.example.gym.dto.request.UpdateTrainerRequestDto;
+import org.example.gym.dto.response.TrainerWorkloadResponseDto;
 import org.example.gym.entity.TrainerEntity;
 import org.example.gym.entity.TrainingTypeEntity;
 import org.example.gym.entity.UserEntity;
@@ -27,6 +28,7 @@ public class TrainerService {
     private final UserService userService;
     private final ValidationUtils validationUtils;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JmsProducerService jmsProducerService;
 
     /**
      * Constructs a new {@link TrainerService} instance, injecting the necessary dependencies for managing trainer operations.
@@ -42,13 +44,14 @@ public class TrainerService {
                           TrainingTypeService trainingTypeService,
                           ValidationUtils validationUtils,
                           UserService userService,
-                          BCryptPasswordEncoder passwordEncoder
+                          BCryptPasswordEncoder passwordEncoder, JmsProducerService jmsProducerService
     ) {
         this.trainerRepository = trainerRepository;
         this.trainingTypeService = trainingTypeService;
         this.validationUtils = validationUtils;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.jmsProducerService = jmsProducerService;
     }
 
     /**
@@ -153,5 +156,20 @@ public class TrainerService {
                     log.error("Trainer not found with username: {}", trainerUsername);
                     return new TrainerNotFoundException("Trainer not found with username: " + trainerUsername);
                 });
+    }
+
+    /**
+     * Retrieves the training hours for a specific trainer and month using JMS.
+     * This method acts as a simple facade, delegating the actual request handling
+     * to the {@link JmsProducerService}. It requests training hours based on
+     * the provided username and month.
+     *
+     * @param trainerUsername the username of the trainer whose training hours are being requested
+     * @param month the month (as an integer) for which training hours are requested
+     * @return a {@link TrainerWorkloadResponseDto} containing the training hours,
+     *         or null if no response is received within the timeout period.
+     */
+    public TrainerWorkloadResponseDto getTrainingHours(String trainerUsername, Integer month) {
+        return jmsProducerService.requestTrainingHours(trainerUsername, month);
     }
 }
