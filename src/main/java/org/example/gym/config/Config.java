@@ -8,10 +8,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gym.logger.TransactionInterceptor;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -50,11 +48,6 @@ public class Config implements WebMvcConfigurer {
 
     }
 
-    @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 
     /**
      * Provides a {@link SecureRandom} instance for generating cryptographically strong random numbers.
@@ -79,6 +72,4 @@ public class Config implements WebMvcConfigurer {
         registry.addInterceptor(transactionInterceptor)
                 .addPathPatterns("/**");
     }
-
-
 }

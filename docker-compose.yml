@@ -47,17 +47,24 @@ services:
         - SPRING_APPLICATION_NAME=rest-gym
         - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
         - SPRING_PROFILES_ACTIVE=local
-        - JWT_SECRET=fslmkdksmfkdsmkcmlxzmckdsffewtovmcnirefdgsdfwefw
+      env_file:
+        - .env
       depends_on:
         - eureka-server
         - postgres
       networks:
         - gym_network
 
+  activemq:
+    image: rmohr/activemq
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    networks:
+      - gym_network
 networks:
   gym_network:
     driver: bridge
-
 volumes:
   postgres_data:
     driver: local

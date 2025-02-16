@@ -69,5 +69,5 @@ build/
 .DS_Store
 /.idea/
 /.gradle/
+/.env/
 
->>>>>>> origin/development

@@ -69,7 +69,7 @@ public class TrainerService {
         userService.save(user);
         trainerRepository.save(trainer);
 
-        log.debug("Trainer profile created: {}", trainer);
+        log.info("Trainer profile created successfully for trainerID {}", trainer.getId());
         return trainer;
     }
 
@@ -80,14 +80,14 @@ public class TrainerService {
      */
     @Transactional
     public void toggleTrainerStatus(ActivateRequestDto requestDto) {
-        log.info("Toggling trainer status for {}", requestDto.getUsername());
+        log.info("Toggling trainer status!");
         TrainerEntity trainer = getTrainer(requestDto.getUsername());
         UserEntity user = trainer.getUser();
         user.setIsActive(requestDto.isActive());
         UserEntity save = userService.save(user);
         trainer.setUser(save);
         trainerRepository.save(trainer);
-        log.info("Trainer status toggled successfully for {}", requestDto.getUsername());
+        log.info("Trainer status toggled successfully for trainerID {}", trainer.getId());
     }
 
     /**
@@ -98,7 +98,7 @@ public class TrainerService {
      */
     @Transactional
     public TrainerEntity updateTrainerProfile(UpdateTrainerRequestDto requestDto) {
-        log.info("Updating trainer profile for {}", requestDto.getUsername());
+        log.info("Updating trainer profile!");
         TrainerEntity trainer = getTrainer(requestDto.getUsername());
         UserEntity user = trainer.getUser();
         user.setUsername(requestDto.getUsername());
@@ -111,7 +111,7 @@ public class TrainerService {
         trainer.setUser(save);
         validationUtils.validateUpdateTrainer(trainer);
         TrainerEntity updateTrainer = trainerRepository.save(trainer);
-        log.info("Trainee profile updated successfully for {}", user.getUsername());
+        log.info("Trainer profile updated successfully for trainerId {}", user.getId());
         return updateTrainer;
     }
 
@@ -147,7 +147,7 @@ public class TrainerService {
      */
     @Transactional
     public TrainerEntity getTrainer(String trainerUsername) {
-        log.info("Retrieving trainer by username {}", trainerUsername);
+        log.info("Retrieving trainer!");
         return trainerRepository.findByUser_Username(trainerUsername)
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username: {}", trainerUsername);

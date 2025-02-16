@@ -34,17 +34,6 @@ public class TokenService {
     }
 
     /**
-     * Revokes all tokens for the given user.
-     *
-     * @param user The user whose tokens should be revoked.
-     */
-    public void revokeAllTokensForUser(UserEntity user) {
-        TokenEntity tokens = getTokenByUser(user);
-        tokens.setRevoked(true);
-        tokenRepository.save(tokens);
-    }
-
-    /**
      * Adds a new token to the repository.
      *
      * @param token The token to be added.

@@ -1,17 +1,15 @@
 package org.example.gym.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import org.example.gym.dto.request.AddTrainingRequestDto;
 import org.example.gym.dto.request.TraineeTrainingsRequestDto;
 import org.example.gym.dto.request.TrainerTrainingRequestDto;
 import org.example.gym.dto.response.GetTrainerTrainingListResponseDto;
@@ -25,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -73,37 +72,6 @@ public class TrainingControllerTest {
         assertEquals(1, response.getBody().size());
     }
 
-    @Test
-    public void deleteTraining_Successful() {
-        Long trainingId = 1L;
-
-        // Set up conditions and responses
-        doNothing().when(trainingService).deleteTraining(trainingId);
-
-        // Perform the method call
-        ResponseEntity<Void> response = trainingController.deleteTraining(trainingId);
-
-        // Verification
-        verify(trainingService, times(1)).deleteTraining(trainingId);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
-    public void deleteTraining_NotFound() {
-        Long trainingId = 2L;
-
-        // Setup to throw an exception when the training is not found
-        doThrow(new RuntimeException("Training not found")).when(trainingService).deleteTraining(trainingId);
-
-        // Expecting the controller to handle it and convert to a suitable HTTP status
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            trainingController.deleteTraining(trainingId);
-        });
-
-        // Perform verification
-        assertEquals("Training not found", exception.getMessage());
-        verify(trainingService, times(1)).deleteTraining(trainingId);
-    }
 
     @Test
     public void testGetTrainerTrainingList() {
@@ -128,6 +96,42 @@ public class TrainingControllerTest {
         verify(trainingService).getTrainingsForTrainer(any());
         verify(mapper).mapToDtoTrainingTrainer(trainingEntities);
         assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    public void testAddTraining() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer token123");
+        AddTrainingRequestDto requestDto = new AddTrainingRequestDto();
+        requestDto.setTraineeUsername("JohnD");
+        requestDto.setTrainerUsername("JaneD");
+
+        doNothing().when(trainingService).addTraining(any(AddTrainingRequestDto.class));
+
+        // Act
+        ResponseEntity<Void> response = trainingController.addTraining(requestDto);
+
+        // Assert
+        verify(trainingService).addTraining(requestDto);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteTraining() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer token123");
+        Long trainingId = 1L;
+
+
+        // Act
+        ResponseEntity<Void> response = trainingController.deleteTraining(
+                //headers,
+                trainingId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
 }

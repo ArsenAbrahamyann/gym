@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gym.dto.response.InvalidLoginResponse;
+import org.example.gym.dto.response.InvalidLoginResponseDto;
 import org.example.gym.exeption.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  * This component is used to return a custom JSON response with a 401 Unauthorized status
  * when an authentication error occurs, such as when a request is made without valid credentials.
  *
- * <p>It returns a JSON response containing an {@link InvalidLoginResponse} object when
+ * <p>It returns a JSON response containing an {@link InvalidLoginResponseDto} object when
  * an authentication exception is thrown.</p>
  */
 @Component
