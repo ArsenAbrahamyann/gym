@@ -1,22 +1,30 @@
 package org.example.gym.service;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import javax.jms.TextMessage;
 import org.example.gym.dto.request.TrainerWorkloadRequestDto;
+import org.example.gym.dto.response.TrainerWorkloadResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.retry.support.RetryTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class JmsProducerServiceTest {
@@ -27,42 +35,65 @@ public class JmsProducerServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private RetryTemplate retryTemplate;
+
     @InjectMocks
     private JmsProducerService jmsProducerService;
 
-    private static final String QUEUE_NAME = "trainer.training.update";
-    private TrainerWorkloadRequestDto request;
-    private final String jsonMessage = "{\"username\":\"john.doe\"}";
-
-    /**
-     * Sets up the necessary preconditions before each test execution.
-     * Initializes request objects and configures mock behavior.
-     *
-     * @throws Exception if there is any issue during the setup.
-     */
     @BeforeEach
-    public void setUp() throws Exception {
-        request = new TrainerWorkloadRequestDto();
-        request.setTrainerUsername("john.doe");
-
-        when(objectMapper.writeValueAsString(any(TrainerWorkloadRequestDto.class))).thenReturn(jsonMessage);
+    void setUp() {
+        jmsProducerService = new JmsProducerService(jmsTemplate, objectMapper, retryTemplate);
     }
 
     @Test
-    public void shouldSendTrainingUpdateSuccessfully() {
+    void testSendTrainingUpdate_Success() throws JsonProcessingException {
+        TrainerWorkloadRequestDto request = new TrainerWorkloadRequestDto();
+        when(objectMapper.writeValueAsString(request)).thenReturn("{}");
         jmsProducerService.sendTrainingUpdate(request);
-        verify(jmsTemplate).convertAndSend(eq(QUEUE_NAME), eq(jsonMessage));
-        verifyNoMoreInteractions(jmsTemplate);
+
+        verify(jmsTemplate, times(1)).convertAndSend(eq("trainer.training.update"),
+                anyString());
     }
 
     @Test
-    public void shouldHandleJmsExceptionWhenSendingTrainingUpdate() {
-        doThrow(new JmsException("JMS failure") {}).when(jmsTemplate).convertAndSend(eq(QUEUE_NAME), eq(jsonMessage));
+    void testSendTrainingUpdate_ExceptionHandled() throws JsonProcessingException {
+        TrainerWorkloadRequestDto request = new TrainerWorkloadRequestDto();
+        when(objectMapper.writeValueAsString(request)).thenThrow(new JsonProcessingException("Error") {});
 
         jmsProducerService.sendTrainingUpdate(request);
 
-        // Verify that an attempt was made to send a message
-        verify(jmsTemplate).convertAndSend(eq(QUEUE_NAME), eq(jsonMessage));
-        // Add verification for logging or error handling if applicable
+        verify(jmsTemplate, times(1)).convertAndSend(eq("trainer.training.update.dlq"),
+                anyString());
     }
+
+
+    @Test
+    void testRequestTrainingHours_Timeout() {
+        String trainerUsername = "john_doe";
+        Integer month = 8;
+
+        TrainerWorkloadResponseDto result = jmsProducerService.requestTrainingHours(trainerUsername, month);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testHandleTrainingHoursResponse_Success() throws Exception {
+        String correlationId = UUID.randomUUID().toString();
+        TextMessage message = mock(TextMessage.class);
+        TrainerWorkloadResponseDto responseDto = new TrainerWorkloadResponseDto();
+        CompletableFuture<TrainerWorkloadResponseDto> future = new CompletableFuture<>();
+        jmsProducerService.pendingRequests.put(correlationId, future);
+
+        when(message.getJMSCorrelationID()).thenReturn(correlationId);
+        when(message.getText()).thenReturn("{}");
+        when(objectMapper.readValue("{}", TrainerWorkloadResponseDto.class)).thenReturn(responseDto);
+
+        jmsProducerService.handleTrainingHoursResponse(message);
+
+        assertTrue(future.isDone());
+        assertEquals(responseDto, future.get());
+    }
+
 }
