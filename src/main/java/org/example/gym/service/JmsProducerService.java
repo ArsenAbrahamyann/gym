@@ -34,7 +34,7 @@ public class JmsProducerService {
     private final JmsTemplate jmsTemplate;
     private final ObjectMapper objectMapper;
     private final RetryTemplate retryTemplate;
-    private final Map<String, CompletableFuture<TrainerWorkloadResponseDto>> pendingRequests;
+    public final Map<String, CompletableFuture<TrainerWorkloadResponseDto>> pendingRequests;
 
     /**
      * Constructs a new JmsProducerService with essential components for message handling.

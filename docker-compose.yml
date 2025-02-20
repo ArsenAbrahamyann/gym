@@ -17,6 +17,18 @@ services:
     networks:
       - gym_network
 
+  mongo:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: trainerDB
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - gym_network
+
   eureka-server:
     image: steeltoeoss/eureka-server
     ports:
@@ -69,4 +81,6 @@ networks:
     driver: bridge
 volumes:
   postgres_data:
+    driver: local
+  mongo_data:
     driver: local
