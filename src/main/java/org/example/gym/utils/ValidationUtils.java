@@ -174,7 +174,7 @@ public class ValidationUtils {
      * @param toDate The end date.
      * @throws ValidationException if the 'from' date is after the 'to' date or the dates are invalid.
      */
-    void validateDateRange(LocalDateTime fromDate, LocalDateTime toDate) {
+    public void validateDateRange(LocalDateTime fromDate, LocalDateTime toDate) {
         SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         try {
             if (sdf.parse(String.valueOf(fromDate)).after(sdf.parse(String.valueOf(toDate)))) {
@@ -192,7 +192,7 @@ public class ValidationUtils {
      * @param fieldName The name of the field being validated.
      * @throws ValidationException if the date is not in the correct format.
      */
-    void validateDateFormat(LocalDateTime date, String fieldName) {
+    public void validateDateFormat(LocalDateTime date, String fieldName) {
         SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
         sdf.setLenient(false);
         try {
