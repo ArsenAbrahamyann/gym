@@ -1,5 +1,7 @@
 version: '3.8'
+
 name: gym_app
+
 
 services:
   postgres:
@@ -17,6 +19,7 @@ services:
     networks:
       - gym_network
 
+
   mongo:
     image: mongo:latest
     container_name: mongo_db
@@ -29,6 +32,7 @@ services:
     networks:
       - gym_network
 
+
   eureka-server:
     image: steeltoeoss/eureka-server
     ports:
@@ -39,6 +43,7 @@ services:
       EUREKA_CLIENT_FETCHREGISTRY: "false"
     networks:
       - gym_network
+
 
   trainer-service:
       image: arsenabrahamyan/trainerservice:latest
@@ -53,6 +58,8 @@ services:
         - eureka-server
       networks:
         - gym_network
+
+
   rest-gym:
       image: arsenabrahamyan/restgym:latest
       ports:
@@ -69,6 +76,7 @@ services:
       networks:
         - gym_network
 
+
   activemq:
     image: rmohr/activemq
     ports:
@@ -76,9 +84,13 @@ services:
       - "8161:8161"
     networks:
       - gym_network
+
+
+
 networks:
   gym_network:
     driver: bridge
+
 volumes:
   postgres_data:
     driver: local
